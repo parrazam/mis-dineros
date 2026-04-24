@@ -12,6 +12,8 @@ import androidx.navigation.navArgument
 import com.parra.misdineros.presentation.home.HomeScreen
 import com.parra.misdineros.presentation.settings.SettingsScreen
 import com.parra.misdineros.presentation.stats.StatsScreen
+import com.parra.misdineros.presentation.subscriptions.detail.SubscriptionDetailScreen
+import com.parra.misdineros.presentation.subscriptions.edit.SubscriptionEditScreen
 import com.parra.misdineros.presentation.subscriptions.list.SubscriptionListScreen
 
 @Composable
@@ -53,9 +55,16 @@ fun MisDinerosNavHost(
 
         composable(
             route = Destination.SubscriptionDetail.route,
-            arguments = listOf(navArgument(Destination.SubscriptionDetail.ARG_ID) { type = NavType.StringType }),
+            arguments = listOf(
+                navArgument(Destination.SubscriptionDetail.ARG_ID) { type = NavType.StringType },
+            ),
         ) {
-            // Placeholder — se implementa en Fase 4
+            SubscriptionDetailScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = { id ->
+                    navController.navigate(Destination.SubscriptionEdit.route(id))
+                },
+            )
         }
 
         composable(
@@ -68,15 +77,17 @@ fun MisDinerosNavHost(
                 },
             ),
         ) {
-            // Placeholder — se implementa en Fase 4
+            SubscriptionEditScreen(
+                onNavigateBack = { navController.popBackStack() },
+            )
         }
 
         composable(Destination.FxRatesEditor.route) {
-            // Placeholder — se implementa en Fase 7
+            // Fase 7
         }
 
         composable(Destination.CategoryEditor.route) {
-            // Placeholder — se implementa en Fase 7
+            // Fase 7
         }
     }
 }
