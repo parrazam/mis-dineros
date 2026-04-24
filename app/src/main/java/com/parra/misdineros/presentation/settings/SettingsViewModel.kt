@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.parra.misdineros.designsystem.theme.AppTheme
 import com.parra.misdineros.domain.model.AppSettings
 import com.parra.misdineros.domain.repository.SettingsRepository
+import com.parra.misdineros.notifications.NotificationScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repo: SettingsRepository,
+    private val notificationScheduler: NotificationScheduler,
 ) : ViewModel() {
 
     val settings: StateFlow<AppSettings> = repo.observe()
@@ -26,8 +28,17 @@ class SettingsViewModel @Inject constructor(
 
     fun setCurrency(code: String) = update { it.copy(globalCurrencyCode = code) }
     fun setTheme(theme: AppTheme) = update { it.copy(appTheme = theme) }
-    fun setNotifsEnabled(enabled: Boolean) = update { it.copy(notificationsEnabled = enabled) }
-    fun setNotifHour(hour: Int) = update { it.copy(notificationHour = hour) }
+
+    fun setNotifsEnabled(enabled: Boolean) {
+        update { it.copy(notificationsEnabled = enabled) }
+        notificationScheduler.schedule(settings.value.notificationHour, enabled)
+    }
+
+    fun setNotifHour(hour: Int) {
+        update { it.copy(notificationHour = hour) }
+        notificationScheduler.schedule(hour, settings.value.notificationsEnabled)
+    }
+
     fun setNotifyDays(days: Int) = update { it.copy(defaultNotifyDaysBefore = days) }
     fun setSummaryEnabled(enabled: Boolean) = update { it.copy(monthlySummaryEnabled = enabled) }
 }

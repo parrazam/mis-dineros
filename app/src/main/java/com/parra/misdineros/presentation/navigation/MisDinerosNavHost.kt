@@ -9,6 +9,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.parra.misdineros.presentation.home.HomeScreen
 import com.parra.misdineros.presentation.settings.CategoryEditorScreen
 import com.parra.misdineros.presentation.settings.FxRatesEditorScreen
@@ -57,6 +58,7 @@ fun MisDinerosNavHost(
 
         composable(
             route = Destination.SubscriptionDetail.route,
+            deepLinks = listOf(navDeepLink { uriPattern = "misdineros://subscription/{id}" }),
             arguments = listOf(
                 navArgument(Destination.SubscriptionDetail.ARG_ID) { type = NavType.StringType },
             ),

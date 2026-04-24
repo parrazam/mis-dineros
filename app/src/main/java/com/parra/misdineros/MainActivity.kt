@@ -1,6 +1,7 @@
 package com.parra.misdineros
 
 import android.Manifest
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -23,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.parra.misdineros.designsystem.theme.AppTheme
@@ -35,6 +37,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
+    private var navController: NavHostController? = null
 
     private val notifPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -47,7 +50,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val appTheme by mainViewModel.appTheme.collectAsStateWithLifecycle()
             MisDinerosTheme(appTheme = appTheme) {
-                val navController = rememberNavController()
+                val navController = rememberNavController().also { this@MainActivity.navController = it }
                 val currentEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = currentEntry?.destination?.route
 
@@ -121,6 +124,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        navController?.handleDeepLink(intent)
     }
 
     override fun onResume() {
