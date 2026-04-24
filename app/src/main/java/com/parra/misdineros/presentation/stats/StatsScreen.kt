@@ -47,10 +47,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottomAxis
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStartAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.parra.misdineros.R
@@ -319,13 +321,13 @@ private fun ColumnBarChart(monthlyMinor: Long, annualMinor: Long, currency: Stri
         CartesianChartHost(
             chart = rememberCartesianChart(
                 rememberColumnCartesianLayer(),
-                startAxis = rememberStartAxis(
-                    valueFormatter = { value, _, _ ->
+                startAxis = VerticalAxis.rememberStart(
+                    valueFormatter = { _, value, _ ->
                         MoneyFormatter.format(value.toLong(), currency)
                     },
                 ),
-                bottomAxis = rememberBottomAxis(
-                    valueFormatter = { value, _, _ ->
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    valueFormatter = { _, value, _ ->
                         if (value.toInt() == 0) "Mensual" else "Anual"
                     },
                 ),
