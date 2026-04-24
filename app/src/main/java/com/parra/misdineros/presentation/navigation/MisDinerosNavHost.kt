@@ -10,6 +10,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.parra.misdineros.presentation.home.HomeScreen
+import com.parra.misdineros.presentation.settings.CategoryEditorScreen
+import com.parra.misdineros.presentation.settings.FxRatesEditorScreen
 import com.parra.misdineros.presentation.settings.SettingsScreen
 import com.parra.misdineros.presentation.stats.StatsScreen
 import com.parra.misdineros.presentation.subscriptions.detail.SubscriptionDetailScreen
@@ -83,11 +85,11 @@ fun MisDinerosNavHost(
         }
 
         composable(Destination.FxRatesEditor.route) {
-            // Fase 7
+            FxRatesEditorScreen(onNavigateBack = { navController.popBackStack() })
         }
 
         composable(Destination.CategoryEditor.route) {
-            // Fase 7
+            CategoryEditorScreen(onNavigateBack = { navController.popBackStack() })
         }
     }
 }

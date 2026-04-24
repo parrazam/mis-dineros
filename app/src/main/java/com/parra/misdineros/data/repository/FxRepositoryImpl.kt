@@ -35,6 +35,10 @@ class FxRepositoryImpl @Inject constructor(
         dao.upsertAll(rates.map { it.toEntity() })
     }
 
+    override suspend fun resetToDefaults() {
+        dao.upsertAll(BundledFxRates.generateEntities())
+    }
+
     override suspend fun convert(amountMinor: Long, from: String, to: String): Long {
         if (from == to) return amountMinor
         val rate = getRate(from, to) ?: 1.0

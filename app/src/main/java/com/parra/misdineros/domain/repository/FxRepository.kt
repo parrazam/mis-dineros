@@ -8,6 +8,7 @@ interface FxRepository {
     suspend fun getRate(base: String, quote: String): Double?
     suspend fun upsert(rate: FxRate)
     suspend fun upsertAll(rates: List<FxRate>)
+    suspend fun resetToDefaults()
 
     suspend fun convert(amountMinor: Long, from: String, to: String): Long
 }

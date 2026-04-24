@@ -71,6 +71,12 @@
     <string name="notif_summary_title">Resumen de suscripciones</string>
     <string name="notif_summary_body">Gasto este mes: %1$s · %2$d renovaciones pendientes</string>
 
+    <!-- Ajustes — tema -->
+    <string name="settings_theme">Tema</string>
+    <string name="settings_theme_system">Sistema</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_theme_dark">Oscuro</string>
+
     <!-- Errores -->
     <string name="error_invalid_amount">Introduce un importe válido</string>
     <string name="error_name_required">El nombre es obligatorio</string>
