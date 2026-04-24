@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mis Dineros</string>
+
+    <!-- Navegación -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_subscriptions">Suscripciones</string>
+    <string name="nav_stats">Estadísticas</string>
+    <string name="nav_settings">Ajustes</string>
+
+    <!-- Home -->
+    <string name="home_monthly_spend">Gasto mensual</string>
+    <string name="home_annual_equivalent">Equivalente anual</string>
+    <string name="home_active_count">%1$d activas</string>
+    <string name="home_paused_count">%1$d pausadas</string>
+    <string name="home_upcoming_renewals">Próximas renovaciones</string>
+    <string name="home_top_expensive">Top 5 más caras</string>
+
+    <!-- Suscripciones -->
+    <string name="subscriptions_empty">Sin suscripciones aún.\nPulsa + para añadir la primera.</string>
+    <string name="subscription_paused">Pausada</string>
+    <string name="subscription_active">Activa</string>
+    <string name="billing_monthly">Mensual</string>
+    <string name="billing_annual">Anual</string>
+    <string name="renews_on">Renueva el %1$s</string>
+    <string name="add_subscription">Nueva suscripción</string>
+    <string name="edit_subscription">Editar suscripción</string>
+
+    <!-- Editor -->
+    <string name="field_name">Nombre del servicio</string>
+    <string name="field_amount">Importe</string>
+    <string name="field_currency">Moneda</string>
+    <string name="field_cycle">Ciclo de facturación</string>
+    <string name="field_renewal_date">Próxima renovación</string>
+    <string name="field_category">Categoría</string>
+    <string name="field_notify_days">Avisar N días antes</string>
+    <string name="field_notes">Notas</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_delete">Eliminar</string>
+    <string name="action_pause">Pausar</string>
+    <string name="action_resume">Reactivar</string>
+
+    <!-- Estadísticas -->
+    <string name="stats_by_category">Por categoría</string>
+    <string name="stats_global">Global</string>
+    <string name="stats_top5">Top 5</string>
+    <string name="stats_monthly">Este mes</string>
+    <string name="stats_annual">Anual</string>
+
+    <!-- Ajustes -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_currency">Moneda global</string>
+    <string name="settings_notifications">Notificaciones</string>
+    <string name="settings_notif_enabled">Activar notificaciones</string>
+    <string name="settings_notif_hour">Hora del aviso</string>
+    <string name="settings_notif_default_days">Días de antelación por defecto</string>
+    <string name="settings_monthly_summary">Resumen mensual</string>
+    <string name="settings_categories">Categorías</string>
+    <string name="settings_fx_rates">Tasas de cambio</string>
+    <string name="settings_export">Exportar datos (JSON)</string>
+    <string name="settings_import">Importar datos (JSON)</string>
+    <string name="settings_about">Acerca de</string>
+    <string name="settings_version">Versión %1$s</string>
+
+    <!-- Notificaciones -->
+    <string name="notif_channel_renewals">Renovaciones</string>
+    <string name="notif_channel_summary">Resumen mensual</string>
+    <string name="notif_renewal_title">Renueva pronto: %1$s</string>
+    <string name="notif_renewal_body">Renueva el %1$s · %2$s</string>
+    <string name="notif_summary_title">Resumen de suscripciones</string>
+    <string name="notif_summary_body">Gasto este mes: %1$s · %2$d renovaciones pendientes</string>
+
+    <!-- Errores -->
+    <string name="error_invalid_amount">Introduce un importe válido</string>
+    <string name="error_name_required">El nombre es obligatorio</string>
+    <string name="error_import_failed">No se pudo importar el archivo</string>
+    <string name="error_export_failed">No se pudo exportar los datos</string>
+</resources>
