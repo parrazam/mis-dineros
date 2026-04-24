@@ -84,7 +84,7 @@ fun SubscriptionEditScreen(
 
     var showIconPicker by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
-    val iconSheetState = rememberModalBottomSheetState(skipPartialExpansion = true)
+    val iconSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
