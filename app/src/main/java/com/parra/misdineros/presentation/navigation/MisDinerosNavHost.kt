@@ -5,11 +5,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import androidx.navigation.toRoute
 import com.parra.misdineros.presentation.home.HomeScreen
 import com.parra.misdineros.presentation.settings.CategoryEditorScreen
 import com.parra.misdineros.presentation.settings.FxRatesEditorScreen
@@ -27,70 +26,57 @@ fun MisDinerosNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Destination.Home.route,
+        startDestination = Destination.Home,
         modifier = modifier.padding(innerPadding),
     ) {
-        composable(Destination.Home.route) {
+        composable<Destination.Home> {
             HomeScreen(
-                onNavigateToSubscriptions = { navController.navigate(Destination.SubscriptionList.route) },
-                onNavigateToDetail = { id -> navController.navigate(Destination.SubscriptionDetail.route(id)) },
+                onNavigateToSubscriptions = { navController.navigate(Destination.SubscriptionList) },
+                onNavigateToDetail = { id -> navController.navigate(Destination.SubscriptionDetail(id)) },
             )
         }
 
-        composable(Destination.SubscriptionList.route) {
+        composable<Destination.SubscriptionList> {
             SubscriptionListScreen(
-                onNavigateToEdit = { id -> navController.navigate(Destination.SubscriptionEdit.route(id)) },
-                onNavigateToDetail = { id -> navController.navigate(Destination.SubscriptionDetail.route(id)) },
-                onAddNew = { navController.navigate(Destination.SubscriptionEdit.route()) },
+                onNavigateToEdit = { id -> navController.navigate(Destination.SubscriptionEdit(id)) },
+                onNavigateToDetail = { id -> navController.navigate(Destination.SubscriptionDetail(id)) },
+                onAddNew = { navController.navigate(Destination.SubscriptionEdit()) },
             )
         }
 
-        composable(Destination.Stats.route) {
+        composable<Destination.Stats> {
             StatsScreen()
         }
 
-        composable(Destination.Settings.route) {
+        composable<Destination.Settings> {
             SettingsScreen(
-                onNavigateToFxRates = { navController.navigate(Destination.FxRatesEditor.route) },
-                onNavigateToCategories = { navController.navigate(Destination.CategoryEditor.route) },
+                onNavigateToFxRates = { navController.navigate(Destination.FxRatesEditor) },
+                onNavigateToCategories = { navController.navigate(Destination.CategoryEditor) },
             )
         }
 
-        composable(
-            route = Destination.SubscriptionDetail.route,
-            deepLinks = listOf(navDeepLink { uriPattern = "misdineros://subscription/{id}" }),
-            arguments = listOf(
-                navArgument(Destination.SubscriptionDetail.ARG_ID) { type = NavType.StringType },
-            ),
+        composable<Destination.SubscriptionDetail>(
+            deepLinks = listOf(navDeepLink<Destination.SubscriptionDetail>(basePath = "misdineros://subscription")),
         ) {
             SubscriptionDetailScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToEdit = { id ->
-                    navController.navigate(Destination.SubscriptionEdit.route(id))
+                    navController.navigate(Destination.SubscriptionEdit(id))
                 },
             )
         }
 
-        composable(
-            route = Destination.SubscriptionEdit.route,
-            arguments = listOf(
-                navArgument(Destination.SubscriptionEdit.ARG_ID) {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                },
-            ),
-        ) {
+        composable<Destination.SubscriptionEdit> {
             SubscriptionEditScreen(
                 onNavigateBack = { navController.popBackStack() },
             )
         }
 
-        composable(Destination.FxRatesEditor.route) {
+        composable<Destination.FxRatesEditor> {
             FxRatesEditorScreen(onNavigateBack = { navController.popBackStack() })
         }
 
-        composable(Destination.CategoryEditor.route) {
+        composable<Destination.CategoryEditor> {
             CategoryEditorScreen(onNavigateBack = { navController.popBackStack() })
         }
     }

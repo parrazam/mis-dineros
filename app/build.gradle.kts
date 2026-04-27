@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.parra.misdineros"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.parra.misdineros"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
 

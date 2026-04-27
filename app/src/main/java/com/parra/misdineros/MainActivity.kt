@@ -24,10 +24,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.parra.misdineros.designsystem.theme.AppTheme
 import com.parra.misdineros.designsystem.theme.MisDinerosTheme
 import com.parra.misdineros.presentation.navigation.Destination
 import com.parra.misdineros.presentation.navigation.MisDinerosNavHost
@@ -52,15 +53,14 @@ class MainActivity : ComponentActivity() {
             MisDinerosTheme(appTheme = appTheme) {
                 val navController = rememberNavController().also { this@MainActivity.navController = it }
                 val currentEntry by navController.currentBackStackEntryAsState()
-                val currentRoute = currentEntry?.destination?.route
+                val currentDestination = currentEntry?.destination
 
-                val bottomRoutes = listOf(
-                    Destination.Home.route,
-                    Destination.SubscriptionList.route,
-                    Destination.Stats.route,
-                    Destination.Settings.route,
-                )
-                val showBottomBar = currentRoute in bottomRoutes
+                val showBottomBar = currentDestination?.run {
+                    hasRoute<Destination.Home>() ||
+                    hasRoute<Destination.SubscriptionList>() ||
+                    hasRoute<Destination.Stats>() ||
+                    hasRoute<Destination.Settings>()
+                } ?: false
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -68,10 +68,10 @@ class MainActivity : ComponentActivity() {
                         if (showBottomBar) {
                             NavigationBar {
                                 NavigationBarItem(
-                                    selected = currentRoute == Destination.Home.route,
+                                    selected = currentDestination?.hasRoute<Destination.Home>() == true,
                                     onClick = {
-                                        navController.navigate(Destination.Home.route) {
-                                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                        navController.navigate(Destination.Home) {
+                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                                             launchSingleTop = true
                                             restoreState = true
                                         }
@@ -80,10 +80,10 @@ class MainActivity : ComponentActivity() {
                                     label = { Text(stringResource(R.string.nav_home)) },
                                 )
                                 NavigationBarItem(
-                                    selected = currentRoute == Destination.SubscriptionList.route,
+                                    selected = currentDestination?.hasRoute<Destination.SubscriptionList>() == true,
                                     onClick = {
-                                        navController.navigate(Destination.SubscriptionList.route) {
-                                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                        navController.navigate(Destination.SubscriptionList) {
+                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                                             launchSingleTop = true
                                             restoreState = true
                                         }
@@ -92,10 +92,10 @@ class MainActivity : ComponentActivity() {
                                     label = { Text(stringResource(R.string.nav_subscriptions)) },
                                 )
                                 NavigationBarItem(
-                                    selected = currentRoute == Destination.Stats.route,
+                                    selected = currentDestination?.hasRoute<Destination.Stats>() == true,
                                     onClick = {
-                                        navController.navigate(Destination.Stats.route) {
-                                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                        navController.navigate(Destination.Stats) {
+                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                                             launchSingleTop = true
                                             restoreState = true
                                         }
@@ -104,9 +104,9 @@ class MainActivity : ComponentActivity() {
                                     label = { Text(stringResource(R.string.nav_stats)) },
                                 )
                                 NavigationBarItem(
-                                    selected = currentRoute == Destination.Settings.route,
+                                    selected = currentDestination?.hasRoute<Destination.Settings>() == true,
                                     onClick = {
-                                        navController.navigate(Destination.Settings.route) {
+                                        navController.navigate(Destination.Settings) {
                                             launchSingleTop = true
                                         }
                                     },

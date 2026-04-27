@@ -5,39 +5,45 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.ui.graphics.vector.ImageVector
+import kotlinx.serialization.Serializable
 
-sealed class Destination(val route: String) {
-
+sealed interface Destination {
     // ─── Bottom nav ────────────────────────────────────────────────────────────
-    data object Home : Destination("home")
-    data object SubscriptionList : Destination("subscriptions")
-    data object Stats : Destination("stats")
+    @Serializable
+    data object Home : Destination
+
+    @Serializable
+    data object SubscriptionList : Destination
+
+    @Serializable
+    data object Stats : Destination
 
     // ─── Detalle / edición ─────────────────────────────────────────────────────
-    data object SubscriptionEdit : Destination("subscriptions/edit?id={id}") {
-        const val ARG_ID = "id"
-        fun route(id: String? = null) = if (id != null) "subscriptions/edit?id=$id" else "subscriptions/edit"
-    }
+    @Serializable
+    data class SubscriptionEdit(val id: String? = null) : Destination
 
-    data object SubscriptionDetail : Destination("subscriptions/{id}") {
-        const val ARG_ID = "id"
-        fun route(id: String) = "subscriptions/$id"
-    }
+    @Serializable
+    data class SubscriptionDetail(val id: String) : Destination
 
     // ─── Ajustes ───────────────────────────────────────────────────────────────
-    data object Settings : Destination("settings")
-    data object FxRatesEditor : Destination("settings/fx-rates")
-    data object CategoryEditor : Destination("settings/categories")
+    @Serializable
+    data object Settings : Destination
+
+    @Serializable
+    data object FxRatesEditor : Destination
+
+    @Serializable
+    data object CategoryEditor : Destination
 }
 
 data class BottomNavItem(
-    val destination: Destination,
+    val route: Destination,
     val icon: ImageVector,
     val labelRes: Int,
 )
 
 val bottomNavItems = listOf(
-    BottomNavItem(Destination.Home, Icons.Default.Home, android.R.string.ok), // replaced in UI with string res
+    BottomNavItem(Destination.Home, Icons.Default.Home, android.R.string.ok),
     BottomNavItem(Destination.SubscriptionList, Icons.Default.List, android.R.string.ok),
     BottomNavItem(Destination.Stats, Icons.Default.BarChart, android.R.string.ok),
 )

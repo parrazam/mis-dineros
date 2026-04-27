@@ -3,6 +3,7 @@ package com.parra.misdineros.presentation.subscriptions.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.parra.misdineros.domain.model.Category
 import com.parra.misdineros.domain.model.Subscription
 import com.parra.misdineros.domain.repository.CategoryRepository
@@ -40,7 +41,7 @@ class SubscriptionDetailViewModel @Inject constructor(
     private val deleteUseCase: DeleteSubscriptionUseCase,
 ) : ViewModel() {
 
-    private val subscriptionId: String = checkNotNull(savedStateHandle[Destination.SubscriptionDetail.ARG_ID])
+    private val subscriptionId: String = savedStateHandle.toRoute<Destination.SubscriptionDetail>().id
 
     private val _uiState = MutableStateFlow(SubscriptionDetailUiState())
     val uiState: StateFlow<SubscriptionDetailUiState> = _uiState.asStateFlow()

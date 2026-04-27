@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.parra.misdineros.domain.model.BillingCycle
 import com.parra.misdineros.domain.model.Category
 import com.parra.misdineros.domain.model.Subscription
@@ -66,7 +67,7 @@ class SubscriptionEditViewModel @Inject constructor(
     private val upsertSubscription: UpsertSubscriptionUseCase,
 ) : ViewModel() {
 
-    private val subscriptionId: String? = savedStateHandle[Destination.SubscriptionEdit.ARG_ID]
+    private val subscriptionId: String? = savedStateHandle.toRoute<Destination.SubscriptionEdit>().id
 
     private val _uiState = MutableStateFlow(SubscriptionEditUiState())
     val uiState: StateFlow<SubscriptionEditUiState> = _uiState.asStateFlow()
