@@ -63,12 +63,5 @@ di/             — Hilt modules (DatabaseModule, RepositoryModule, WorkerModule
 
 ## Phases still pending (v1)
 
-Phases 1-3 are complete (commit `adfdf5e`). Remaining:
-- **Phase 4**: `SubscriptionListScreen`, `SubscriptionEditScreen`, `SubscriptionDetailScreen`, icon picker bottom sheet, `ServiceIcon` component.
-- **Phase 5**: `HomeScreen` — monthly total, annual equivalent, upcoming renewals (7 days), top-5 card.
-- **Phase 6**: `StatsScreen` — vico charts (donut by category, bars month/year, top-5 list).
-- **Phase 7**: `SettingsScreen` — currency, FX editor, category manager, notification toggles, theme override, export/import triggers.
-- **Phase 8**: `RenewalReminderWorker`, `MonthlySummaryWorker`, `NotificationScheduler`, `NotificationChannelFactory`.
-- **Phase 9**: JSON export/import via SAF (`ActivityResultContracts.CreateDocument` / `OpenDocument`), versioned format, base64-embedded custom icons.
-- **Phase 10**: CI polish, README.
-- **Phase 11**: Accessibility, M3 animations, adaptive/landscape layouts.
+Phases 1-10 are complete. Remaining:
+- **Phase 11**: Accessibility (TalkBack content descriptions, AA contrast), M3 animations, adaptive/landscape layouts.
