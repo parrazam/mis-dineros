@@ -26,4 +26,10 @@ interface CategoryDao {
 
     @Upsert
     suspend fun upsertAll(entities: List<CategoryEntity>)
+
+    @Query("SELECT * FROM categories ORDER BY sortOrder ASC")
+    suspend fun getAll(): List<CategoryEntity>
+
+    @Query("DELETE FROM categories")
+    suspend fun deleteAll()
 }

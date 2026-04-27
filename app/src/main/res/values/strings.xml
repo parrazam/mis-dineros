@@ -77,6 +77,13 @@
     <string name="settings_theme_light">Claro</string>
     <string name="settings_theme_dark">Oscuro</string>
 
+    <!-- Copia de seguridad -->
+    <string name="backup_import_confirm_title">Importar copia de seguridad</string>
+    <string name="backup_import_confirm_message">Esto reemplazará todos los datos actuales. Esta acción no se puede deshacer.</string>
+    <string name="backup_import_confirm_button">Importar</string>
+    <string name="backup_export_success">Datos exportados correctamente</string>
+    <string name="backup_import_success">Datos importados correctamente</string>
+
     <!-- Errores -->
     <string name="error_invalid_amount">Introduce un importe válido</string>
     <string name="error_name_required">El nombre es obligatorio</string>

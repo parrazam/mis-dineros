@@ -32,4 +32,13 @@ interface SubscriptionDao {
 
     @Query("UPDATE subscriptions SET nextRenewalDate = :newDate, updatedAt = :now WHERE id = :id")
     suspend fun updateRenewalDate(id: String, newDate: String, now: Long)
+
+    @Query("SELECT * FROM subscriptions ORDER BY name ASC")
+    suspend fun getAll(): List<SubscriptionEntity>
+
+    @Upsert
+    suspend fun upsertAll(entities: List<SubscriptionEntity>)
+
+    @Query("DELETE FROM subscriptions")
+    suspend fun deleteAll()
 }

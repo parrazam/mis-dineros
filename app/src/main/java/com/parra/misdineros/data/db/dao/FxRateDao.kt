@@ -23,4 +23,10 @@ interface FxRateDao {
 
     @Query("SELECT COUNT(*) FROM fx_rates")
     suspend fun count(): Int
+
+    @Query("SELECT * FROM fx_rates ORDER BY base ASC, quote ASC")
+    suspend fun getAll(): List<FxRateEntity>
+
+    @Query("DELETE FROM fx_rates")
+    suspend fun deleteAll()
 }
