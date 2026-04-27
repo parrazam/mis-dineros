@@ -29,12 +29,14 @@ class BackupRepositoryImpl @Inject constructor(
 
     override suspend fun restore(snapshot: BackupSnapshot) {
         db.withTransaction {
+            // Borrar en orden hijo → padre para evitar FK violations
             subscriptionDao.deleteAll()
             categoryDao.deleteAll()
             fxRateDao.deleteAll()
-            subscriptionDao.upsertAll(snapshot.subscriptions.map { it.toEntity() })
+            // Insertar en orden padre → hijo
             categoryDao.upsertAll(snapshot.categories.map { it.toEntity() })
             fxRateDao.upsertAll(snapshot.fxRates.map { it.toEntity() })
+            subscriptionDao.upsertAll(snapshot.subscriptions.map { it.toEntity() })
         }
         settingsRepository.update(snapshot.settings)
     }

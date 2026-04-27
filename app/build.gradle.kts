@@ -123,5 +123,6 @@ dependencies {
     androidTestImplementation(libs.room.testing)
     androidTestImplementation(libs.workmanager.testing)
     androidTestImplementation(libs.hilt.android)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
     kspAndroidTest(libs.hilt.android.compiler)
 }
