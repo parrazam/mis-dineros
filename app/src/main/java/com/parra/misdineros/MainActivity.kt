@@ -25,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -71,7 +70,7 @@ class MainActivity : ComponentActivity() {
                                     selected = currentDestination?.hasRoute<Destination.Home>() == true,
                                     onClick = {
                                         navController.navigate(Destination.Home) {
-                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                            popUpTo<Destination.Home> { saveState = true }
                                             launchSingleTop = true
                                             restoreState = true
                                         }
@@ -83,7 +82,7 @@ class MainActivity : ComponentActivity() {
                                     selected = currentDestination?.hasRoute<Destination.SubscriptionList>() == true,
                                     onClick = {
                                         navController.navigate(Destination.SubscriptionList) {
-                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                            popUpTo<Destination.Home> { saveState = true }
                                             launchSingleTop = true
                                             restoreState = true
                                         }
@@ -95,7 +94,7 @@ class MainActivity : ComponentActivity() {
                                     selected = currentDestination?.hasRoute<Destination.Stats>() == true,
                                     onClick = {
                                         navController.navigate(Destination.Stats) {
-                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                            popUpTo<Destination.Home> { saveState = true }
                                             launchSingleTop = true
                                             restoreState = true
                                         }
@@ -107,7 +106,9 @@ class MainActivity : ComponentActivity() {
                                     selected = currentDestination?.hasRoute<Destination.Settings>() == true,
                                     onClick = {
                                         navController.navigate(Destination.Settings) {
+                                            popUpTo<Destination.Home> { saveState = true }
                                             launchSingleTop = true
+                                            restoreState = true
                                         }
                                     },
                                     icon = { Icon(Icons.Default.Settings, contentDescription = null) },
