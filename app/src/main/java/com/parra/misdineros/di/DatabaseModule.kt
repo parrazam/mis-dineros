@@ -23,7 +23,6 @@ object DatabaseModule {
             "mis_dineros.db",
         )
             .addCallback(MisDinerosDatabase.seedCallback)
-            .fallbackToDestructiveMigration()
             .build()
     }
 
