@@ -7,25 +7,13 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
-fun gitVersionName(): String {
-    return runCatching {
-        ProcessBuilder("git", "describe", "--tags", "--always")
-            .directory(rootProject.projectDir)
-            .start()
-            .inputStream.bufferedReader().readLine()
-            ?.trim()?.removePrefix("v") ?: "dev"
-    }.getOrDefault("dev")
-}
+val gitVersionName: String = providers.exec {
+    commandLine("git", "describe", "--tags", "--always")
+}.standardOutput.asText.map { it.trim().removePrefix("v") }.orElse("dev").get()
 
-fun gitVersionCode(): Int {
-    return runCatching {
-        ProcessBuilder("git", "rev-list", "--count", "HEAD")
-            .directory(rootProject.projectDir)
-            .start()
-            .inputStream.bufferedReader().readLine()
-            ?.trim()?.toIntOrNull() ?: 1
-    }.getOrDefault(1)
-}
+val gitVersionCode: Int = providers.exec {
+    commandLine("git", "rev-list", "--count", "HEAD")
+}.standardOutput.asText.map { it.trim().toIntOrNull() ?: 1 }.orElse(1).get()
 
 android {
     namespace = "com.parra.misdineros"
@@ -35,8 +23,8 @@ android {
         applicationId = "com.parra.misdineros"
         minSdk = 26
         targetSdk = 35
-        versionCode = gitVersionCode()
-        versionName = gitVersionName()
+        versionCode = gitVersionCode
+        versionName = gitVersionName
 
         testInstrumentationRunner = "com.parra.misdineros.HiltTestRunner"
 
