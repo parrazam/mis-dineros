@@ -1,5 +1,9 @@
 package com.parra.misdineros.presentation.navigation
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -18,6 +22,14 @@ import com.parra.misdineros.presentation.subscriptions.detail.SubscriptionDetail
 import com.parra.misdineros.presentation.subscriptions.edit.SubscriptionEditScreen
 import com.parra.misdineros.presentation.subscriptions.list.SubscriptionListScreen
 
+private val tabEnter = fadeIn()
+private val tabExit = fadeOut()
+
+private val slideEnter = slideInHorizontally(initialOffsetX = { it }) + fadeIn()
+private val slideExit = slideOutHorizontally(targetOffsetX = { -it / 3 }) + fadeOut()
+private val slidePopEnter = slideInHorizontally(initialOffsetX = { -it / 3 }) + fadeIn()
+private val slidePopExit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
+
 @Composable
 fun MisDinerosNavHost(
     navController: NavHostController,
@@ -28,6 +40,10 @@ fun MisDinerosNavHost(
         navController = navController,
         startDestination = Destination.Home,
         modifier = modifier.padding(innerPadding),
+        enterTransition = { tabEnter },
+        exitTransition = { tabExit },
+        popEnterTransition = { tabEnter },
+        popExitTransition = { tabExit },
     ) {
         composable<Destination.Home> {
             HomeScreen(
@@ -57,6 +73,10 @@ fun MisDinerosNavHost(
 
         composable<Destination.SubscriptionDetail>(
             deepLinks = listOf(navDeepLink<Destination.SubscriptionDetail>(basePath = "misdineros://subscription")),
+            enterTransition = { slideEnter },
+            exitTransition = { slideExit },
+            popEnterTransition = { slidePopEnter },
+            popExitTransition = { slidePopExit },
         ) {
             SubscriptionDetailScreen(
                 onNavigateBack = { navController.popBackStack() },
@@ -66,17 +86,32 @@ fun MisDinerosNavHost(
             )
         }
 
-        composable<Destination.SubscriptionEdit> {
+        composable<Destination.SubscriptionEdit>(
+            enterTransition = { slideEnter },
+            exitTransition = { slideExit },
+            popEnterTransition = { slidePopEnter },
+            popExitTransition = { slidePopExit },
+        ) {
             SubscriptionEditScreen(
                 onNavigateBack = { navController.popBackStack() },
             )
         }
 
-        composable<Destination.FxRatesEditor> {
+        composable<Destination.FxRatesEditor>(
+            enterTransition = { slideEnter },
+            exitTransition = { slideExit },
+            popEnterTransition = { slidePopEnter },
+            popExitTransition = { slidePopExit },
+        ) {
             FxRatesEditorScreen(onNavigateBack = { navController.popBackStack() })
         }
 
-        composable<Destination.CategoryEditor> {
+        composable<Destination.CategoryEditor>(
+            enterTransition = { slideEnter },
+            exitTransition = { slideExit },
+            popEnterTransition = { slidePopEnter },
+            popExitTransition = { slidePopExit },
+        ) {
             CategoryEditorScreen(onNavigateBack = { navController.popBackStack() })
         }
     }

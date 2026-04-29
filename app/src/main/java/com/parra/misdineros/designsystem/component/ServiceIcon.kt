@@ -33,6 +33,7 @@ fun ServiceIcon(
     modifier: Modifier = Modifier,
     fallbackName: String = "",
     size: Dp = 48.dp,
+    contentDescription: String? = null,
 ) {
     when {
         iconRef.startsWith("bundled:") -> {
@@ -48,7 +49,7 @@ fun ServiceIcon(
                 ) {
                     Icon(
                         imageVector = entry.icon,
-                        contentDescription = entry.displayName,
+                        contentDescription = contentDescription ?: entry.displayName,
                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(size * 0.55f),
                     )
@@ -66,7 +67,7 @@ fun ServiceIcon(
             if (bitmap != null) {
                 androidx.compose.foundation.Image(
                     bitmap = bitmap,
-                    contentDescription = null,
+                    contentDescription = contentDescription ?: fallbackName.ifEmpty { null },
                     contentScale = ContentScale.Crop,
                     modifier = modifier
                         .size(size)

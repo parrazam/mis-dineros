@@ -84,6 +84,11 @@
     <string name="backup_export_success">Datos exportados correctamente</string>
     <string name="backup_import_success">Datos importados correctamente</string>
 
+    <!-- Accesibilidad -->
+    <string name="action_back">Volver</string>
+    <string name="content_desc_subscription_options">Opciones de %1$s</string>
+    <string name="content_desc_service_icon">Icono de %1$s</string>
+
     <!-- Errores -->
     <string name="error_invalid_amount">Introduce un importe válido</string>
     <string name="error_name_required">El nombre es obligatorio</string>

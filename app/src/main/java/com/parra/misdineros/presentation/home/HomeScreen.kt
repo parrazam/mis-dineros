@@ -3,6 +3,7 @@ package com.parra.misdineros.presentation.home
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -87,34 +88,82 @@ fun HomeScreen(
             }
 
             else -> {
-                Column(
+                BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding)
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp),
+                        .padding(innerPadding),
                 ) {
-                    SummaryCard(state = state)
+                    val isWide = maxWidth >= 600.dp
+                    if (isWide) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(24.dp),
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .verticalScroll(rememberScrollState()),
+                                verticalArrangement = Arrangement.spacedBy(24.dp),
+                            ) {
+                                SummaryCard(state = state)
+                                Spacer(Modifier.height(8.dp))
+                            }
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .verticalScroll(rememberScrollState()),
+                                verticalArrangement = Arrangement.spacedBy(24.dp),
+                            ) {
+                                if (state.upcomingRenewals.isNotEmpty()) {
+                                    UpcomingSection(
+                                        renewals = state.upcomingRenewals,
+                                        categories = state.categories,
+                                        onTap = onNavigateToDetail,
+                                    )
+                                }
+                                if (state.top5.isNotEmpty()) {
+                                    Top5Section(
+                                        ranked = state.top5,
+                                        categories = state.categories,
+                                        globalCurrency = state.globalCurrency,
+                                        onTap = onNavigateToDetail,
+                                    )
+                                }
+                                Spacer(Modifier.height(8.dp))
+                            }
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(24.dp),
+                        ) {
+                            SummaryCard(state = state)
 
-                    if (state.upcomingRenewals.isNotEmpty()) {
-                        UpcomingSection(
-                            renewals = state.upcomingRenewals,
-                            categories = state.categories,
-                            onTap = onNavigateToDetail,
-                        )
+                            if (state.upcomingRenewals.isNotEmpty()) {
+                                UpcomingSection(
+                                    renewals = state.upcomingRenewals,
+                                    categories = state.categories,
+                                    onTap = onNavigateToDetail,
+                                )
+                            }
+
+                            if (state.top5.isNotEmpty()) {
+                                Top5Section(
+                                    ranked = state.top5,
+                                    categories = state.categories,
+                                    globalCurrency = state.globalCurrency,
+                                    onTap = onNavigateToDetail,
+                                )
+                            }
+
+                            Spacer(Modifier.height(8.dp))
+                        }
                     }
-
-                    if (state.top5.isNotEmpty()) {
-                        Top5Section(
-                            ranked = state.top5,
-                            categories = state.categories,
-                            globalCurrency = state.globalCurrency,
-                            onTap = onNavigateToDetail,
-                        )
-                    }
-
-                    Spacer(Modifier.height(8.dp))
                 }
             }
         }

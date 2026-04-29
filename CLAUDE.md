@@ -61,7 +61,6 @@ di/             — Hilt modules (DatabaseModule, RepositoryModule, WorkerModule
 
 `HiltTestRunner` in `androidTest/` is the custom runner configured in `build.gradle.kts`. Hilt-injected components in instrumented tests must use `@HiltAndroidTest` + `HiltAndroidRule`.
 
-## Phases still pending (v1)
+## Phases status
 
-Phases 1-10 are complete. Remaining:
-- **Phase 11**: Accessibility (TalkBack content descriptions, AA contrast), M3 animations, adaptive/landscape layouts.
+All 11 phases complete. v1 feature set is done.

@@ -139,7 +139,10 @@ fun SubscriptionCard(
 
             Box {
                 IconButton(onClick = { showMenu = true }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = null)
+                    Icon(
+                        Icons.Default.MoreVert,
+                        contentDescription = stringResource(R.string.content_desc_subscription_options, subscription.name),
+                    )
                 }
                 DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                     DropdownMenuItem(
