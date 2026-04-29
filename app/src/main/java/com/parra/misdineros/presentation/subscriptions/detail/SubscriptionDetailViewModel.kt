@@ -14,11 +14,12 @@ import com.parra.misdineros.presentation.navigation.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -43,29 +44,24 @@ class SubscriptionDetailViewModel @Inject constructor(
 
     private val subscriptionId: String = savedStateHandle.toRoute<Destination.SubscriptionDetail>().id
 
-    private val _uiState = MutableStateFlow(SubscriptionDetailUiState())
-    val uiState: StateFlow<SubscriptionDetailUiState> = _uiState.asStateFlow()
-
     private val _events = Channel<SubscriptionDetailUiEvent>(Channel.BUFFERED)
     val events: Flow<SubscriptionDetailUiEvent> = _events.receiveAsFlow()
 
-    init {
-        load()
-    }
-
-    private fun load() {
-        viewModelScope.launch {
-            val subscription = subscriptionRepository.getById(subscriptionId)
-            val category = subscription?.categoryId?.let { categoryRepository.getById(it) }
-            _uiState.update { it.copy(isLoading = false, subscription = subscription, category = category) }
+    val uiState = subscriptionRepository.observeById(subscriptionId)
+        .flatMapLatest { sub ->
+            val categoryFlow = sub?.categoryId?.let { categoryRepository.observeById(it) } ?: flowOf(null)
+            combine(flowOf(sub), categoryFlow) { s, c ->
+                SubscriptionDetailUiState(isLoading = false, subscription = s, category = c)
+            }
         }
-    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = SubscriptionDetailUiState(),
+        )
 
     fun togglePause() {
-        viewModelScope.launch {
-            togglePauseUseCase(subscriptionId)
-            load()
-        }
+        viewModelScope.launch { togglePauseUseCase(subscriptionId) }
     }
 
     fun delete() {

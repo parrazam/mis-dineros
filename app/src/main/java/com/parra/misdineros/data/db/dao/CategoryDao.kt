@@ -15,6 +15,9 @@ interface CategoryDao {
     @Query("SELECT * FROM categories WHERE id = :id LIMIT 1")
     suspend fun getById(id: String): CategoryEntity?
 
+    @Query("SELECT * FROM categories WHERE id = :id LIMIT 1")
+    fun observeById(id: String): Flow<CategoryEntity?>
+
     @Upsert
     suspend fun upsert(entity: CategoryEntity)
 

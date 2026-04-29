@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface CategoryRepository {
     fun observeAll(): Flow<List<Category>>
+    fun observeById(id: String): Flow<Category?>
     suspend fun getById(id: String): Category?
     suspend fun upsert(category: Category)
     suspend fun delete(id: String)

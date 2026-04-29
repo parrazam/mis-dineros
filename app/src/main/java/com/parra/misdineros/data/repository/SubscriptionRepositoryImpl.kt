@@ -19,6 +19,9 @@ class SubscriptionRepositoryImpl @Inject constructor(
     override fun observeActive(): Flow<List<Subscription>> =
         dao.observeActive().map { list -> list.map { it.toDomain() } }
 
+    override fun observeById(id: String): Flow<Subscription?> =
+        dao.observeById(id).map { it?.toDomain() }
+
     override suspend fun getById(id: String): Subscription? =
         dao.getById(id)?.toDomain()
 

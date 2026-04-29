@@ -20,6 +20,9 @@ class CategoryRepositoryImpl @Inject constructor(
             .onStart { seedIfEmpty() }
             .map { list -> list.map { it.toDomain() } }
 
+    override fun observeById(id: String): Flow<Category?> =
+        dao.observeById(id).map { it?.toDomain() }
+
     override suspend fun getById(id: String): Category? =
         dao.getById(id)?.toDomain()
 

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 interface SubscriptionRepository {
     fun observeAll(): Flow<List<Subscription>>
     fun observeActive(): Flow<List<Subscription>>
+    fun observeById(id: String): Flow<Subscription?>
     suspend fun getById(id: String): Subscription?
     suspend fun upsert(subscription: Subscription)
     suspend fun delete(id: String)
