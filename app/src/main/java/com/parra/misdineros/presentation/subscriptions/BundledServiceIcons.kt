@@ -1,73 +1,54 @@
 package com.parra.misdineros.presentation.subscriptions
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.Article
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Backup
-import androidx.compose.material.icons.filled.Brush
-import androidx.compose.material.icons.filled.ChatBubble
-import androidx.compose.material.icons.filled.ChildCare
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.CloudDone
-import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Headphones
-import androidx.compose.material.icons.filled.LibraryMusic
-import androidx.compose.material.icons.filled.LiveTv
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.OndemandVideo
-import androidx.compose.material.icons.filled.QueueMusic
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.SmartToy
-import androidx.compose.material.icons.filled.SportsEsports
-import androidx.compose.material.icons.filled.Subscriptions
-import androidx.compose.material.icons.filled.Theaters
-import androidx.compose.material.icons.filled.Tv
-import androidx.compose.material.icons.filled.VideoCall
-import androidx.compose.material.icons.filled.VideogameAsset
-import androidx.compose.material.icons.filled.VpnLock
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.annotation.DrawableRes
+import com.parra.misdineros.R
 
 object BundledServiceIcons {
 
     data class CatalogEntry(
         val key: String,
         val displayName: String,
-        val icon: ImageVector,
+        @DrawableRes val iconRes: Int,
     )
 
     val catalog: List<CatalogEntry> = listOf(
-        CatalogEntry("netflix", "Netflix", Icons.Default.LiveTv),
-        CatalogEntry("disney", "Disney+", Icons.Default.ChildCare),
-        CatalogEntry("amazon_prime", "Amazon Prime Video", Icons.Default.ShoppingCart),
-        CatalogEntry("hbo", "Max / HBO", Icons.Default.Theaters),
-        CatalogEntry("apple_tv", "Apple TV+", Icons.Default.Tv),
-        CatalogEntry("youtube", "YouTube Premium", Icons.Default.OndemandVideo),
-        CatalogEntry("twitch", "Twitch", Icons.Default.VideogameAsset),
-        CatalogEntry("spotify", "Spotify", Icons.Default.Headphones),
-        CatalogEntry("apple_music", "Apple Music", Icons.Default.MusicNote),
-        CatalogEntry("youtube_music", "YouTube Music", Icons.Default.QueueMusic),
-        CatalogEntry("amazon_music", "Amazon Music", Icons.Default.LibraryMusic),
-        CatalogEntry("icloud", "iCloud+", Icons.Default.Cloud),
-        CatalogEntry("google_one", "Google One", Icons.Default.Backup),
-        CatalogEntry("dropbox", "Dropbox", Icons.Default.CloudDone),
-        CatalogEntry("onedrive", "OneDrive", Icons.Default.CloudUpload),
-        CatalogEntry("microsoft365", "Microsoft 365", Icons.Default.Apps),
-        CatalogEntry("adobe", "Adobe Creative Cloud", Icons.Default.Brush),
-        CatalogEntry("notion", "Notion", Icons.Default.Article),
-        CatalogEntry("slack", "Slack", Icons.Default.ChatBubble),
-        CatalogEntry("zoom", "Zoom", Icons.Default.VideoCall),
-        CatalogEntry("github", "GitHub", Icons.Default.Code),
-        CatalogEntry("nordvpn", "NordVPN", Icons.Default.VpnLock),
-        CatalogEntry("password_mgr", "Gestor de contraseñas", Icons.Default.Lock),
-        CatalogEntry("nintendo", "Nintendo Switch Online", Icons.Default.SportsEsports),
-        CatalogEntry("xbox", "Xbox Game Pass", Icons.Default.VideogameAsset),
-        CatalogEntry("playstation", "PlayStation Plus", Icons.Default.SportsEsports),
-        CatalogEntry("chatgpt", "ChatGPT Plus", Icons.Default.SmartToy),
-        CatalogEntry("midjourney", "Midjourney", Icons.Default.AutoAwesome),
-        CatalogEntry("generic", "Otro servicio", Icons.Default.Subscriptions),
+        // Vídeo
+        CatalogEntry("netflix",       "Netflix",               R.drawable.ic_brand_netflix),
+        CatalogEntry("disney",        "Disney+",               R.drawable.ic_brand_disney),
+        CatalogEntry("amazon_prime",  "Prime Video",           R.drawable.ic_brand_amazon_prime),
+        CatalogEntry("hbo",           "Max / HBO",             R.drawable.ic_brand_hbo),
+        CatalogEntry("apple_tv",      "Apple TV+",             R.drawable.ic_brand_apple_tv),
+        CatalogEntry("youtube",       "YouTube Premium",       R.drawable.ic_brand_youtube),
+        CatalogEntry("twitch",        "Twitch",                R.drawable.ic_brand_twitch),
+        // Música
+        CatalogEntry("spotify",       "Spotify",               R.drawable.ic_brand_spotify),
+        CatalogEntry("apple_music",   "Apple Music",           R.drawable.ic_brand_apple_music),
+        CatalogEntry("youtube_music", "YouTube Music",         R.drawable.ic_brand_youtube_music),
+        CatalogEntry("amazon_music",  "Amazon Music",          R.drawable.ic_brand_amazon_music),
+        // Almacenamiento
+        CatalogEntry("icloud",        "iCloud+",               R.drawable.ic_brand_icloud),
+        CatalogEntry("google_one",    "Google One",            R.drawable.ic_brand_google_one),
+        CatalogEntry("dropbox",       "Dropbox",               R.drawable.ic_brand_dropbox),
+        CatalogEntry("onedrive",      "OneDrive",              R.drawable.ic_brand_onedrive),
+        // Productividad
+        CatalogEntry("microsoft365",  "Microsoft 365",         R.drawable.ic_brand_microsoft365),
+        CatalogEntry("adobe",         "Adobe Creative Cloud",  R.drawable.ic_brand_adobe),
+        CatalogEntry("notion",        "Notion",                R.drawable.ic_brand_notion),
+        CatalogEntry("slack",         "Slack",                 R.drawable.ic_brand_slack),
+        CatalogEntry("zoom",          "Zoom",                  R.drawable.ic_brand_zoom),
+        CatalogEntry("github",        "GitHub",                R.drawable.ic_brand_github),
+        // Seguridad
+        CatalogEntry("nordvpn",       "NordVPN",               R.drawable.ic_brand_nordvpn),
+        CatalogEntry("password_mgr",  "Bitwarden / 1Password", R.drawable.ic_brand_bitwarden),
+        // Gaming
+        CatalogEntry("nintendo",      "Nintendo Switch Online", R.drawable.ic_brand_nintendo),
+        CatalogEntry("xbox",          "Xbox Game Pass",        R.drawable.ic_brand_xbox),
+        CatalogEntry("playstation",   "PlayStation Plus",      R.drawable.ic_brand_playstation),
+        // IA
+        CatalogEntry("chatgpt",       "ChatGPT Plus",          R.drawable.ic_brand_openai),
+        CatalogEntry("midjourney",    "Midjourney",            R.drawable.ic_brand_midjourney),
+        // Genérico
+        CatalogEntry("generic",       "Otro servicio",         R.drawable.ic_brand_generic),
     )
 
     fun byKey(key: String): CatalogEntry? = catalog.find { it.key == key }

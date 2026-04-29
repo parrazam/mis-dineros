@@ -1,6 +1,7 @@
 package com.parra.misdineros.designsystem.component
 
 import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -17,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.parra.misdineros.presentation.subscriptions.BundledServiceIcons
@@ -48,10 +50,10 @@ fun ServiceIcon(
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
-                        imageVector = entry.icon,
+                        painter = painterResource(entry.iconRes),
                         contentDescription = contentDescription ?: entry.displayName,
                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(size * 0.55f),
+                        modifier = Modifier.size(size * 0.6f),
                     )
                 }
             } else {
@@ -65,7 +67,7 @@ fun ServiceIcon(
                 runCatching { BitmapFactory.decodeFile(path)?.asImageBitmap() }.getOrNull()
             }
             if (bitmap != null) {
-                androidx.compose.foundation.Image(
+                Image(
                     bitmap = bitmap,
                     contentDescription = contentDescription ?: fallbackName.ifEmpty { null },
                     contentScale = ContentScale.Crop,
