@@ -1,5 +1,6 @@
 package com.parra.misdineros.notifications
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -30,6 +31,7 @@ class RenewalReminderWorker @AssistedInject constructor(
     private val settingsRepository: SettingsRepository,
 ) : CoroutineWorker(appContext, workerParams) {
 
+    @SuppressLint("MissingPermission")
     override suspend fun doWork(): Result {
         val settings = settingsRepository.observe().first()
         if (!settings.notificationsEnabled) return Result.success()
@@ -47,6 +49,7 @@ class RenewalReminderWorker @AssistedInject constructor(
         return Result.success()
     }
 
+    @SuppressLint("MissingPermission")
     private fun sendNotification(sub: Subscription) {
         val notifManager = NotificationManagerCompat.from(appContext)
         if (!notifManager.areNotificationsEnabled()) return

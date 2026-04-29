@@ -1,5 +1,6 @@
 package com.parra.misdineros.notifications
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -25,6 +26,7 @@ class MonthlySummaryWorker @AssistedInject constructor(
     private val calcMonthlySpend: CalcMonthlySpendUseCase,
 ) : CoroutineWorker(appContext, workerParams) {
 
+    @SuppressLint("MissingPermission")
     override suspend fun doWork(): Result {
         val settings = settingsRepository.observe().first()
         if (!settings.notificationsEnabled || !settings.monthlySummaryEnabled) return Result.success()
