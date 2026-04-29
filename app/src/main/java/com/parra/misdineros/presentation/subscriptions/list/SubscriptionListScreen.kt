@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PauseCircle
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -178,8 +180,10 @@ private fun SwipeToDeleteItem(
 
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
-            if (value == SwipeToDismissBoxValue.EndToStart) {
-                showConfirm = true
+            when (value) {
+                SwipeToDismissBoxValue.EndToStart -> showConfirm = true
+                SwipeToDismissBoxValue.StartToEnd -> onTogglePause()
+                else -> {}
             }
             false
         },
@@ -187,20 +191,26 @@ private fun SwipeToDeleteItem(
 
     SwipeToDismissBox(
         state = dismissState,
-        enableDismissFromStartToEnd = false,
+        enableDismissFromStartToEnd = true,
         enableDismissFromEndToStart = true,
         backgroundContent = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(end = 16.dp),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.action_delete),
-                    tint = MaterialTheme.colorScheme.error,
-                )
+            val isStartToEnd = dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (isStartToEnd) {
+                    Icon(
+                        imageVector = if (item.subscription.isPaused) Icons.Default.PlayCircle else Icons.Default.PauseCircle,
+                        contentDescription = if (item.subscription.isPaused) "Reanudar" else "Pausar",
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.align(Alignment.CenterStart).padding(start = 16.dp),
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.action_delete),
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.CenterEnd).padding(end = 16.dp),
+                    )
+                }
             }
         },
     ) {
