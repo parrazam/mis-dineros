@@ -25,7 +25,11 @@ class MisDinerosApplication : Application(), Configuration.Provider {
         NotificationChannelFactory.createChannels(this)
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             val settings = settingsRepository.observe().first()
-            notificationScheduler.schedule(settings.notificationHour, settings.notificationsEnabled)
+            notificationScheduler.schedule(
+                settings.notificationHour,
+                settings.notificationMinute,
+                settings.notificationsEnabled
+            )
         }
     }
 
