@@ -37,20 +37,24 @@ jobs:
           mkdir -p keystore
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > keystore/release.jks
 
-      - name: Build release APK
+      - name: Build release APK + AAB
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: mis-dineros
-        run: ./gradlew assembleRelease --no-daemon
+        run: ./gradlew assembleRelease bundleRelease --no-daemon
 
-      - name: Rename APK
+      - name: Rename artifacts
         run: |
           mv app/build/outputs/apk/release/app-release.apk \
              app/build/outputs/apk/release/mis-dineros-${{ github.ref_name }}.apk
+          mv app/build/outputs/bundle/release/app-release.aab \
+             app/build/outputs/bundle/release/mis-dineros-${{ github.ref_name }}.aab
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: "Mis Dineros ${{ github.ref_name }}"
           generate_notes: true
-          files: app/build/outputs/apk/release/mis-dineros-${{ github.ref_name }}.apk
+          files: |
+            app/build/outputs/apk/release/mis-dineros-${{ github.ref_name }}.apk
+            app/build/outputs/bundle/release/mis-dineros-${{ github.ref_name }}.aab
