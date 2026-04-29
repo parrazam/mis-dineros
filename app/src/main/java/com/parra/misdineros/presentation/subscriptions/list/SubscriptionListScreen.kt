@@ -21,6 +21,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -43,6 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.parra.misdineros.R
 import com.parra.misdineros.designsystem.component.SubscriptionCard
+import com.parra.misdineros.domain.model.BillingCycle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +80,7 @@ fun SubscriptionListScreen(
                 }
             }
 
-            state.items.isEmpty() -> {
+            !state.hasAnySubscription -> {
                 Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
                     Text(
                         text = stringResource(R.string.subscriptions_empty),
@@ -89,22 +93,74 @@ fun SubscriptionListScreen(
             }
 
             else -> {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(innerPadding),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(state.items, key = { it.subscription.id }) { item ->
-                        SwipeToDeleteItem(
-                            item = item,
-                            onTap = { onNavigateToDetail(item.subscription.id) },
-                            onEdit = { onNavigateToEdit(item.subscription.id) },
-                            onTogglePause = { viewModel.togglePause(item.subscription.id) },
-                            onDelete = { viewModel.delete(item.subscription.id) },
-                        )
+                Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+                    CycleFilterRow(
+                        activeFilter = state.activeFilter,
+                        onFilterChange = viewModel::setFilter,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+
+                    if (state.items.isEmpty()) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = stringResource(
+                                    when (state.activeFilter) {
+                                        BillingCycle.MONTHLY -> R.string.subscriptions_empty_filtered_monthly
+                                        BillingCycle.ANNUAL -> R.string.subscriptions_empty_filtered_annual
+                                        null -> R.string.subscriptions_empty
+                                    }
+                                ),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(32.dp),
+                            )
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            items(state.items, key = { it.subscription.id }) { item ->
+                                SwipeToDeleteItem(
+                                    item = item,
+                                    onTap = { onNavigateToDetail(item.subscription.id) },
+                                    onEdit = { onNavigateToEdit(item.subscription.id) },
+                                    onTogglePause = { viewModel.togglePause(item.subscription.id) },
+                                    onDelete = { viewModel.delete(item.subscription.id) },
+                                )
+                            }
+                        }
                     }
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CycleFilterRow(
+    activeFilter: BillingCycle?,
+    onFilterChange: (BillingCycle?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val options = listOf(
+        null to R.string.subscriptions_filter_all,
+        BillingCycle.MONTHLY to R.string.subscriptions_filter_monthly,
+        BillingCycle.ANNUAL to R.string.subscriptions_filter_annual,
+    )
+    SingleChoiceSegmentedButtonRow(modifier = modifier) {
+        options.forEachIndexed { index, (cycle, labelRes) ->
+            SegmentedButton(
+                selected = activeFilter == cycle,
+                onClick = { onFilterChange(cycle) },
+                shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                label = { Text(stringResource(labelRes)) },
+            )
         }
     }
 }

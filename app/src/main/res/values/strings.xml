@@ -18,6 +18,11 @@
 
     <!-- Suscripciones -->
     <string name="subscriptions_empty">Sin suscripciones aún.\nPulsa + para añadir la primera.</string>
+    <string name="subscriptions_filter_all">Todas</string>
+    <string name="subscriptions_filter_monthly">Mensual</string>
+    <string name="subscriptions_filter_annual">Anual</string>
+    <string name="subscriptions_empty_filtered_monthly">No hay suscripciones mensuales</string>
+    <string name="subscriptions_empty_filtered_annual">No hay suscripciones anuales</string>
     <string name="subscription_paused">Pausada</string>
     <string name="subscription_active">Activa</string>
     <string name="billing_monthly">Mensual</string>
