@@ -41,7 +41,10 @@ class RenewalReminderWorker @AssistedInject constructor(
             .filter { !it.isPaused }
             .forEach { sub ->
                 val notifyDays = (sub.notifyDaysBefore ?: settings.defaultNotifyDaysBefore).toLong()
-                if (sub.nextRenewalDate.minusDays(notifyDays) == today) {
+                val targetDate = sub.nextRenewalDate.minusDays(notifyDays)
+                // Margen de ±1 día para absorber retrasos de WorkManager/Doze
+                val daysDiff = java.time.temporal.ChronoUnit.DAYS.between(targetDate, today)
+                if (daysDiff in 0..1 && !sub.nextRenewalDate.isBefore(today)) {
                     sendNotification(sub)
                 }
             }

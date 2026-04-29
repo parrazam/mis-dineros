@@ -1,15 +1,20 @@
 package com.parra.misdineros.presentation.settings
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.parra.misdineros.designsystem.theme.AppTheme
 import com.parra.misdineros.domain.model.AppSettings
 import com.parra.misdineros.domain.repository.SettingsRepository
 import com.parra.misdineros.domain.usecase.ExportDataUseCase
 import com.parra.misdineros.domain.usecase.ImportDataUseCase
 import com.parra.misdineros.notifications.NotificationScheduler
+import com.parra.misdineros.notifications.RenewalReminderWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +33,7 @@ sealed interface BackupState {
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val repo: SettingsRepository,
     private val notificationScheduler: NotificationScheduler,
     private val exportDataUseCase: ExportDataUseCase,
@@ -81,4 +87,10 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun clearBackupState() { _backupState.value = BackupState.Idle }
+
+    fun testNotificationNow() {
+        WorkManager.getInstance(context).enqueue(
+            OneTimeWorkRequestBuilder<RenewalReminderWorker>().build()
+        )
+    }
 }

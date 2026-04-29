@@ -223,6 +223,10 @@ fun SettingsScreen(
                     checked = settings.monthlySummaryEnabled,
                     onCheckedChange = viewModel::setSummaryEnabled,
                 )
+                NavSettingsItem(
+                    title = "Probar notificación ahora",
+                    onClick = viewModel::testNotificationNow,
+                )
             }
             HorizontalDivider()
 
