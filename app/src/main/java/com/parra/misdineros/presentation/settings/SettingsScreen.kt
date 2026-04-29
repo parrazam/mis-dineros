@@ -36,7 +36,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -82,6 +84,7 @@ fun SettingsScreen(
 
     var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
     var showImportDialog by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json"),
@@ -116,6 +119,30 @@ fun SettingsScreen(
             }
             else -> {}
         }
+    }
+
+    if (showTimePicker) {
+        val timePickerState = rememberTimePickerState(
+            initialHour = settings.notificationHour,
+            initialMinute = settings.notificationMinute,
+            is24Hour = true,
+        )
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            title = { Text(stringResource(R.string.settings_notif_hour)) },
+            text = { TimePicker(state = timePickerState) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.setNotifTime(timePickerState.hour, timePickerState.minute)
+                    showTimePicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
+        )
     }
 
     if (showImportDialog && pendingImportUri != null) {
@@ -177,11 +204,12 @@ fun SettingsScreen(
                 leadingIcon = Icons.Default.Notifications,
             )
             if (settings.notificationsEnabled) {
-                DropdownSettingsItem(
-                    title = stringResource(R.string.settings_notif_hour),
-                    value = "${settings.notificationHour}:00",
-                    options = (0..23).map { "$it:00" },
-                    onSelect = { viewModel.setNotifHour(it.substringBefore(":").toInt()) },
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.settings_notif_hour)) },
+                    supportingContent = {
+                        Text("%02d:%02d".format(settings.notificationHour, settings.notificationMinute))
+                    },
+                    modifier = Modifier.clickable { showTimePicker = true },
                 )
                 DropdownSettingsItem(
                     title = stringResource(R.string.settings_notif_default_days),

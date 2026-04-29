@@ -28,6 +28,7 @@ class SettingsDataStore @Inject constructor(
         val CURRENCY = stringPreferencesKey("global_currency")
         val NOTIFS_ENABLED = booleanPreferencesKey("notifs_enabled")
         val NOTIF_HOUR = intPreferencesKey("notif_hour")
+        val NOTIF_MINUTE = intPreferencesKey("notif_minute")
         val NOTIFY_DAYS = intPreferencesKey("notify_days")
         val SUMMARY_ENABLED = booleanPreferencesKey("summary_enabled")
         val THEME = stringPreferencesKey("app_theme")
@@ -38,6 +39,7 @@ class SettingsDataStore @Inject constructor(
             globalCurrencyCode = prefs[Keys.CURRENCY] ?: "EUR",
             notificationsEnabled = prefs[Keys.NOTIFS_ENABLED] ?: true,
             notificationHour = prefs[Keys.NOTIF_HOUR] ?: 9,
+            notificationMinute = prefs[Keys.NOTIF_MINUTE] ?: 0,
             defaultNotifyDaysBefore = prefs[Keys.NOTIFY_DAYS] ?: 3,
             monthlySummaryEnabled = prefs[Keys.SUMMARY_ENABLED] ?: true,
             appTheme = prefs[Keys.THEME]?.let { runCatching { AppTheme.valueOf(it) }.getOrNull() }
@@ -50,6 +52,7 @@ class SettingsDataStore @Inject constructor(
             prefs[Keys.CURRENCY] = settings.globalCurrencyCode
             prefs[Keys.NOTIFS_ENABLED] = settings.notificationsEnabled
             prefs[Keys.NOTIF_HOUR] = settings.notificationHour
+            prefs[Keys.NOTIF_MINUTE] = settings.notificationMinute
             prefs[Keys.NOTIFY_DAYS] = settings.defaultNotifyDaysBefore
             prefs[Keys.SUMMARY_ENABLED] = settings.monthlySummaryEnabled
             prefs[Keys.THEME] = settings.appTheme.name

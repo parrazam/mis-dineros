@@ -49,12 +49,12 @@ class SettingsViewModel @Inject constructor(
 
     fun setNotifsEnabled(enabled: Boolean) {
         update { it.copy(notificationsEnabled = enabled) }
-        notificationScheduler.schedule(settings.value.notificationHour, enabled)
+        with(settings.value) { notificationScheduler.schedule(notificationHour, notificationMinute, enabled) }
     }
 
-    fun setNotifHour(hour: Int) {
-        update { it.copy(notificationHour = hour) }
-        notificationScheduler.schedule(hour, settings.value.notificationsEnabled)
+    fun setNotifTime(hour: Int, minute: Int) {
+        update { it.copy(notificationHour = hour, notificationMinute = minute) }
+        notificationScheduler.schedule(hour, minute, settings.value.notificationsEnabled)
     }
 
     fun setNotifyDays(days: Int) = update { it.copy(defaultNotifyDaysBefore = days) }
