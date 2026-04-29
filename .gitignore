@@ -18,3 +18,4 @@ local.properties
 # Android signing
 *.jks
 *.keystore
+keystore/
