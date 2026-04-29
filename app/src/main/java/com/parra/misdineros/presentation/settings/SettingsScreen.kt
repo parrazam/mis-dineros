@@ -97,15 +97,17 @@ fun SettingsScreen(
     }
 
     val isLoading = backupState is BackupState.Loading
+    val exportSuccessMsg = stringResource(R.string.backup_export_success)
+    val importSuccessMsg = stringResource(R.string.backup_import_success)
 
     LaunchedEffect(backupState) {
         when (val state = backupState) {
             is BackupState.ExportSuccess -> {
-                snackbarHostState.showSnackbar(context.getString(R.string.backup_export_success))
+                snackbarHostState.showSnackbar(exportSuccessMsg)
                 viewModel.clearBackupState()
             }
             is BackupState.ImportSuccess -> {
-                snackbarHostState.showSnackbar(context.getString(R.string.backup_import_success))
+                snackbarHostState.showSnackbar(importSuccessMsg)
                 viewModel.clearBackupState()
             }
             is BackupState.Error -> {
