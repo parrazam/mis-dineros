@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.parra.misdineros.R
 import com.parra.misdineros.core.money.MoneyFormatter
@@ -81,26 +82,23 @@ fun SubscriptionCard(
             )
 
             Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Text(
-                        text = subscription.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.weight(1f, fill = false),
+                Text(
+                    text = subscription.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                if (subscription.isPaused) {
+                    SuggestionChip(
+                        onClick = {},
+                        label = { Text(stringResource(R.string.subscription_paused), style = MaterialTheme.typography.labelSmall) },
+                        colors = SuggestionChipDefaults.suggestionChipColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            labelColor = MaterialTheme.colorScheme.onErrorContainer,
+                        ),
                     )
-                    if (subscription.isPaused) {
-                        SuggestionChip(
-                            onClick = {},
-                            label = { Text(stringResource(R.string.subscription_paused), style = MaterialTheme.typography.labelSmall) },
-                            colors = SuggestionChipDefaults.suggestionChipColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                labelColor = MaterialTheme.colorScheme.onErrorContainer,
-                            ),
-                        )
-                    }
                 }
 
                 if (category != null) {
