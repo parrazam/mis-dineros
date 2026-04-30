@@ -360,8 +360,10 @@ private fun CategoryDialog(
                     }
                 }
 
-                Text("Color", style = MaterialTheme.typography.labelMedium)
-                ColorPickerRow(selected = colorArgb, onSelect = onColorChange)
+                if (mode != IconMode.IMAGE) {
+                    Text("Color", style = MaterialTheme.typography.labelMedium)
+                    ColorPickerRow(selected = colorArgb, onSelect = onColorChange)
+                }
             }
         },
         confirmButton = {
