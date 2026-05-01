@@ -7,13 +7,28 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
-val gitVersionName: String = providers.exec {
-    commandLine("git", "describe", "--tags", "--always")
-}.standardOutput.asText.map { it.trim().removePrefix("v") }.orElse("dev").get()
+// Lee git en tiempo de configuración usando providers.exec, que es la API soportada
+// por el configuration cache de Gradle. ignoreExitValue=true evita que falle la build
+// si git no está disponible o no hay historial; comprobamos el exitValue antes de
+// considerar válida la salida.
+fun gitOutput(vararg args: String): Provider<String> = providers.exec {
+    commandLine("git", *args)
+    isIgnoreExitValue = true
+}.let { result ->
+    result.result.zip(result.standardOutput.asText) { execResult, output ->
+        if (execResult.exitValue == 0) output.trim() else ""
+    }
+}
 
-val gitVersionCode: Int = providers.exec {
-    commandLine("git", "rev-list", "--count", "HEAD")
-}.standardOutput.asText.map { it.trim().toIntOrNull() ?: 1 }.orElse(1).get()
+val gitVersionName: String = gitOutput("describe", "--tags", "--always")
+    .map { it.removePrefix("v").ifEmpty { "dev" } }
+    .getOrElse("dev")
+
+val gitVersionCode: Int = gitOutput("rev-list", "--count", "HEAD")
+    .map { it.toIntOrNull() ?: 1 }
+    .getOrElse(1)
+
+println("[mis-dineros] versionCode=$gitVersionCode versionName=$gitVersionName")
 
 android {
     namespace = "com.parra.misdineros"
