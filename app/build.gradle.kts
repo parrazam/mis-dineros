@@ -7,13 +7,26 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
-val gitVersionName: String = providers.exec {
-    commandLine("git", "describe", "--tags", "--always")
-}.standardOutput.asText.map { it.trim().removePrefix("v") }.orElse("dev").get()
+fun runGit(vararg args: String): String? = try {
+    val proc = ProcessBuilder("git", *args)
+        .directory(rootProject.projectDir)
+        .redirectErrorStream(true)
+        .start()
+    val output = proc.inputStream.bufferedReader().readText().trim()
+    if (proc.waitFor() == 0 && output.isNotEmpty()) output else null
+} catch (_: Exception) {
+    null
+}
 
-val gitVersionCode: Int = providers.exec {
-    commandLine("git", "rev-list", "--count", "HEAD")
-}.standardOutput.asText.map { it.trim().toIntOrNull() ?: 1 }.orElse(1).get()
+val gitVersionName: String = (runGit("describe", "--tags", "--always")
+    ?.removePrefix("v"))
+    ?: "dev"
+
+val gitVersionCode: Int = runGit("rev-list", "--count", "HEAD")
+    ?.toIntOrNull()
+    ?: 1
+
+println("[mis-dineros] versionCode=$gitVersionCode versionName=$gitVersionName")
 
 android {
     namespace = "com.parra.misdineros"
