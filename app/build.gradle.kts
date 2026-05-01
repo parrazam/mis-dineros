@@ -7,24 +7,26 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
-fun runGit(vararg args: String): String? = try {
-    val proc = ProcessBuilder("git", *args)
-        .directory(rootProject.projectDir)
-        .redirectErrorStream(true)
-        .start()
-    val output = proc.inputStream.bufferedReader().readText().trim()
-    if (proc.waitFor() == 0 && output.isNotEmpty()) output else null
-} catch (_: Exception) {
-    null
+// Lee git en tiempo de configuración usando providers.exec, que es la API soportada
+// por el configuration cache de Gradle. ignoreExitValue=true evita que falle la build
+// si git no está disponible o no hay historial; comprobamos el exitValue antes de
+// considerar válida la salida.
+fun gitOutput(vararg args: String): Provider<String> = providers.exec {
+    commandLine("git", *args)
+    isIgnoreExitValue = true
+}.let { result ->
+    result.result.zip(result.standardOutput.asText) { execResult, output ->
+        if (execResult.exitValue == 0) output.trim() else ""
+    }
 }
 
-val gitVersionName: String = (runGit("describe", "--tags", "--always")
-    ?.removePrefix("v"))
-    ?: "dev"
+val gitVersionName: String = gitOutput("describe", "--tags", "--always")
+    .map { it.removePrefix("v").ifEmpty { "dev" } }
+    .getOrElse("dev")
 
-val gitVersionCode: Int = runGit("rev-list", "--count", "HEAD")
-    ?.toIntOrNull()
-    ?: 1
+val gitVersionCode: Int = gitOutput("rev-list", "--count", "HEAD")
+    .map { it.toIntOrNull() ?: 1 }
+    .getOrElse(1)
 
 println("[mis-dineros] versionCode=$gitVersionCode versionName=$gitVersionName")
 
