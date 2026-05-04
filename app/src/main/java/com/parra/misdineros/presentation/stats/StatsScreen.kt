@@ -10,8 +10,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,7 +32,6 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -52,15 +54,6 @@ import kotlin.math.cos
 import kotlin.math.sin
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
-import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
-import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.parra.misdineros.R
 import com.parra.misdineros.core.money.MoneyFormatter
 import com.parra.misdineros.designsystem.component.ServiceIcon
@@ -341,10 +334,16 @@ private fun GlobalTab(state: StatsUiState) {
             )
         }
 
-        ColumnBarChart(
-            monthlyMinor = state.monthlyTotalMinor,
-            annualMinor = state.annualEquivalentMinor,
-            currency = state.globalCurrency,
+        BillingCycleSplitCard(
+            monthlyFromMonthlyMinor = state.monthlyFromMonthlyCycleMinor,
+            monthlyFromAnnualMinor = state.monthlyFromAnnualCycleMinor,
+            globalCurrency = state.globalCurrency,
+        )
+
+        ActiveVsTotalCard(
+            activeMinor = state.monthlyTotalMinor,
+            totalMinor = state.monthlyTotalIncludingPausedMinor,
+            globalCurrency = state.globalCurrency,
         )
     }
 }
@@ -380,38 +379,180 @@ private fun GlobalStatCard(label: String, amount: String, modifier: Modifier = M
 }
 
 @Composable
-private fun ColumnBarChart(monthlyMinor: Long, annualMinor: Long, currency: String) {
-    val modelProducer = remember { CartesianChartModelProducer() }
-
-    LaunchedEffect(monthlyMinor, annualMinor) {
-        modelProducer.runTransaction {
-            columnSeries { series(monthlyMinor.toFloat(), annualMinor.toFloat()) }
-        }
-    }
+private fun BillingCycleSplitCard(
+    monthlyFromMonthlyMinor: Long,
+    monthlyFromAnnualMinor: Long,
+    globalCurrency: String,
+) {
+    val total = (monthlyFromMonthlyMinor + monthlyFromAnnualMinor).coerceAtLeast(1L)
+    val monthlyFraction = (monthlyFromMonthlyMinor.toFloat() / total).coerceIn(0f, 1f)
+    val monthlyPct = (monthlyFraction * 100).roundToInt()
+    val annualPct = 100 - monthlyPct
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
-        CartesianChartHost(
-            chart = rememberCartesianChart(
-                rememberColumnCartesianLayer(),
-                startAxis = VerticalAxis.rememberStart(
-                    valueFormatter = { _, value, _ ->
-                        MoneyFormatter.format(value.toLong(), currency)
-                    },
-                ),
-                bottomAxis = HorizontalAxis.rememberBottom(
-                    valueFormatter = { _, value, _ ->
-                        if (value.toInt() == 0) "Mensual" else "Anual"
-                    },
-                ),
-            ),
-            modelProducer = modelProducer,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(240.dp)
-                .padding(8.dp),
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = "Reparto por ciclo de facturación",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(10.dp)
+                    .clip(RoundedCornerShape(50)),
+            ) {
+                if (monthlyFraction > 0f) {
+                    Box(
+                        modifier = Modifier
+                            .weight(monthlyFraction)
+                            .fillMaxHeight()
+                            .background(MaterialTheme.colorScheme.primary),
+                    )
+                }
+                if (monthlyFraction < 1f) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f - monthlyFraction)
+                            .fillMaxHeight()
+                            .background(MaterialTheme.colorScheme.inversePrimary),
+                    )
+                }
+            }
+
+            CycleRow(
+                label = "Mensual",
+                amount = MoneyFormatter.format(monthlyFromMonthlyMinor, globalCurrency),
+                pct = "$monthlyPct%",
+                dotColor = MaterialTheme.colorScheme.primary,
+            )
+            CycleRow(
+                label = "Anual / mes",
+                amount = MoneyFormatter.format(monthlyFromAnnualMinor, globalCurrency),
+                pct = "$annualPct%",
+                dotColor = MaterialTheme.colorScheme.inversePrimary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ActiveVsTotalCard(
+    activeMinor: Long,
+    totalMinor: Long,
+    globalCurrency: String,
+) {
+    if (totalMinor == 0L) return
+    val fraction = (activeMinor.toFloat() / totalMinor).coerceIn(0f, 1f)
+    val savedMinor = totalMinor - activeMinor
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = "Activo vs. total contratado",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(10.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)),
+            ) {
+                if (fraction > 0f) {
+                    Box(
+                        modifier = Modifier
+                            .weight(fraction)
+                            .fillMaxHeight()
+                            .background(MaterialTheme.colorScheme.primary),
+                    )
+                }
+                if (fraction < 1f) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f - fraction)
+                            .fillMaxHeight()
+                            .background(MaterialTheme.colorScheme.inversePrimary),
+                    )
+                }
+            }
+
+            CycleRow(
+                label = "Activo",
+                amount = MoneyFormatter.format(activeMinor, globalCurrency),
+                pct = "${(fraction * 100).roundToInt()}%",
+                dotColor = MaterialTheme.colorScheme.primary,
+            )
+            CycleRow(
+                label = "Total contratado",
+                amount = MoneyFormatter.format(totalMinor, globalCurrency),
+                pct = "100%",
+                dotColor = MaterialTheme.colorScheme.inversePrimary,
+            )
+
+            if (savedMinor > 0L) {
+                HorizontalDivider()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "Ahorro pausando",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = MoneyFormatter.format(savedMinor, globalCurrency),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CycleRow(label: String, amount: String, pct: String, dotColor: Color) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Canvas(modifier = Modifier.size(10.dp)) { drawCircle(dotColor) }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = amount,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+        )
+        Text(
+            text = pct,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(36.dp),
+            textAlign = TextAlign.End,
         )
     }
 }

@@ -2,6 +2,7 @@ package com.parra.misdineros.presentation.stats
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.parra.misdineros.domain.model.BillingCycle
 import com.parra.misdineros.domain.model.Category
 import com.parra.misdineros.domain.repository.CategoryRepository
 import com.parra.misdineros.domain.repository.SettingsRepository
@@ -31,6 +32,9 @@ data class StatsUiState(
     val annualEquivalentMinor: Long = 0L,
     val categoryItems: List<CategorySpendItem> = emptyList(),
     val top5: List<RankedSubscription> = emptyList(),
+    val monthlyFromMonthlyCycleMinor: Long = 0L,
+    val monthlyFromAnnualCycleMinor: Long = 0L,
+    val monthlyTotalIncludingPausedMinor: Long = 0L,
 )
 
 @HiltViewModel
@@ -55,6 +59,19 @@ class StatsViewModel @Inject constructor(
         val top5 = calcTopExpensive(subscriptions, currency, limit = 5)
         val spendByCategory = calcSpendByCategory(subscriptions, currency)
 
+        val monthlyFromMonthly = calcMonthlySpend(
+            subscriptions.filter { it.billingCycle == BillingCycle.MONTHLY },
+            currency,
+        )
+        val monthlyFromAnnual = calcMonthlySpend(
+            subscriptions.filter { it.billingCycle == BillingCycle.ANNUAL },
+            currency,
+        )
+        val totalIncludingPaused = calcMonthlySpend(
+            subscriptions.map { it.copy(isPaused = false) },
+            currency,
+        )
+
         val categoryMap = categories.associateBy { it.id }
         val categoryItems = spendByCategory.mapNotNull { spend ->
             val category = categoryMap[spend.categoryId] ?: return@mapNotNull null
@@ -72,6 +89,9 @@ class StatsViewModel @Inject constructor(
             annualEquivalentMinor = annual,
             categoryItems = categoryItems,
             top5 = top5,
+            monthlyFromMonthlyCycleMinor = monthlyFromMonthly,
+            monthlyFromAnnualCycleMinor = monthlyFromAnnual,
+            monthlyTotalIncludingPausedMinor = totalIncludingPaused,
         )
     }.stateIn(
         scope = viewModelScope,
