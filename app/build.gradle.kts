@@ -53,10 +53,14 @@ android {
         create("release") {
             val keystoreFile = rootProject.file("keystore/release.jks")
             if (keystoreFile.exists()) {
+                val storePass = System.getenv("KEYSTORE_PASSWORD") ?: ""
+                // KEY_PASSWORD puede diferir de KEYSTORE_PASSWORD; si no se define,
+                // se asume que ambas son iguales (caso más común con keytool por defecto).
+                val keyPass = System.getenv("KEY_PASSWORD") ?: storePass
                 storeFile = keystoreFile
-                storePassword = System.getenv("KEYSTORE_PASSWORD") ?: ""
+                storePassword = storePass
                 keyAlias = System.getenv("KEY_ALIAS") ?: "mis-dineros"
-                keyPassword = System.getenv("KEYSTORE_PASSWORD") ?: ""
+                keyPassword = keyPass
             }
         }
     }
