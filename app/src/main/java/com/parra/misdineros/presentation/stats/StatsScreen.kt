@@ -1,6 +1,8 @@
 package com.parra.misdineros.presentation.stats
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,11 +42,14 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlin.math.cos
+import kotlin.math.sin
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -115,6 +121,8 @@ private fun PorCategoriaTab(state: StatsUiState) {
         return
     }
 
+    var selectedCategoryId by remember { mutableStateOf<String?>(null) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -126,6 +134,7 @@ private fun PorCategoriaTab(state: StatsUiState) {
             items = state.categoryItems,
             globalCurrency = state.globalCurrency,
             totalMinor = state.monthlyTotalMinor,
+            selectedCategoryId = selectedCategoryId,
             modifier = Modifier
                 .fillMaxWidth(0.65f)
                 .aspectRatio(1f)
@@ -135,6 +144,10 @@ private fun PorCategoriaTab(state: StatsUiState) {
         DonutLegend(
             items = state.categoryItems,
             globalCurrency = state.globalCurrency,
+            selectedCategoryId = selectedCategoryId,
+            onCategoryClick = { categoryId ->
+                selectedCategoryId = if (selectedCategoryId == categoryId) null else categoryId
+            },
         )
 
         Spacer(Modifier.height(8.dp))
@@ -146,8 +159,12 @@ private fun DonutChart(
     items: List<CategorySpendItem>,
     globalCurrency: String,
     totalMinor: Long,
+    selectedCategoryId: String?,
     modifier: Modifier = Modifier,
 ) {
+    val selectedItem = items.firstOrNull { it.category.id == selectedCategoryId }
+    val hasSelection = selectedCategoryId != null
+
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val strokeWidth = size.minDimension * 0.16f
@@ -158,50 +175,107 @@ private fun DonutChart(
             if (total <= 0f) return@Canvas
 
             val gap = 3f
+            val explodeDistance = size.minDimension * 0.06f
             var startAngle = -90f
+
             items.forEach { item ->
                 val sweep = (item.monthlyAmountMinor / total) * 360f
-                drawArc(
-                    color = Color(item.category.colorArgb),
-                    startAngle = startAngle + gap / 2f,
-                    sweepAngle = (sweep - gap).coerceAtLeast(0.5f),
-                    useCenter = false,
-                    style = Stroke(width = strokeWidth, cap = StrokeCap.Butt),
-                    topLeft = topLeft,
-                    size = arcSize,
-                )
+                val isSelected = item.category.id == selectedCategoryId
+                val alpha = if (hasSelection && !isSelected) 0.28f else 1f
+
+                if (isSelected) {
+                    val midAngle = startAngle + sweep / 2f
+                    val radians = Math.toRadians(midAngle.toDouble())
+                    val dx = (cos(radians) * explodeDistance).toFloat()
+                    val dy = (sin(radians) * explodeDistance).toFloat()
+                    withTransform({ translate(dx, dy) }) {
+                        drawArc(
+                            color = Color(item.category.colorArgb),
+                            startAngle = startAngle + gap / 2f,
+                            sweepAngle = (sweep - gap).coerceAtLeast(0.5f),
+                            useCenter = false,
+                            style = Stroke(width = strokeWidth * 1.18f, cap = StrokeCap.Butt),
+                            topLeft = topLeft,
+                            size = arcSize,
+                        )
+                    }
+                } else {
+                    drawArc(
+                        color = Color(item.category.colorArgb).copy(alpha = alpha),
+                        startAngle = startAngle + gap / 2f,
+                        sweepAngle = (sweep - gap).coerceAtLeast(0.5f),
+                        useCenter = false,
+                        style = Stroke(width = strokeWidth, cap = StrokeCap.Butt),
+                        topLeft = topLeft,
+                        size = arcSize,
+                    )
+                }
                 startAngle += sweep
             }
         }
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = MoneyFormatter.format(totalMinor, globalCurrency),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-            )
-            Text(
-                text = "/ mes",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        if (selectedItem != null) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = selectedItem.category.name,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = MoneyFormatter.format(selectedItem.monthlyAmountMinor, globalCurrency),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    text = "${selectedItem.percentage.toInt()}%",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        } else {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = MoneyFormatter.format(totalMinor, globalCurrency),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    text = "/ mes",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun DonutLegend(items: List<CategorySpendItem>, globalCurrency: String) {
+private fun DonutLegend(
+    items: List<CategorySpendItem>,
+    globalCurrency: String,
+    selectedCategoryId: String?,
+    onCategoryClick: (String) -> Unit,
+) {
+    val highlightColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
         Column(modifier = Modifier.padding(vertical = 8.dp)) {
             items.forEachIndexed { index, item ->
+                val isSelected = item.category.id == selectedCategoryId
                 if (index > 0) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clickable { onCategoryClick(item.category.id) }
+                        .background(if (isSelected) highlightColor else Color.Transparent)
                         .padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -212,6 +286,7 @@ private fun DonutLegend(items: List<CategorySpendItem>, globalCurrency: String) 
                     Text(
                         text = item.category.name,
                         style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                         modifier = Modifier.weight(1f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -219,7 +294,7 @@ private fun DonutLegend(items: List<CategorySpendItem>, globalCurrency: String) 
                     Text(
                         text = MoneyFormatter.format(item.monthlyAmountMinor, globalCurrency),
                         style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                     )
                     Text(
                         text = "${item.percentage.roundToInt()}%",
