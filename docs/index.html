@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Mis Dineros — Tus suscripciones, en tu móvil. Y solo ahí.</title>
+  <meta name="description" content="Gestor de suscripciones para Android. 100% local: sin servidores, sin telemetría, sin red. Dashboard, estadísticas, divisas y notificaciones. Open paleta Blue Snorkel." />
+  <meta name="theme-color" content="#0F1C2E" />
+
+  <!-- OG -->
+  <meta property="og:title" content="Mis Dineros — Suscripciones, 100% local" />
+  <meta property="og:description" content="Gestor de suscripciones para Android sin servidores, sin telemetría, sin red." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://parrazam.github.io/mis-dineros/" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,30..100&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ─── NAV ─────────────────────────────────────────────────────────────── -->
+  <header class="nav">
+    <a class="brand" href="/mis-dineros/">
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 108 108" width="32" height="32">
+          <defs>
+            <linearGradient id="bgg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#0F1C2E" />
+              <stop offset="1" stop-color="#050A14" />
+            </linearGradient>
+          </defs>
+          <rect width="108" height="108" rx="22" fill="url(#bgg)" />
+          <circle cx="54" cy="54" r="28" fill="none" stroke="#00A8DC" stroke-width="7" />
+          <path fill="#FFFFFF" d="M54,30 C44.5,30 36.5,36.3 33.8,45 L30,45 L30,50 L32.8,50 C32.7,50.7 32.7,51.3 32.7,52 C32.7,52.7 32.7,53.3 32.8,54 L30,54 L30,59 L33.8,59 C36.5,67.7 44.5,74 54,74 C59.3,74 64.1,72.1 67.8,69 L64.5,64.7 C61.8,67 58.1,68.5 54,68.5 C47.9,68.5 42.7,65 40.1,60 L56,60 L56,55 L38.7,55 C38.6,54 38.6,53 38.6,52 C38.6,51 38.6,50 38.7,49 L56,49 L56,44 L40.1,44 C42.7,39 47.9,35.5 54,35.5 C58.1,35.5 61.8,37 64.5,39.3 L67.8,35 C64.1,31.9 59.3,30 54,30 Z" />
+        </svg>
+      </span>
+      <span class="brand__name">Mis Dineros</span>
+    </a>
+    <nav class="nav__links">
+      <a href="#features">Qué hace</a>
+      <a href="#privacy">Privacidad</a>
+      <a href="https://github.com/parrazam/mis-dineros" target="_blank" rel="noopener">Código</a>
+    </nav>
+  </header>
+
+  <!-- ─── HERO ────────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero__grain" aria-hidden="true"></div>
+    <div class="hero__inner">
+      <div class="hero__copy">
+        <span class="eyebrow">v0.4 · Android · 100% local</span>
+        <h1 class="hero__title">
+          Tus suscripciones, <em>en tu móvil</em>.
+          <span class="hero__title-accent">Y solo ahí.</span>
+        </h1>
+        <p class="hero__lead">
+          Mis Dineros lleva la cuenta de lo que pagas cada mes en Netflix, Spotify, iCloud
+          y todo lo demás. Sin cuenta de usuario. Sin servidores. Sin red.
+          Tus datos no salen de tu teléfono — ni siquiera al ahorrarte unos euros.
+        </p>
+        <div class="hero__ctas">
+          <a class="btn btn--primary" href="#features">Ver qué hace</a>
+          <a class="btn btn--ghost" href="privacy.html">Política de privacidad</a>
+        </div>
+        <ul class="hero__chips">
+          <li><span class="dot"></span> Sin telemetría</li>
+          <li><span class="dot"></span> Sin red</li>
+          <li><span class="dot"></span> Sin cuenta</li>
+        </ul>
+      </div>
+
+      <!-- Mockup móvil -->
+      <div class="phones" aria-label="Capturas de la app">
+        <div class="phone phone--back" aria-hidden="true">
+          <div class="phone__screen">
+            <!-- Stats screen -->
+            <div class="screen screen--stats">
+              <div class="screen__bar">
+                <span>Estadísticas</span>
+              </div>
+              <div class="donut">
+                <svg viewBox="0 0 100 100" width="160" height="160">
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#DCE4EB" stroke-width="14" />
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#E53935" stroke-width="14" stroke-dasharray="72 239" stroke-dashoffset="0" transform="rotate(-90 50 50)" />
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#8E24AA" stroke-width="14" stroke-dasharray="48 239" stroke-dashoffset="-72" transform="rotate(-90 50 50)" />
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#1E88E5" stroke-width="14" stroke-dasharray="42 239" stroke-dashoffset="-120" transform="rotate(-90 50 50)" />
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#00ACC1" stroke-width="14" stroke-dasharray="35 239" stroke-dashoffset="-162" transform="rotate(-90 50 50)" />
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#43A047" stroke-width="14" stroke-dasharray="42 239" stroke-dashoffset="-197" transform="rotate(-90 50 50)" />
+                  <text x="50" y="48" text-anchor="middle" font-size="9" font-weight="600" fill="#181C1F">63,40 €</text>
+                  <text x="50" y="60" text-anchor="middle" font-size="6" fill="#71787F">este mes</text>
+                </svg>
+              </div>
+              <ul class="legend">
+                <li><i style="background:#E53935"></i><span>Streaming</span></li>
+                <li><i style="background:#8E24AA"></i><span>Música</span></li>
+                <li><i style="background:#1E88E5"></i><span>Productividad</span></li>
+                <li><i style="background:#00ACC1"></i><span>Nube</span></li>
+                <li><i style="background:#43A047"></i><span>Gaming</span></li>
+                <li><i style="background:#F4511E"></i><span>Noticias</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="phone phone--front">
+          <div class="phone__notch" aria-hidden="true"></div>
+          <div class="phone__screen">
+            <!-- Dashboard screen -->
+            <div class="screen screen--dash">
+              <div class="screen__bar">
+                <span>Mis Dineros</span>
+                <span class="screen__bar-icon" aria-hidden="true">⋯</span>
+              </div>
+
+              <div class="kpi">
+                <span class="kpi__label">Gasto mensual</span>
+                <span class="kpi__value">63,40 €</span>
+                <span class="kpi__sub">≈ 760,80 € al año</span>
+              </div>
+
+              <h3 class="screen__h">Próximas renovaciones</h3>
+
+              <div class="row">
+                <div class="row__icon" style="background:#E53935">N</div>
+                <div class="row__main">
+                  <span class="row__title">Netflix</span>
+                  <span class="row__sub">en 2 días · Streaming</span>
+                </div>
+                <span class="row__amt">12,99 €</span>
+              </div>
+              <div class="row">
+                <div class="row__icon" style="background:#8E24AA">S</div>
+                <div class="row__main">
+                  <span class="row__title">Spotify Family</span>
+                  <span class="row__sub">en 4 días · Música</span>
+                </div>
+                <span class="row__amt">13,49 €</span>
+              </div>
+              <div class="row">
+                <div class="row__icon" style="background:#00ACC1">i</div>
+                <div class="row__main">
+                  <span class="row__title">iCloud+ 200 GB</span>
+                  <span class="row__sub">en 6 días · Nube</span>
+                </div>
+                <span class="row__amt">2,99 €</span>
+              </div>
+              <div class="row">
+                <div class="row__icon" style="background:#1E88E5">G</div>
+                <div class="row__main">
+                  <span class="row__title">GitHub Pro</span>
+                  <span class="row__sub">en 7 días · Productividad</span>
+                </div>
+                <span class="row__amt">3,67 €</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FEATURES ────────────────────────────────────────────────────────── -->
+  <section id="features" class="features">
+    <div class="section__head">
+      <span class="eyebrow eyebrow--dark">Qué hace</span>
+      <h2 class="section__title">Lo justo y necesario.<br/>Y nada más.</h2>
+      <p class="section__lead">Una app que no quiere ser una plataforma. Quiere que sepas, de un vistazo, cuánto te cuestan tus suscripciones y cuándo se renueva la siguiente.</p>
+    </div>
+
+    <div class="features__grid">
+
+      <article class="card card--lg card--accent">
+        <div class="card__num">01</div>
+        <h3>Suscripciones</h3>
+        <p>Nombre, importe, moneda, ciclo mensual o anual, categoría, notas e icono personalizado. Lo añades en segundos y lo olvidas — la app recuerda por ti.</p>
+      </article>
+
+      <article class="card">
+        <div class="card__num">02</div>
+        <h3>Dashboard</h3>
+        <p>Gasto mensual real, equivalente anual, próximas renovaciones a 7 días y top 5 más caras.</p>
+      </article>
+
+      <article class="card">
+        <div class="card__num">03</div>
+        <h3>Estadísticas</h3>
+        <p>Donut por categoría, barras de gasto mensual y anual, ranking de las más costosas.</p>
+      </article>
+
+      <article class="card">
+        <div class="card__num">04</div>
+        <h3>Divisas</h3>
+        <p>Conversión automática a tu moneda principal con tasas editables. Funcionan offline porque vienen incluidas.</p>
+      </article>
+
+      <article class="card">
+        <div class="card__num">05</div>
+        <h3>Notificaciones</h3>
+        <p>Aviso N días antes de cada renovación, configurable por suscripción. Y un resumen mensual.</p>
+      </article>
+
+      <article class="card card--lg">
+        <div class="card__num">06</div>
+        <h3>Backup en JSON</h3>
+        <p>Exportas e importas todo en un archivo JSON versionado — incluidos los iconos personalizados, embebidos en base64. Tu copia, en tu Drive, en tu USB, donde quieras.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ─── PRIVACY MANIFESTO ───────────────────────────────────────────────── -->
+  <section id="privacy" class="manifesto">
+    <div class="manifesto__inner">
+      <span class="eyebrow eyebrow--light">Privacidad</span>
+      <h2 class="manifesto__title">Esta app no quiere saber nada de ti.</h2>
+      <div class="manifesto__grid">
+        <div>
+          <h3>Sin servidores</h3>
+          <p>No hay backend al que mandar datos. No los hay porque no existe.</p>
+        </div>
+        <div>
+          <h3>Sin telemetría</h3>
+          <p>No analytics, no crashlytics, no SDKs de medición. Cero.</p>
+        </div>
+        <div>
+          <h3>Sin red</h3>
+          <p>La app ni siquiera pide permiso de internet. Vive entera en tu dispositivo.</p>
+        </div>
+        <div>
+          <h3>Sin cuenta</h3>
+          <p>Ni email, ni login, ni "continuar con Google". Abres y usas.</p>
+        </div>
+      </div>
+      <a class="btn btn--light" href="privacy.html">Lee la política de privacidad completa →</a>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ──────────────────────────────────────────────────────────── -->
+  <footer class="foot">
+    <div class="foot__inner">
+      <div>
+        <span class="brand brand--small">
+          <span class="brand__name">Mis Dineros</span>
+        </span>
+        <p class="foot__copy">Hecho con cariño en algún punto entre la sierra de Madrid y Asturias.</p>
+      </div>
+      <nav class="foot__links">
+        <a href="privacy.html">Privacidad</a>
+        <a href="https://github.com/parrazam/mis-dineros" target="_blank" rel="noopener">GitHub</a>
+        <a href="#features">Qué hace</a>
+      </nav>
+    </div>
+    <div class="foot__line">
+      <span>© 2026 Víctor Parra</span>
+      <span class="mono">v0.4.1 · Blue Snorkel #0077B6</span>
+    </div>
+  </footer>
+
+</body>
+</html>
