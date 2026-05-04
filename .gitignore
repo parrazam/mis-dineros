@@ -19,3 +19,8 @@ local.properties
 *.jks
 *.keystore
 keystore/
+
+# AI assistants — settings personales (las skills sí se trackean en .agents/)
+.claude/settings.local.json
+.cursor/
+.aider*
