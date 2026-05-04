@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -24,9 +25,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -150,7 +152,6 @@ fun SubscriptionListScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CycleFilterRow(
     activeFilter: BillingCycle?,
@@ -158,17 +159,28 @@ private fun CycleFilterRow(
     modifier: Modifier = Modifier,
 ) {
     val options = listOf(
-        null to R.string.subscriptions_filter_all,
         BillingCycle.MONTHLY to R.string.subscriptions_filter_monthly,
         BillingCycle.ANNUAL to R.string.subscriptions_filter_annual,
     )
-    SingleChoiceSegmentedButtonRow(modifier = modifier) {
-        options.forEachIndexed { index, (cycle, labelRes) ->
-            SegmentedButton(
-                selected = activeFilter == cycle,
-                onClick = { onFilterChange(cycle) },
-                shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        options.forEach { (cycle, labelRes) ->
+            val selected = activeFilter == cycle
+            FilterChip(
+                selected = selected,
+                onClick = { onFilterChange(if (selected) null else cycle) },
                 label = { Text(stringResource(labelRes)) },
+                leadingIcon = if (selected) {
+                    {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(FilterChipDefaults.IconSize),
+                        )
+                    }
+                } else null,
             )
         }
     }

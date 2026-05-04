@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -28,9 +29,15 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
@@ -347,25 +354,52 @@ private fun NavSettingsItem(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ThemePickerItem(current: AppTheme, onSelect: (AppTheme) -> Unit) {
     val options = listOf(
-        AppTheme.SYSTEM to "Sistema",
-        AppTheme.LIGHT to "Claro",
-        AppTheme.DARK to "Oscuro",
+        AppTheme.SYSTEM to "🌓 Sistema",
+        AppTheme.LIGHT to "☀️ Claro",
+        AppTheme.DARK to "🌙 Oscuro",
     )
     ListItem(
         headlineContent = { Text("Tema") },
-        trailingContent = {
-            SingleChoiceSegmentedButtonRow {
-                options.forEachIndexed { index, (theme, label) ->
-                    SegmentedButton(
-                        selected = current == theme,
-                        onClick = { onSelect(theme) },
-                        shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
-                        label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+        supportingContent = {
+            Row(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(50),
                     )
+                    .padding(4.dp),
+            ) {
+                options.forEach { (theme, label) ->
+                    val isSelected = theme == current
+                    val bgColor by animateColorAsState(
+                        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                        label = "pillBg",
+                    )
+                    val textColor by animateColorAsState(
+                        targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                      else MaterialTheme.colorScheme.onSurfaceVariant,
+                        label = "pillText",
+                    )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(50))
+                            .background(bgColor)
+                            .clickable { onSelect(theme) }
+                            .padding(horizontal = 14.dp, vertical = 6.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = textColor,
+                        )
+                    }
                 }
             }
         },
