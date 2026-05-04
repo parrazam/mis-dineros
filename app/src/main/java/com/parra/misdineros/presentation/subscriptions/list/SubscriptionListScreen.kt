@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -104,6 +106,9 @@ fun SubscriptionListScreen(
             }
 
             else -> {
+                val listState = rememberLazyListState()
+                LaunchedEffect(state.activeFilter) { listState.scrollToItem(0) }
+
                 Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                     CycleFilterRow(
                         activeFilter = state.activeFilter,
@@ -131,6 +136,7 @@ fun SubscriptionListScreen(
                         }
                     } else {
                         LazyColumn(
+                            state = listState,
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
