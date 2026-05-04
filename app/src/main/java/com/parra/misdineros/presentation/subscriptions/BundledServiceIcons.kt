@@ -39,16 +39,16 @@ object BundledServiceIcons {
         CatalogEntry("github",        "GitHub",                R.drawable.ic_brand_github),
         // Seguridad
         CatalogEntry("nordvpn",       "NordVPN",               R.drawable.ic_brand_nordvpn),
-        CatalogEntry("password_mgr",  "Bitwarden / 1Password", R.drawable.ic_brand_bitwarden),
+        CatalogEntry("password_mgr",  "Bitwarden",             R.drawable.ic_brand_bitwarden),
         // Gaming
-        CatalogEntry("nintendo",      "Nintendo Switch Online", R.drawable.ic_brand_nintendo),
+        CatalogEntry("nintendo",      "Nintendo",              R.drawable.ic_brand_nintendo),
         CatalogEntry("xbox",          "Xbox Game Pass",        R.drawable.ic_brand_xbox),
-        CatalogEntry("playstation",   "PlayStation Plus",      R.drawable.ic_brand_playstation),
+        CatalogEntry("playstation",   "PS Plus",               R.drawable.ic_brand_playstation),
         // IA
-        CatalogEntry("chatgpt",       "ChatGPT Plus",          R.drawable.ic_brand_openai),
+        CatalogEntry("chatgpt",       "ChatGPT",               R.drawable.ic_brand_openai),
         CatalogEntry("midjourney",    "Midjourney",            R.drawable.ic_brand_midjourney),
         // Genérico
-        CatalogEntry("generic",       "Otro servicio",         R.drawable.ic_brand_generic),
+        CatalogEntry("generic",       "Otros",                 R.drawable.ic_brand_generic),
     )
 
     fun byKey(key: String): CatalogEntry? = catalog.find { it.key == key }
