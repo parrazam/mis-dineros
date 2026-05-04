@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Política de privacidad — Mis Dineros</title>
+  <meta name="description" content="Política de privacidad de Mis Dineros: una app Android que no recopila datos personales, no se conecta a internet y no usa servicios de terceros." />
+  <meta name="theme-color" content="#0F1C2E" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,30..100&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="nav">
+    <a class="brand" href="/mis-dineros/">
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 108 108" width="32" height="32">
+          <defs>
+            <linearGradient id="bgg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#0F1C2E" />
+              <stop offset="1" stop-color="#050A14" />
+            </linearGradient>
+          </defs>
+          <rect width="108" height="108" rx="24" fill="url(#bgg)" />
+          <circle cx="54" cy="54" r="30" fill="none" stroke="#00A8DC" stroke-width="6" />
+          <text x="54" y="64" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="36" font-weight="500" fill="#FFFFFF">€</text>
+        </svg>
+      </span>
+      <span class="brand__name">Mis Dineros</span>
+    </a>
+    <nav class="nav__links">
+      <a href="/mis-dineros/#features">Qué hace</a>
+      <a href="/mis-dineros/#privacy">Privacidad</a>
+      <a href="https://github.com/parrazam/mis-dineros" target="_blank" rel="noopener">Código</a>
+    </nav>
+  </header>
+
+  <main class="legal">
+    <a class="legal__back" href="/mis-dineros/">← Volver</a>
+
+    <span class="legal__meta">Última actualización · 4 de mayo de 2026</span>
+    <h1>Política de privacidad</h1>
+
+    <div class="legal__intro">
+      <p><strong>Resumen en una frase:</strong> Mis Dineros no recopila, no transmite ni almacena en ningún servidor información personal del usuario. Toda la información introducida en la aplicación permanece exclusivamente en el dispositivo del usuario.</p>
+    </div>
+
+    <h2>1. Quién es el responsable</h2>
+    <p>El responsable del desarrollo y distribución de la aplicación <strong>Mis Dineros</strong> (en adelante, "la aplicación") es <strong>Víctor Parra</strong>, en adelante "el responsable" o "el desarrollador".</p>
+    <p>Para cualquier consulta relacionada con esta política de privacidad puede ponerse en contacto a través del correo electrónico: <a href="mailto:contacto@parravidales.es">contacto@parravidales.es</a>.</p>
+
+    <h2>2. Qué datos trata la aplicación</h2>
+    <p>La aplicación está diseñada para gestionar suscripciones personales y permite al usuario introducir, de forma voluntaria, información como:</p>
+    <ul>
+      <li>Nombre, importe y moneda de cada suscripción.</li>
+      <li>Ciclo de facturación (mensual o anual) y fecha de la próxima renovación.</li>
+      <li>Categoría, notas e iconos personalizados (incluidas imágenes elegidas por el usuario).</li>
+      <li>Preferencias de notificaciones, divisa principal y otros ajustes de la propia aplicación.</li>
+    </ul>
+    <p>Estos datos se almacenan <strong>exclusivamente en la memoria interna del dispositivo</strong> del usuario, en la base de datos local privada de la aplicación. <strong>En ningún momento se envían a servidores remotos ni a terceros.</strong></p>
+
+    <h2>3. Conexiones de red</h2>
+    <p>La aplicación <strong>no solicita el permiso de acceso a internet</strong> en su archivo de manifiesto y, por tanto, no establece ninguna conexión de red. Esto incluye:</p>
+    <ul>
+      <li>No realiza llamadas a APIs ni a servicios web propios o de terceros.</li>
+      <li>No descarga datos en tiempo de ejecución. Las tasas de cambio entre divisas se incluyen incorporadas (bundled) en la propia aplicación y pueden ser editadas manualmente por el usuario.</li>
+      <li>No incluye SDKs de analítica, publicidad, atribución, medición de errores ni cualquier otra forma de telemetría.</li>
+    </ul>
+
+    <h2>4. Permisos del sistema</h2>
+    <p>La aplicación solicita únicamente los permisos estrictamente necesarios para su funcionamiento:</p>
+    <ul>
+      <li><strong>Notificaciones</strong> (<code>POST_NOTIFICATIONS</code> en Android 13+): para mostrar avisos locales antes de la renovación de cada suscripción y el resumen mensual configurable. Las notificaciones se generan localmente en el dispositivo mediante <code>WorkManager</code>; no involucran servidores externos.</li>
+      <li><strong>Lectura de imágenes</strong> (a través del selector de fotos del sistema): solo cuando el usuario decide voluntariamente añadir un icono personalizado a una suscripción. La imagen seleccionada se copia a la zona privada de la aplicación y no se comparte con ningún servicio.</li>
+      <li><strong>Almacenamiento de archivos del sistema</strong> (a través del selector del sistema): solo cuando el usuario solicita exportar o importar manualmente una copia de seguridad en formato JSON. La aplicación no accede al almacenamiento sin acción explícita del usuario.</li>
+    </ul>
+
+    <h2>5. Servicios de terceros</h2>
+    <p>La aplicación <strong>no utiliza servicios de terceros</strong> que tengan acceso a datos del usuario. En particular, no se incluyen las siguientes categorías de servicios:</p>
+    <ul>
+      <li>Servicios de analítica (Google Analytics, Firebase Analytics, etc.).</li>
+      <li>Servicios de medición de fallos (Crashlytics, Sentry, etc.).</li>
+      <li>Plataformas de publicidad o atribución.</li>
+      <li>Sistemas de autenticación o cuentas de usuario.</li>
+      <li>Servicios de sincronización en la nube.</li>
+    </ul>
+
+    <h2>6. Copias de seguridad</h2>
+    <p>La aplicación permite al usuario exportar una copia de seguridad en formato JSON, que incluye sus suscripciones, categorías, tasas de cambio editadas, ajustes e iconos personalizados (estos últimos codificados en base64 dentro del propio archivo).</p>
+    <p>El archivo de exportación se guarda en la ubicación que el usuario elija mediante el selector de archivos del sistema operativo. El responsable <strong>no tiene acceso a esa copia</strong> ni a su contenido. La gestión, almacenamiento y eventual compartición del archivo es responsabilidad exclusiva del usuario.</p>
+
+    <h2>7. Datos de niños</h2>
+    <p>La aplicación no está dirigida a menores de 13 años y no recopila intencionadamente datos de menores. Dado que la aplicación no recopila datos personales de ningún tipo, esta política se cumple por diseño.</p>
+
+    <h2>8. Conservación y eliminación de datos</h2>
+    <p>Como toda la información se almacena localmente en el dispositivo, su conservación depende del usuario. Para eliminar todos los datos basta con desinstalar la aplicación o utilizar la opción del sistema operativo "Borrar datos" en los ajustes de la aplicación. No existe ninguna copia remota que el responsable deba o pueda eliminar.</p>
+
+    <h2>9. Derechos del usuario</h2>
+    <p>De acuerdo con el Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD), el usuario tiene derecho de acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad respecto a sus datos personales.</p>
+    <p>Dado que el responsable <strong>no recibe ni almacena ningún dato personal del usuario</strong>, estos derechos se ejercen directamente sobre el dispositivo: el usuario tiene control total y exclusivo sobre la información introducida en la aplicación, pudiendo consultarla, modificarla, exportarla o eliminarla en cualquier momento desde la propia aplicación o desinstalándola.</p>
+    <p>Si así lo desea, el usuario puede presentar una reclamación ante la Agencia Española de Protección de Datos (<a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>).</p>
+
+    <h2>10. Cambios en esta política</h2>
+    <p>Esta política puede actualizarse cuando se introduzcan nuevas funcionalidades en la aplicación o cuando lo exijan cambios legales. La fecha de la última actualización se indica al inicio del documento. Las versiones anteriores quedan registradas en el historial público del repositorio de código fuente del sitio web.</p>
+
+    <h2>11. Contacto</h2>
+    <p>Para cualquier duda, solicitud o reclamación relacionada con esta política, escriba a <a href="mailto:contacto@parravidales.es">contacto@parravidales.es</a>.</p>
+  </main>
+
+  <footer class="foot">
+    <div class="foot__inner">
+      <div>
+        <span class="brand brand--small"><span class="brand__name">Mis Dineros</span></span>
+        <p class="foot__copy">Hecho con cariño en algún punto entre la sierra de Madrid y Asturias.</p>
+      </div>
+      <nav class="foot__links">
+        <a href="/mis-dineros/">Inicio</a>
+        <a href="https://github.com/parrazam/mis-dineros" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+    <div class="foot__line">
+      <span>© 2026 Víctor Parra</span>
+      <span class="mono">Política v1.0</span>
+    </div>
+  </footer>
+
+</body>
+</html>
