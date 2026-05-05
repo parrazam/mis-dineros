@@ -158,7 +158,10 @@ em { font-style: italic; font-variation-settings: "opsz" 144, "SOFT" 100; }
   background: color-mix(in srgb, var(--snorkel-soft) 35%, transparent);
 }
 .eyebrow--dark  { color: var(--ink-soft); border-color: var(--line); background: var(--surface-card); }
-.eyebrow--light { color: var(--snorkel-soft); border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); }
+/* eyebrow--light siempre vive sobre el manifesto oscuro (que no cambia con
+   el tema), así que el color es fijo y no depende de --snorkel-soft, que sí
+   se vuelve oscuro en dark mode y se fundiría con el fondo. */
+.eyebrow--light { color: #C9E6FF; border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); }
 
 /* ─── NAV ──────────────────────────────────────────────────────────────── */
 .nav {
@@ -300,10 +303,11 @@ html.theme-dark .theme-toggle .icon-moon { display: none; }
   background: transparent; color: var(--ink); border-color: var(--line);
 }
 .btn--ghost:hover { background: var(--surface-card); border-color: var(--snorkel); color: var(--snorkel-deep); }
+/* btn--light siempre vive sobre el manifesto oscuro: colores fijos */
 .btn--light {
-  background: var(--paper); color: var(--ink); margin-top: 28px;
+  background: #F6FAFE; color: #181C1F; margin-top: 28px;
 }
-.btn--light:hover { background: var(--snorkel-soft); color: var(--snorkel-ink); }
+.btn--light:hover { background: #C9E6FF; color: #001E2F; }
 
 /* ─── Phones / mockups ─────────────────────────────────────────────────── */
 .phones {
@@ -486,9 +490,11 @@ html.theme-dark .theme-toggle .icon-moon { display: none; }
 .card p { color: var(--ink-soft); margin: 0; font-size: 0.98rem; }
 
 /* ─── MANIFESTO (Privacy block) ────────────────────────────────────────── */
+/* Esta sección tiene fondo oscuro siempre, así que sus colores de texto
+   son fijos (no dependen del tema de la página). */
 .manifesto {
   background: linear-gradient(160deg, var(--night) 0%, var(--night-deep) 100%);
-  color: var(--paper);
+  color: #F6FAFE;
   position: relative; overflow: hidden;
 }
 .manifesto::before {
