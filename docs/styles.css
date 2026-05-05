@@ -624,6 +624,17 @@ html.theme-dark .theme-toggle .icon-moon { display: none; }
   .foot__line { flex-direction: column; align-items: flex-start; }
   .phone { width: 260px; height: 540px; }
   .phone--back { transform: rotate(-6deg) scale(0.92); }
+  /* Compactar el contenido interno del mockup para que entre en el
+     viewport reducido (KPI, "próximas renovaciones", etc.). */
+  .screen { padding: 44px 14px 14px; gap: 10px; }
+  .kpi { padding: 14px 16px; }
+  .kpi__value { font-size: 1.6rem; }
+  .kpi__sub { font-size: 0.66rem; }
+  .row { padding: 6px 4px; }
+  .row__title { font-size: 0.86rem; }
+  .row__sub { font-size: 0.66rem; }
+  .row__amt { font-size: 0.78rem; }
+  .screen__h { font-size: 0.7rem; margin: 4px 0 -4px; }
 }
 
 /* Reduce motion */
