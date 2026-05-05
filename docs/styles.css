@@ -5,20 +5,11 @@
    ────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  /* Paleta exactamente alineada con app/src/main/.../theme/Color.kt */
+  /* ── Tokens de marca (constantes, no cambian con el tema) ───────────── */
   --snorkel:        #0077B6;
-  --snorkel-deep:   #006492;   /* md_theme_light_primary  */
-  --snorkel-soft:   #C9E6FF;   /* primaryContainer        */
-  --snorkel-ink:    #001E2F;   /* onPrimaryContainer      */
-  --cyan:           #00A8DC;   /* del icono adaptativo    */
-  --night:          #0F1C2E;   /* fondo del icono         */
+  --cyan:           #00A8DC;
+  --night:          #0F1C2E;        /* fondo del icono adaptativo */
   --night-deep:     #050A14;
-  --paper:          #F6FAFE;   /* md_theme_light_background */
-  --ink:            #181C1F;
-  --ink-soft:       #40484F;
-  --ink-mute:       #71787F;
-  --line:           #DCE4EB;
-  --line-soft:      #EDF1F5;
 
   /* Categorías (idénticas a CategoryStreaming, CategoryMusica, …) */
   --c-streaming:    #E53935;
@@ -27,16 +18,102 @@
   --c-nube:         #00ACC1;
   --c-gaming:       #43A047;
 
+  /* ── Tokens semánticos (modo claro por defecto) ─────────────────────── */
+  /* Alineados con md_theme_light_* de app/.../theme/Color.kt */
+  --snorkel-deep:   #006492;        /* primary             */
+  --snorkel-soft:   #C9E6FF;        /* primaryContainer    */
+  --snorkel-ink:    #001E2F;        /* onPrimaryContainer  */
+  --paper:          #F6FAFE;        /* background          */
+  --ink:            #181C1F;        /* onBackground        */
+  --ink-soft:       #40484F;        /* onSurfaceVariant    */
+  --ink-mute:       #71787F;        /* outline             */
+  --line:           #DCE4EB;        /* surfaceVariant      */
+  --line-soft:      #EDF1F5;        /* inverseOnSurface    */
+  --surface-card:   #FFFFFF;
+  --hero-grad-1:    rgba(0,168,220,0.12);
+  --hero-grad-2:    rgba(0,119,182,0.10);
+  --kpi-grad-1:     #0077B6;
+  --kpi-grad-2:     #006492;
+  --shadow-soft:    0 1px 2px rgba(0,30,47,.06), 0 8px 24px -12px rgba(0,30,47,.18);
+  --shadow-deep:    0 30px 60px -30px rgba(0,30,47,.45), 0 12px 24px -16px rgba(0,30,47,.25);
+
+  /* SVG icon tints (cambian con el tema) */
+  --grain-color:    rgba(0,30,47,0.04);
+
+  /* Tipografía & layout */
   --serif: "Fraunces", "Iowan Old Style", "Georgia", serif;
   --sans:  "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono:  "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-
   --radius: 16px;
   --radius-lg: 28px;
-  --shadow-soft: 0 1px 2px rgba(0,30,47,.06), 0 8px 24px -12px rgba(0,30,47,.18);
-  --shadow-deep: 0 30px 60px -30px rgba(0,30,47,.45), 0 12px 24px -16px rgba(0,30,47,.25);
-
   --max: 1180px;
+}
+
+/* ── Modo oscuro por preferencia del SO (default) ─────────────────────── */
+/* Alineados con md_theme_dark_* de app/.../theme/Color.kt */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --snorkel-deep:   #8ACEFF;        /* dark primary               */
+    --snorkel-soft:   #004B6E;        /* dark primaryContainer      */
+    --snorkel-ink:    #C9E6FF;        /* dark onPrimaryContainer    */
+    --paper:          #101416;        /* dark background            */
+    --ink:            #E1E2E5;        /* dark onBackground          */
+    --ink-soft:       #C0C7CE;        /* dark onSurfaceVariant      */
+    --ink-mute:       #8A9199;        /* dark outline               */
+    --line:           #2C3134;        /* dark line                  */
+    --line-soft:      #1A1F22;
+    --surface-card:   #181C1F;
+    --hero-grad-1:    rgba(0,168,220,0.20);
+    --hero-grad-2:    rgba(138,206,255,0.12);
+    --kpi-grad-1:     #004B6E;
+    --kpi-grad-2:     #00344E;
+    --shadow-soft:    0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    --shadow-deep:    0 30px 60px -30px rgba(0,0,0,.85), 0 12px 24px -16px rgba(0,0,0,.6);
+    --grain-color:    rgba(255,255,255,0.04);
+  }
+}
+
+/* ── Override manual desde el toggle ──────────────────────────────────── */
+/* Al fijar .theme-light o .theme-dark en <html>, ignoramos el SO */
+html.theme-light {
+  color-scheme: light;
+  --snorkel-deep:   #006492;
+  --snorkel-soft:   #C9E6FF;
+  --snorkel-ink:    #001E2F;
+  --paper:          #F6FAFE;
+  --ink:            #181C1F;
+  --ink-soft:       #40484F;
+  --ink-mute:       #71787F;
+  --line:           #DCE4EB;
+  --line-soft:      #EDF1F5;
+  --surface-card:   #FFFFFF;
+  --hero-grad-1:    rgba(0,168,220,0.12);
+  --hero-grad-2:    rgba(0,119,182,0.10);
+  --kpi-grad-1:     #0077B6;
+  --kpi-grad-2:     #006492;
+  --shadow-soft:    0 1px 2px rgba(0,30,47,.06), 0 8px 24px -12px rgba(0,30,47,.18);
+  --shadow-deep:    0 30px 60px -30px rgba(0,30,47,.45), 0 12px 24px -16px rgba(0,30,47,.25);
+  --grain-color:    rgba(0,30,47,0.04);
+}
+html.theme-dark {
+  color-scheme: dark;
+  --snorkel-deep:   #8ACEFF;
+  --snorkel-soft:   #004B6E;
+  --snorkel-ink:    #C9E6FF;
+  --paper:          #101416;
+  --ink:            #E1E2E5;
+  --ink-soft:       #C0C7CE;
+  --ink-mute:       #8A9199;
+  --line:           #2C3134;
+  --line-soft:      #1A1F22;
+  --surface-card:   #181C1F;
+  --hero-grad-1:    rgba(0,168,220,0.20);
+  --hero-grad-2:    rgba(138,206,255,0.12);
+  --kpi-grad-1:     #004B6E;
+  --kpi-grad-2:     #00344E;
+  --shadow-soft:    0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  --shadow-deep:    0 30px 60px -30px rgba(0,0,0,.85), 0 12px 24px -16px rgba(0,0,0,.6);
+  --grain-color:    rgba(255,255,255,0.04);
 }
 
 * { box-sizing: border-box; }
@@ -78,9 +155,9 @@ em { font-style: italic; font-variation-settings: "opsz" 144, "SOFT" 100; }
   padding: 6px 12px;
   border: 1px solid var(--snorkel-soft);
   border-radius: 999px;
-  background: rgba(201,230,255,0.35);
+  background: color-mix(in srgb, var(--snorkel-soft) 35%, transparent);
 }
-.eyebrow--dark  { color: var(--ink-soft); border-color: var(--line); background: #fff; }
+.eyebrow--dark  { color: var(--ink-soft); border-color: var(--line); background: var(--surface-card); }
 .eyebrow--light { color: var(--snorkel-soft); border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); }
 
 /* ─── NAV ──────────────────────────────────────────────────────────────── */
@@ -88,7 +165,7 @@ em { font-style: italic; font-variation-settings: "opsz" 144, "SOFT" 100; }
   position: sticky; top: 0; z-index: 50;
   display: flex; align-items: center; justify-content: space-between;
   padding: 18px clamp(20px, 4vw, 56px);
-  background: rgba(246, 250, 254, 0.8);
+  background: color-mix(in srgb, var(--paper) 80%, transparent);
   backdrop-filter: saturate(140%) blur(12px);
   -webkit-backdrop-filter: saturate(140%) blur(12px);
   border-bottom: 1px solid var(--line-soft);
@@ -113,21 +190,51 @@ em { font-style: italic; font-variation-settings: "opsz" 144, "SOFT" 100; }
   height: 1px; background: var(--snorkel);
 }
 
+/* ─── Theme toggle ─────────────────────────────────────────────────────── */
+.theme-toggle {
+  appearance: none; -webkit-appearance: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  margin-left: 8px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-card);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color .15s ease, border-color .15s ease, background .15s ease;
+}
+.theme-toggle:hover {
+  color: var(--snorkel-deep);
+  border-color: var(--snorkel);
+}
+.theme-toggle svg { width: 18px; height: 18px; }
+/* Mostramos el icono opuesto al tema actual: en light se ve la luna,
+   en dark se ve el sol — indica a dónde irías al pulsar. */
+.theme-toggle .icon-sun { display: none; }
+.theme-toggle .icon-moon { display: block; }
+html.theme-dark .theme-toggle .icon-sun { display: block; }
+html.theme-dark .theme-toggle .icon-moon { display: none; }
+@media (prefers-color-scheme: dark) {
+  html:not(.theme-light) .theme-toggle .icon-sun { display: block; }
+  html:not(.theme-light) .theme-toggle .icon-moon { display: none; }
+}
+
 /* ─── HERO ─────────────────────────────────────────────────────────────── */
 .hero {
   position: relative;
   padding: clamp(56px, 9vw, 120px) clamp(20px, 4vw, 56px) clamp(64px, 8vw, 120px);
   background:
-    radial-gradient(ellipse 90% 70% at 80% 0%, rgba(0,168,220,0.12), transparent 60%),
-    radial-gradient(ellipse 70% 60% at 10% 30%, rgba(0,119,182,0.10), transparent 60%),
+    radial-gradient(ellipse 90% 70% at 80% 0%, var(--hero-grad-1), transparent 60%),
+    radial-gradient(ellipse 70% 60% at 10% 30%, var(--hero-grad-2), transparent 60%),
     var(--paper);
   overflow: hidden;
 }
 .hero__grain {
   position: absolute; inset: 0;
   background-image:
-    radial-gradient(circle at 20% 10%, rgba(0,30,47,0.04) 1px, transparent 1px),
-    radial-gradient(circle at 70% 80%, rgba(0,30,47,0.04) 1px, transparent 1px);
+    radial-gradient(circle at 20% 10%, var(--grain-color) 1px, transparent 1px),
+    radial-gradient(circle at 70% 80%, var(--grain-color) 1px, transparent 1px);
   background-size: 22px 22px, 28px 28px;
   pointer-events: none;
   opacity: 0.5;
@@ -192,7 +299,7 @@ em { font-style: italic; font-variation-settings: "opsz" 144, "SOFT" 100; }
 .btn--ghost {
   background: transparent; color: var(--ink); border-color: var(--line);
 }
-.btn--ghost:hover { background: #fff; border-color: var(--snorkel); color: var(--snorkel-deep); }
+.btn--ghost:hover { background: var(--surface-card); border-color: var(--snorkel); color: var(--snorkel-deep); }
 .btn--light {
   background: var(--paper); color: var(--ink); margin-top: 28px;
 }
@@ -240,10 +347,21 @@ em { font-style: italic; font-variation-settings: "opsz" 144, "SOFT" 100; }
 }
 .phone__screen {
   width: 100%; height: 100%;
-  background: var(--paper);
+  background: #F6FAFE;
+  color: #181C1F;
   border-radius: 32px;
   overflow: hidden;
   position: relative;
+  /* Variables locales para que las pantallas no hereden los tokens del dark mode.
+     Los mockups representan una captura real de la app, que en estas vistas
+     usa el tema claro de Material — así el visitante reconoce el UI tal cual. */
+  --ink: #181C1F;
+  --ink-soft: #40484F;
+  --ink-mute: #71787F;
+  --line: #DCE4EB;
+  --paper: #F6FAFE;
+  --snorkel-deep: #006492;
+  --snorkel-soft: #C9E6FF;
 }
 
 /* Pantallas — replican el aspecto de Material 3 con la paleta de la app */
@@ -340,7 +458,7 @@ em { font-style: italic; font-variation-settings: "opsz" 144, "SOFT" 100; }
 }
 .card {
   grid-column: span 2;
-  background: #fff;
+  background: var(--surface-card);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   padding: 32px;
@@ -354,7 +472,7 @@ em { font-style: italic; font-variation-settings: "opsz" 144, "SOFT" 100; }
 }
 .card--lg { grid-column: span 4; }
 .card--accent {
-  background: linear-gradient(155deg, var(--snorkel-soft), #fff 70%);
+  background: linear-gradient(155deg, var(--snorkel-soft), var(--surface-card) 70%);
   border-color: transparent;
 }
 .card__num {
@@ -469,7 +587,7 @@ em { font-style: italic; font-variation-settings: "opsz" 144, "SOFT" 100; }
 .legal a:hover { color: var(--snorkel); }
 
 .legal__intro {
-  background: linear-gradient(155deg, var(--snorkel-soft), #fff 70%);
+  background: linear-gradient(155deg, var(--snorkel-soft), var(--surface-card) 70%);
   border: 1px solid var(--snorkel-soft);
   border-radius: var(--radius-lg);
   padding: 28px 32px;
