@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
                                             restoreState = true
                                         }
                                     },
-                                    icon = { Icon(Icons.Default.List, contentDescription = null) },
+                                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },
                                     label = { Text(stringResource(R.string.nav_subscriptions)) },
                                 )
                                 NavigationBarItem(

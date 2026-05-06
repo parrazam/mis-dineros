@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -136,6 +136,6 @@ fun categoryIconVector(iconKey: String): ImageVector = when (iconKey) {
     "newspaper" -> Icons.Default.Newspaper
     "fitness_center" -> Icons.Default.FitnessCenter
     "smart_toy" -> Icons.Default.SmartToy
-    "article" -> Icons.Default.Article
+    "article" -> Icons.AutoMirrored.Filled.Article
     else -> Icons.Default.Category
 }

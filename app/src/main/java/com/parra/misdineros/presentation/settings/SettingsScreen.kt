@@ -27,7 +27,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.Scaffold
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -306,7 +306,7 @@ private fun DropdownSettingsItem(
             supportingContent = { Text(optionLabel(value)) },
             leadingContent = leadingIcon?.let { { Icon(it, contentDescription = null) } },
             trailingContent = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
+            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { option ->

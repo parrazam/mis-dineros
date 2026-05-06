@@ -16,6 +16,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -47,6 +48,7 @@ class SubscriptionDetailViewModel @Inject constructor(
     private val _events = Channel<SubscriptionDetailUiEvent>(Channel.BUFFERED)
     val events: Flow<SubscriptionDetailUiEvent> = _events.receiveAsFlow()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val uiState = subscriptionRepository.observeById(subscriptionId)
         .flatMapLatest { sub ->
             val categoryFlow = sub?.categoryId?.let { categoryRepository.observeById(it) } ?: flowOf(null)
