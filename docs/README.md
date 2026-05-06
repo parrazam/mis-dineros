@@ -2,7 +2,7 @@
 
 Sitio público servido vía GitHub Pages desde esta carpeta `docs/`.
 
-🌐 **https://parrazam.github.io/mis-dineros/**
+🌐 **https://mis-dineros.cuzo.dev/**
 
 Contiene:
 
