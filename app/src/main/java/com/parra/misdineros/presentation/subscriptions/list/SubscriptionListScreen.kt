@@ -126,7 +126,7 @@ fun SubscriptionListScreen(
                                         BillingCycle.MONTHLY -> R.string.subscriptions_empty_filtered_monthly
                                         BillingCycle.ANNUAL -> R.string.subscriptions_empty_filtered_annual
                                         null -> R.string.subscriptions_empty
-                                    }
+                                    },
                                 ),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -147,7 +147,9 @@ fun SubscriptionListScreen(
                                     onTap = { onNavigateToDetail(item.subscription.id) },
                                     onEdit = { onNavigateToEdit(item.subscription.id) },
                                     onTogglePause = { viewModel.togglePause(item.subscription.id) },
-                                    onDelete = { viewModel.delete(item.subscription.id) },
+                                    onDelete = {
+                                        viewModel.delete(item.subscription.id)
+                                    },
                                 )
                             }
                         }
@@ -200,11 +202,11 @@ private fun SwipeToDeleteItem(
     onTogglePause: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    var showConfirm by remember { mutableStateOf(false) }
+    var showConfirm by remember { mutableStateOf(value = false) }
     val scope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
     // Locked to true once the action fires; reset in onDragStart of the next gesture.
-    var actionFired by remember { mutableStateOf(false) }
+    var actionFired by remember { mutableStateOf(value = false) }
     var isSwipingRight by remember { mutableStateOf<Boolean?>(null) }
     val thresholdPx = with(LocalDensity.current) { 80.dp.toPx() }
 

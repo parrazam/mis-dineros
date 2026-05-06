@@ -80,7 +80,7 @@ fun HomeScreen(
                 }
             }
 
-            state.activeCount == 0 && state.pausedCount == 0 -> {
+            (state.activeCount == 0 && state.pausedCount == 0) -> {
                 EmptyHomeState(
                     onGoToSubscriptions = onNavigateToSubscriptions,
                     modifier = Modifier.fillMaxSize().padding(innerPadding),
@@ -331,9 +331,9 @@ private fun UpcomingRenewalCard(
                 overflow = TextOverflow.Ellipsis,
             )
 
-            if (categoryName != null) {
+            categoryName?.let { name ->
                 Text(
-                    text = categoryName,
+                    text = name,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -342,7 +342,7 @@ private fun UpcomingRenewalCard(
 
             Text(
                 text = renewal.subscription.nextRenewalDate.format(
-                    DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+                    DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM),
                 ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -432,9 +432,9 @@ private fun Top5Item(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            if (categoryName != null) {
+            categoryName?.let { name ->
                 Text(
-                    text = categoryName,
+                    text = name,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

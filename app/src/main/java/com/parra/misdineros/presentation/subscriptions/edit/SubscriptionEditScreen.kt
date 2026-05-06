@@ -33,7 +33,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -88,7 +88,7 @@ fun SubscriptionEditScreen(
 
     val notesBivr = remember { BringIntoViewRequester() }
 
-    var showIconPicker by remember { mutableStateOf(false) }
+    var showIconPicker by remember { mutableStateOf(value = false) }
     var showDatePicker by remember { mutableStateOf(false) }
     val iconSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -102,7 +102,7 @@ fun SubscriptionEditScreen(
                 title = {
                     Text(
                         if (state.isEditing) stringResource(R.string.edit_subscription)
-                        else stringResource(R.string.add_subscription)
+                        else stringResource(R.string.add_subscription),
                     )
                 },
                 navigationIcon = {
@@ -196,7 +196,7 @@ fun SubscriptionEditScreen(
                         label = { Text(stringResource(R.string.field_currency)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(currencyExpanded) },
                         modifier = Modifier
-                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                             .fillMaxWidth(),
                     )
                     ExposedDropdownMenu(
@@ -264,7 +264,7 @@ fun SubscriptionEditScreen(
                     label = { Text(stringResource(R.string.field_category)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(categoryExpanded) },
                     modifier = Modifier
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                         .fillMaxWidth(),
                 )
                 ExposedDropdownMenu(
@@ -298,7 +298,7 @@ fun SubscriptionEditScreen(
                     label = { Text(stringResource(R.string.field_notify_days)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(notifyExpanded) },
                     modifier = Modifier
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                         .fillMaxWidth(),
                 )
                 ExposedDropdownMenu(
@@ -345,7 +345,9 @@ fun SubscriptionEditScreen(
     if (showIconPicker) {
         IconPickerBottomSheet(
             sheetState = iconSheetState,
-            onDismiss = { scope.launch { iconSheetState.hide() }.invokeOnCompletion { showIconPicker = false } },
+            onDismiss = {
+                scope.launch { iconSheetState.hide() }.invokeOnCompletion { showIconPicker = false }
+            },
             onIconSelected = { viewModel.onIconRefChange(it) },
             onPickFromGallery = { imagePickerLauncher.launch("image/*") },
         )
