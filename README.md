@@ -23,7 +23,7 @@ Gestor de suscripciones personal para Android. Sin servidores, sin telemetría, 
 
 - Android 8.0+ (API 26)
 - Android Studio Meerkat o superior
-- JDK 17
+- JDK 21
 
 ## Build
 

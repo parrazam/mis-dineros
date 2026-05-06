@@ -23,7 +23,7 @@ The project requires Android SDK (not present in this dev machine). Use Android 
 ./gradlew connectedAndroidTest
 ```
 
-Gradle wrapper requires JDK 17. The CI uses `actions/setup-java@v4` with `temurin` JDK 17.
+Gradle wrapper requires JDK 21. The CI uses `actions/setup-java@v5` with `temurin` JDK 21.
 
 Room schema files are exported to `app/schemas/` (tracked in git). When changing any `@Entity` or `@Database` version, bump `version` in `@Database` and add a migration or `fallbackToDestructiveMigration`.
 
