@@ -5,8 +5,8 @@
 
 Gestor de suscripciones personal para Android. Sin servidores, sin telemetría, sin red — 100% local.
 
-🌐 **Web** · [parrazam.github.io/mis-dineros](https://parrazam.github.io/mis-dineros/)
-🔒 **Privacidad** · [parrazam.github.io/mis-dineros/privacy.html](https://parrazam.github.io/mis-dineros/privacy.html)
+🌐 **Web** · [mis-dineros.cuzo.dev](https://mis-dineros.cuzo.dev/)
+🔒 **Privacidad** · [mis-dineros.cuzo.dev/privacy.html](https://mis-dineros.cuzo.dev/privacy.html)
 
 ## Características
 
