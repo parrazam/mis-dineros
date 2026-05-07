@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -39,7 +40,9 @@ fun MisDinerosNavHost(
     NavHost(
         navController = navController,
         startDestination = Destination.Home,
-        modifier = modifier.padding(innerPadding),
+        modifier = modifier
+            .padding(innerPadding)
+            .consumeWindowInsets(innerPadding),
         enterTransition = { tabEnter },
         exitTransition = { tabExit },
         popEnterTransition = { tabEnter },
