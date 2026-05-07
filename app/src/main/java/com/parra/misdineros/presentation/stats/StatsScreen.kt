@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -115,35 +116,72 @@ private fun PorCategoriaTab(state: StatsUiState) {
     }
 
     var selectedCategoryId by remember { mutableStateOf<String?>(null) }
+    val isWideScreen = LocalConfiguration.current.screenWidthDp >= 600
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-    ) {
-        DonutChart(
-            items = state.categoryItems,
-            globalCurrency = state.globalCurrency,
-            totalMinor = state.monthlyTotalMinor,
-            selectedCategoryId = selectedCategoryId,
+    val onCategoryClick: (String) -> Unit = { categoryId ->
+        selectedCategoryId = if (selectedCategoryId == categoryId) null else categoryId
+    }
+
+    if (isWideScreen) {
+        Row(
             modifier = Modifier
-                .fillMaxWidth(0.65f)
-                .aspectRatio(1f)
-                .align(Alignment.CenterHorizontally),
-        )
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            DonutChart(
+                items = state.categoryItems,
+                globalCurrency = state.globalCurrency,
+                totalMinor = state.monthlyTotalMinor,
+                selectedCategoryId = selectedCategoryId,
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .aspectRatio(1f),
+            )
 
-        DonutLegend(
-            items = state.categoryItems,
-            globalCurrency = state.globalCurrency,
-            selectedCategoryId = selectedCategoryId,
-            onCategoryClick = { categoryId ->
-                selectedCategoryId = if (selectedCategoryId == categoryId) null else categoryId
-            },
-        )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                DonutLegend(
+                    items = state.categoryItems,
+                    globalCurrency = state.globalCurrency,
+                    selectedCategoryId = selectedCategoryId,
+                    onCategoryClick = onCategoryClick,
+                )
+            }
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
+            DonutChart(
+                items = state.categoryItems,
+                globalCurrency = state.globalCurrency,
+                totalMinor = state.monthlyTotalMinor,
+                selectedCategoryId = selectedCategoryId,
+                modifier = Modifier
+                    .fillMaxWidth(0.65f)
+                    .aspectRatio(1f)
+                    .align(Alignment.CenterHorizontally),
+            )
 
-        Spacer(Modifier.height(8.dp))
+            DonutLegend(
+                items = state.categoryItems,
+                globalCurrency = state.globalCurrency,
+                selectedCategoryId = selectedCategoryId,
+                onCategoryClick = onCategoryClick,
+            )
+
+            Spacer(Modifier.height(8.dp))
+        }
     }
 }
 
