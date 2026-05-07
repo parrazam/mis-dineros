@@ -268,7 +268,20 @@ html.theme-dark .theme-toggle .icon-moon { display: none; }
   max-width: 52ch;
   margin: 0 0 32px;
 }
-.hero__ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
+.hero__ctas { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 28px; }
+.btn-play {
+  display: inline-flex; align-items: center;
+  transition: transform .15s ease, filter .15s ease;
+}
+.btn-play img {
+  height: 52px; width: auto; display: block;
+}
+.btn-play:hover { transform: translateY(-1px); filter: brightness(1.05); }
+.btn-play:focus-visible {
+  outline: 2px solid var(--snorkel);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
 .hero__chips {
   list-style: none; padding: 0; margin: 0;
   display: flex; gap: 18px; flex-wrap: wrap;
