@@ -2,6 +2,7 @@ package com.parra.misdineros.presentation.settings
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
@@ -15,12 +16,18 @@ import com.parra.misdineros.notifications.NotificationScheduler
 import com.parra.misdineros.notifications.RenewalReminderWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 sealed interface BackupState {
@@ -29,6 +36,10 @@ sealed interface BackupState {
     data object ExportSuccess : BackupState
     data object ImportSuccess : BackupState
     data class Error(val message: String) : BackupState
+}
+
+sealed interface BackupEvent {
+    data class Share(val uri: Uri, val mime: String) : BackupEvent
 }
 
 @HiltViewModel
@@ -45,6 +56,9 @@ class SettingsViewModel @Inject constructor(
 
     private val _backupState = MutableStateFlow<BackupState>(BackupState.Idle)
     val backupState: StateFlow<BackupState> = _backupState.asStateFlow()
+
+    private val _events = Channel<BackupEvent>(Channel.BUFFERED)
+    val events: Flow<BackupEvent> = _events.receiveAsFlow()
 
     private fun update(block: (AppSettings) -> AppSettings) {
         viewModelScope.launch { repo.update(block(settings.value)) }
@@ -65,12 +79,43 @@ class SettingsViewModel @Inject constructor(
 
     fun setNotifyDays(days: Int) = update { it.copy(defaultNotifyDaysBefore = days) }
     fun setSummaryEnabled(enabled: Boolean) = update { it.copy(monthlySummaryEnabled = enabled) }
+    fun setAutoBackupEnabled(enabled: Boolean) = update { it.copy(autoBackupEnabled = enabled) }
 
     fun exportData(uri: Uri) {
         viewModelScope.launch {
             _backupState.value = BackupState.Loading
             exportDataUseCase(uri).fold(
                 onSuccess = { _backupState.value = BackupState.ExportSuccess },
+                onFailure = { _backupState.value = BackupState.Error(it.message ?: "Error desconocido") },
+            )
+        }
+    }
+
+    fun exportAndShare() {
+        viewModelScope.launch {
+            _backupState.value = BackupState.Loading
+            exportDataUseCase.exportToBytes().fold(
+                onSuccess = { bytes ->
+                    runCatching {
+                        val exportsDir = File(context.cacheDir, "exports").apply {
+                            deleteRecursively()
+                            mkdirs()
+                        }
+                        val timestamp = LocalDateTime.now()
+                            .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"))
+                        val file = File(exportsDir, "mis-dineros-backup-$timestamp.json")
+                        file.writeBytes(bytes)
+                        val uri = FileProvider.getUriForFile(
+                            context,
+                            "${context.packageName}.fileprovider",
+                            file,
+                        )
+                        _events.send(BackupEvent.Share(uri, "application/json"))
+                        _backupState.value = BackupState.ExportSuccess
+                    }.onFailure {
+                        _backupState.value = BackupState.Error(it.message ?: "Error al preparar el archivo")
+                    }
+                },
                 onFailure = { _backupState.value = BackupState.Error(it.message ?: "Error desconocido") },
             )
         }

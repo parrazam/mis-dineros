@@ -63,8 +63,8 @@
     <string name="settings_monthly_summary">Resumen mensual</string>
     <string name="settings_categories">Categorías</string>
     <string name="settings_fx_rates">Tasas de cambio</string>
-    <string name="settings_export">Exportar datos (JSON)</string>
-    <string name="settings_import">Importar datos (JSON)</string>
+    <string name="settings_export">Exportar datos</string>
+    <string name="settings_import">Importar datos</string>
     <string name="settings_about">Acerca de</string>
     <string name="settings_version">Versión %1$s</string>
 

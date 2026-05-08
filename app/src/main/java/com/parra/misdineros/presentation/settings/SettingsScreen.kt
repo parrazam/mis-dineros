@@ -1,5 +1,6 @@
 package com.parra.misdineros.presentation.settings
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,10 +15,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.CurrencyExchange
+import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -92,6 +96,7 @@ fun SettingsScreen(
     var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
     var showImportDialog by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+    var showExportModeDialog by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json"),
@@ -103,6 +108,21 @@ fun SettingsScreen(
         if (uri != null) {
             pendingImportUri = uri
             showImportDialog = true
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is BackupEvent.Share -> {
+                    val send = Intent(Intent.ACTION_SEND).apply {
+                        type = event.mime
+                        putExtra(Intent.EXTRA_STREAM, event.uri)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    context.startActivity(Intent.createChooser(send, "Compartir backup"))
+                }
+            }
         }
     }
 
@@ -146,6 +166,44 @@ fun SettingsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showTimePicker = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
+        )
+    }
+
+    if (showExportModeDialog) {
+        AlertDialog(
+            onDismissRequest = { showExportModeDialog = false },
+            title = { Text(stringResource(R.string.settings_export)) },
+            text = {
+                Column {
+                    ListItem(
+                        headlineContent = { Text("Guardar en archivos") },
+                        supportingContent = { Text("Elige dónde guardarlo en el dispositivo") },
+                        leadingContent = { Icon(Icons.Default.FolderOpen, contentDescription = null) },
+                        modifier = Modifier.clickable {
+                            showExportModeDialog = false
+                            val timestamp = LocalDateTime.now()
+                                .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"))
+                            exportLauncher.launch("mis-dineros-backup-$timestamp.json")
+                        },
+                    )
+                    HorizontalDivider()
+                    ListItem(
+                        headlineContent = { Text("Compartir") },
+                        supportingContent = { Text("Envía el archivo por otra aplicación") },
+                        leadingContent = { Icon(Icons.Default.Share, contentDescription = null) },
+                        modifier = Modifier.clickable {
+                            showExportModeDialog = false
+                            viewModel.exportAndShare()
+                        },
+                    )
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { showExportModeDialog = false }) {
                     Text(stringResource(R.string.action_cancel))
                 }
             },
@@ -253,17 +311,20 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_export),
                 leadingIcon = Icons.Default.FileUpload,
                 enabled = !isLoading,
-                onClick = {
-                    val timestamp = LocalDateTime.now()
-                        .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"))
-                    exportLauncher.launch("mis-dineros-backup-$timestamp.json")
-                },
+                onClick = { showExportModeDialog = true },
             )
             NavSettingsItem(
                 title = stringResource(R.string.settings_import),
                 leadingIcon = Icons.Default.FileDownload,
                 enabled = !isLoading,
                 onClick = { importLauncher.launch(arrayOf("application/json")) },
+            )
+            SwitchSettingsItem(
+                title = "Copia de seguridad automática",
+                supportingText = "Restaura tus datos al reinstalar o cambiar de móvil. Se sube cifrado a tu cuenta de Google. Máx. 25 MB.",
+                checked = settings.autoBackupEnabled,
+                onCheckedChange = viewModel::setAutoBackupEnabled,
+                leadingIcon = Icons.Default.Backup,
             )
             HorizontalDivider()
 

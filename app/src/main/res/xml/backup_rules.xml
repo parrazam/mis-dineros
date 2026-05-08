@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Reglas de Auto Backup para Android < 12 (fullBackupContent).
+    En Android 12+ se usa data_extraction_rules.xml.
+-->
+<full-backup-content>
+    <include domain="database" path="mis_dineros.db" />
+    <include domain="file" path="datastore/" />
+    <include domain="file" path="icons/" />
+    <include domain="file" path="category_icons/" />
+    <include domain="sharedpref" path="auto_backup_prefs.xml" />
+</full-backup-content>

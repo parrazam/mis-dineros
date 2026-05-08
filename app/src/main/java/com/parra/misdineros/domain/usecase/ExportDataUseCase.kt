@@ -17,7 +17,18 @@ class ExportDataUseCase @Inject constructor(
     @ApplicationContext private val context: Context,
     private val backupRepository: BackupRepository,
 ) {
+    suspend fun exportToBytes(): Result<ByteArray> = runCatching {
+        buildJson().toByteArray(Charsets.UTF_8)
+    }
+
+    // Sobrecarga legacy usada mientras coexista el flujo SAF antiguo.
     suspend operator fun invoke(uri: Uri): Result<Unit> = runCatching {
+        val bytes = buildJson().toByteArray(Charsets.UTF_8)
+        context.contentResolver.openOutputStream(uri)?.buffered()?.use { it.write(bytes) }
+            ?: error("No se pudo abrir el archivo para escritura")
+    }
+
+    private suspend fun buildJson(): String {
         val snapshot = backupRepository.snapshot()
 
         val assets = mutableMapOf<String, String>()
@@ -33,18 +44,15 @@ class ExportDataUseCase @Inject constructor(
             } else sub
         }
 
-        val backupJson = BackupJson(
-            exportedAt = Instant.now().toString(),
-            subscriptions = processedSubs.map { it.toDto() },
-            categories = snapshot.categories.map { it.toDto() },
-            fxRates = snapshot.fxRates.map { it.toDto() },
-            settings = snapshot.settings.toDto(),
-            assets = assets,
+        return Json.encodeToString(
+            BackupJson(
+                exportedAt = Instant.now().toString(),
+                subscriptions = processedSubs.map { it.toDto() },
+                categories = snapshot.categories.map { it.toDto() },
+                fxRates = snapshot.fxRates.map { it.toDto() },
+                settings = snapshot.settings.toDto(),
+                assets = assets,
+            )
         )
-
-        val encoded = Json.encodeToString(backupJson)
-        context.contentResolver.openOutputStream(uri)?.buffered()?.use { out ->
-            out.write(encoded.toByteArray(Charsets.UTF_8))
-        } ?: error("No se pudo abrir el archivo para escritura")
     }
 }

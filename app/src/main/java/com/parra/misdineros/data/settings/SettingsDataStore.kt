@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.parra.misdineros.backup.MisDinerosBackupAgent
 import com.parra.misdineros.designsystem.theme.AppTheme
 import com.parra.misdineros.domain.model.AppSettings
 import com.parra.misdineros.domain.repository.SettingsRepository
@@ -32,6 +33,12 @@ class SettingsDataStore @Inject constructor(
         val NOTIFY_DAYS = intPreferencesKey("notify_days")
         val SUMMARY_ENABLED = booleanPreferencesKey("summary_enabled")
         val THEME = stringPreferencesKey("app_theme")
+        val AUTO_BACKUP = booleanPreferencesKey("auto_backup_enabled")
+    }
+
+    // SharedPreferences mirror para MisDinerosBackupAgent (acceso síncrono desde el agente).
+    private val backupPrefs by lazy {
+        context.getSharedPreferences(MisDinerosBackupAgent.PREFS_NAME, Context.MODE_PRIVATE)
     }
 
     override fun observe(): Flow<AppSettings> = context.dataStore.data.map { prefs ->
@@ -44,6 +51,7 @@ class SettingsDataStore @Inject constructor(
             monthlySummaryEnabled = prefs[Keys.SUMMARY_ENABLED] ?: true,
             appTheme = prefs[Keys.THEME]?.let { runCatching { AppTheme.valueOf(it) }.getOrNull() }
                 ?: AppTheme.SYSTEM,
+            autoBackupEnabled = prefs[Keys.AUTO_BACKUP] ?: true,
         )
     }
 
@@ -56,6 +64,11 @@ class SettingsDataStore @Inject constructor(
             prefs[Keys.NOTIFY_DAYS] = settings.defaultNotifyDaysBefore
             prefs[Keys.SUMMARY_ENABLED] = settings.monthlySummaryEnabled
             prefs[Keys.THEME] = settings.appTheme.name
+            prefs[Keys.AUTO_BACKUP] = settings.autoBackupEnabled
         }
+        // Mirror síncrono para que BackupAgent lo lea sin corrutinas.
+        backupPrefs.edit()
+            .putBoolean(MisDinerosBackupAgent.KEY_ENABLED, settings.autoBackupEnabled)
+            .apply()
     }
 }

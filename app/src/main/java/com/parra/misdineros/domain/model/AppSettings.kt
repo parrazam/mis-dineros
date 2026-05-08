@@ -10,4 +10,5 @@ data class AppSettings(
     val defaultNotifyDaysBefore: Int = 3,
     val monthlySummaryEnabled: Boolean = true,
     val appTheme: AppTheme = AppTheme.SYSTEM,
+    val autoBackupEnabled: Boolean = true,
 )
