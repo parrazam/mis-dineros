@@ -4,6 +4,7 @@ import android.app.backup.BackupAgent
 import android.app.backup.BackupDataInput
 import android.app.backup.BackupDataOutput
 import android.app.backup.FullBackupDataOutput
+import android.database.sqlite.SQLiteDatabase
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import java.io.File
@@ -31,11 +32,16 @@ class MisDinerosBackupAgent : BackupAgent() {
         Log.i(TAG, "onFullBackup: autoBackupEnabled=$enabled")
         if (!enabled) return
 
-        // Base de datos Room (incluye -shm y -wal si existen)
+        // Base de datos Room: checkpoint del WAL antes de copiar para garantizar
+        // que el fichero principal tiene todas las transacciones confirmadas.
         getDatabasePath(DB_NAME).also { db ->
-            if (db.exists()) fullBackupFile(db, data)
-            File("${db.path}-shm").takeIf { it.exists() }?.let { fullBackupFile(it, data) }
-            File("${db.path}-wal").takeIf { it.exists() }?.let { fullBackupFile(it, data) }
+            if (db.exists()) {
+                checkpointWal(db)
+                fullBackupFile(db, data)
+                // Incluir WAL y SHM solo si aún existen tras el checkpoint.
+                File("${db.path}-shm").takeIf { it.exists() }?.let { fullBackupFile(it, data) }
+                File("${db.path}-wal").takeIf { it.exists() }?.let { fullBackupFile(it, data) }
+            }
         }
 
         // DataStore (settings.preferences_pb)
@@ -54,6 +60,20 @@ class MisDinerosBackupAgent : BackupAgent() {
 
     // Restauración de ficheros individuales delegada al sistema.
     // No bloqueamos restore aunque el usuario haya desactivado el backup.
+
+    private fun checkpointWal(dbFile: File) {
+        try {
+            SQLiteDatabase.openDatabase(
+                dbFile.path, null,
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.NO_LOCALIZED_COLLATORS,
+            ).use { db ->
+                db.execSQL("PRAGMA wal_checkpoint(FULL)")
+                Log.i(TAG, "WAL checkpoint completado")
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "WAL checkpoint fallido (se incluirán los ficheros WAL): $e")
+        }
+    }
 
     private fun isAutoBackupEnabled(): Boolean =
         getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
