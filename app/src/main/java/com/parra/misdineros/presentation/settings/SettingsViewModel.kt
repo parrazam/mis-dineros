@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.parra.misdineros.data.backup.PasswordRequiredException
+import com.parra.misdineros.data.backup.WrongPasswordException
 import com.parra.misdineros.designsystem.theme.AppTheme
 import com.parra.misdineros.domain.model.AppSettings
 import com.parra.misdineros.domain.repository.SettingsRepository
@@ -35,6 +37,8 @@ sealed interface BackupState {
     data object Loading : BackupState
     data object ExportSuccess : BackupState
     data object ImportSuccess : BackupState
+    data object PasswordRequired : BackupState
+    data object WrongPassword : BackupState
     data class Error(val message: String) : BackupState
 }
 
@@ -60,6 +64,9 @@ class SettingsViewModel @Inject constructor(
     private val _events = Channel<BackupEvent>(Channel.BUFFERED)
     val events: Flow<BackupEvent> = _events.receiveAsFlow()
 
+    // Contraseña almacenada temporalmente entre el diálogo de export y el callback de SAF.
+    private var pendingExportPassword: CharArray? = null
+
     private fun update(block: (AppSettings) -> AppSettings) {
         viewModelScope.launch { repo.update(block(settings.value)) }
     }
@@ -81,20 +88,27 @@ class SettingsViewModel @Inject constructor(
     fun setSummaryEnabled(enabled: Boolean) = update { it.copy(monthlySummaryEnabled = enabled) }
     fun setAutoBackupEnabled(enabled: Boolean) = update { it.copy(autoBackupEnabled = enabled) }
 
+    fun setPendingExportPassword(password: CharArray?) {
+        pendingExportPassword?.fill(' ')
+        pendingExportPassword = password
+    }
+
     fun exportData(uri: Uri) {
         viewModelScope.launch {
             _backupState.value = BackupState.Loading
-            exportDataUseCase(uri).fold(
+            val password = pendingExportPassword
+            pendingExportPassword = null
+            exportDataUseCase(uri, password).fold(
                 onSuccess = { _backupState.value = BackupState.ExportSuccess },
                 onFailure = { _backupState.value = BackupState.Error(it.message ?: "Error desconocido") },
             )
         }
     }
 
-    fun exportAndShare() {
+    fun exportAndShare(password: CharArray? = null) {
         viewModelScope.launch {
             _backupState.value = BackupState.Loading
-            exportDataUseCase.exportToBytes().fold(
+            exportDataUseCase.exportToBytes(password).fold(
                 onSuccess = { bytes ->
                     runCatching {
                         val exportsDir = File(context.cacheDir, "exports").apply {
@@ -103,14 +117,16 @@ class SettingsViewModel @Inject constructor(
                         }
                         val timestamp = LocalDateTime.now()
                             .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"))
-                        val file = File(exportsDir, "mis-dineros-backup-$timestamp.json")
+                        val ext = if (password != null) "mdb" else "json"
+                        val file = File(exportsDir, "mis-dineros-backup-$timestamp.$ext")
                         file.writeBytes(bytes)
                         val uri = FileProvider.getUriForFile(
                             context,
                             "${context.packageName}.fileprovider",
                             file,
                         )
-                        _events.send(BackupEvent.Share(uri, "application/json"))
+                        val mime = if (password != null) "application/octet-stream" else "application/json"
+                        _events.send(BackupEvent.Share(uri, mime))
                         _backupState.value = BackupState.ExportSuccess
                     }.onFailure {
                         _backupState.value = BackupState.Error(it.message ?: "Error al preparar el archivo")
@@ -121,12 +137,18 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun importData(uri: Uri) {
+    fun importData(uri: Uri, password: CharArray? = null) {
         viewModelScope.launch {
             _backupState.value = BackupState.Loading
-            importDataUseCase(uri).fold(
+            importDataUseCase(uri, password).fold(
                 onSuccess = { _backupState.value = BackupState.ImportSuccess },
-                onFailure = { _backupState.value = BackupState.Error(it.message ?: "Error desconocido") },
+                onFailure = { e ->
+                    _backupState.value = when (e) {
+                        is PasswordRequiredException -> BackupState.PasswordRequired
+                        is WrongPasswordException -> BackupState.WrongPassword
+                        else -> BackupState.Error(e.message ?: "Error desconocido")
+                    }
+                },
             )
         }
     }

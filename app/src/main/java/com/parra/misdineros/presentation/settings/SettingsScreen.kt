@@ -4,18 +4,25 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.CurrencyExchange
-import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.FolderOpen
@@ -25,23 +32,15 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
@@ -56,10 +55,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -95,11 +100,14 @@ fun SettingsScreen(
 
     var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
     var showImportDialog by remember { mutableStateOf(false) }
+    var showPasswordDialog by remember { mutableStateOf(false) }
+    var importPasswordError by remember { mutableStateOf(false) }
+    var importPasswordInput by remember { mutableStateOf("") }
     var showTimePicker by remember { mutableStateOf(false) }
     var showExportModeDialog by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json"),
+        contract = ActivityResultContracts.CreateDocument("*/*"),
     ) { uri -> uri?.let { viewModel.exportData(it) } }
 
     val importLauncher = rememberLauncherForActivityResult(
@@ -137,7 +145,19 @@ fun SettingsScreen(
                 viewModel.clearBackupState()
             }
             is BackupState.ImportSuccess -> {
+                pendingImportUri = null
+                showPasswordDialog = false
                 snackbarHostState.showSnackbar(importSuccessMsg)
+                viewModel.clearBackupState()
+            }
+            is BackupState.PasswordRequired -> {
+                importPasswordError = false
+                importPasswordInput = ""
+                showPasswordDialog = true
+                viewModel.clearBackupState()
+            }
+            is BackupState.WrongPassword -> {
+                importPasswordError = true
                 viewModel.clearBackupState()
             }
             is BackupState.Error -> {
@@ -147,6 +167,8 @@ fun SettingsScreen(
             else -> {}
         }
     }
+
+    // ── Diálogos ──────────────────────────────────────────────────────────────
 
     if (showTimePicker) {
         val timePickerState = rememberTimePickerState(
@@ -173,39 +195,18 @@ fun SettingsScreen(
     }
 
     if (showExportModeDialog) {
-        AlertDialog(
-            onDismissRequest = { showExportModeDialog = false },
-            title = { Text(stringResource(R.string.settings_export)) },
-            text = {
-                Column {
-                    ListItem(
-                        headlineContent = { Text("Guardar en archivos") },
-                        supportingContent = { Text("Elige dónde guardarlo en el dispositivo") },
-                        leadingContent = { Icon(Icons.Default.FolderOpen, contentDescription = null) },
-                        modifier = Modifier.clickable {
-                            showExportModeDialog = false
-                            val timestamp = LocalDateTime.now()
-                                .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"))
-                            exportLauncher.launch("mis-dineros-backup-$timestamp.json")
-                        },
-                    )
-                    HorizontalDivider()
-                    ListItem(
-                        headlineContent = { Text("Compartir") },
-                        supportingContent = { Text("Envía el archivo por otra aplicación") },
-                        leadingContent = { Icon(Icons.Default.Share, contentDescription = null) },
-                        modifier = Modifier.clickable {
-                            showExportModeDialog = false
-                            viewModel.exportAndShare()
-                        },
-                    )
-                }
+        ExportModeDialog(
+            onDismiss = { showExportModeDialog = false },
+            onSaveToFile = { password ->
+                showExportModeDialog = false
+                viewModel.setPendingExportPassword(password)
+                val ts = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"))
+                val ext = if (password != null) "mdb" else "json"
+                exportLauncher.launch("mis-dineros-backup-$ts.$ext")
             },
-            confirmButton = {},
-            dismissButton = {
-                TextButton(onClick = { showExportModeDialog = false }) {
-                    Text(stringResource(R.string.action_cancel))
-                }
+            onShare = { password ->
+                showExportModeDialog = false
+                viewModel.exportAndShare(password)
             },
         )
     }
@@ -219,13 +220,58 @@ fun SettingsScreen(
                 TextButton(onClick = {
                     viewModel.importData(pendingImportUri!!)
                     showImportDialog = false
-                    pendingImportUri = null
+                    // pendingImportUri se conserva por si el archivo está cifrado
                 }) { Text(stringResource(R.string.backup_import_confirm_button)) }
             },
             dismissButton = {
                 TextButton(onClick = {
                     showImportDialog = false
                     pendingImportUri = null
+                }) { Text(stringResource(R.string.action_cancel)) }
+            },
+        )
+    }
+
+    if (showPasswordDialog && pendingImportUri != null) {
+        AlertDialog(
+            onDismissRequest = {
+                showPasswordDialog = false
+                pendingImportUri = null
+                importPasswordError = false
+                importPasswordInput = ""
+            },
+            title = { Text("Archivo cifrado") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Este archivo está protegido con contraseña.")
+                    OutlinedTextField(
+                        value = importPasswordInput,
+                        onValueChange = { importPasswordInput = it; importPasswordError = false },
+                        label = { Text("Contraseña") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        singleLine = true,
+                        isError = importPasswordError,
+                        supportingText = if (importPasswordError) {
+                            { Text("Contraseña incorrecta") }
+                        } else null,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.importData(pendingImportUri!!, importPasswordInput.toCharArray())
+                    },
+                    enabled = importPasswordInput.isNotEmpty() && !isLoading,
+                ) { Text("Importar") }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showPasswordDialog = false
+                    pendingImportUri = null
+                    importPasswordError = false
+                    importPasswordInput = ""
                 }) { Text(stringResource(R.string.action_cancel)) }
             },
         )
@@ -317,7 +363,7 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_import),
                 leadingIcon = Icons.Default.FileDownload,
                 enabled = !isLoading,
-                onClick = { importLauncher.launch(arrayOf("application/json")) },
+                onClick = { importLauncher.launch(arrayOf("*/*")) },
             )
             SwitchSettingsItem(
                 title = "Copia de seguridad automática",
@@ -336,6 +382,99 @@ fun SettingsScreen(
             )
         }
     }
+}
+
+// ─── Diálogo de exportación ───────────────────────────────────────────────────
+
+@Composable
+private fun ExportModeDialog(
+    onDismiss: () -> Unit,
+    onSaveToFile: (password: CharArray?) -> Unit,
+    onShare: (password: CharArray?) -> Unit,
+) {
+    var encryptEnabled by remember { mutableStateOf(false) }
+    var password by remember { mutableStateOf("") }
+    var passwordConfirm by remember { mutableStateOf("") }
+
+    val passwordsMatch = password == passwordConfirm
+    val passwordValid = !encryptEnabled || (password.length >= 6 && passwordsMatch)
+
+    fun resolvedPassword(): CharArray? = if (encryptEnabled) password.toCharArray() else null
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_export)) },
+        text = {
+            Column {
+                SwitchSettingsItem(
+                    title = "Cifrar con contraseña",
+                    checked = encryptEnabled,
+                    onCheckedChange = { enabled ->
+                        encryptEnabled = enabled
+                        if (!enabled) { password = ""; passwordConfirm = "" }
+                    },
+                )
+                if (encryptEnabled) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        OutlinedTextField(
+                            value = password,
+                            onValueChange = { password = it },
+                            label = { Text("Contraseña") },
+                            visualTransformation = PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            singleLine = true,
+                        )
+                        OutlinedTextField(
+                            value = passwordConfirm,
+                            onValueChange = { passwordConfirm = it },
+                            label = { Text("Confirmar contraseña") },
+                            visualTransformation = PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            singleLine = true,
+                            isError = passwordConfirm.isNotEmpty() && !passwordsMatch,
+                            supportingText = when {
+                                passwordConfirm.isNotEmpty() && !passwordsMatch ->
+                                    { { Text("Las contraseñas no coinciden") } }
+                                password.isNotEmpty() && password.length < 6 ->
+                                    { { Text("Mínimo 6 caracteres") } }
+                                else -> null
+                            },
+                        )
+                        Text(
+                            text = "Si pierdes la contraseña, no podrás recuperar este archivo.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+                HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
+                ListItem(
+                    headlineContent = { Text("Guardar en archivos") },
+                    supportingContent = { Text("Elige dónde guardarlo en el dispositivo") },
+                    leadingContent = { Icon(Icons.Default.FolderOpen, contentDescription = null) },
+                    modifier = Modifier
+                        .alpha(if (passwordValid) 1f else 0.38f)
+                        .clickable(enabled = passwordValid) { onSaveToFile(resolvedPassword()) },
+                )
+                HorizontalDivider()
+                ListItem(
+                    headlineContent = { Text("Compartir") },
+                    supportingContent = { Text("Envía el archivo por otra aplicación") },
+                    leadingContent = { Icon(Icons.Default.Share, contentDescription = null) },
+                    modifier = Modifier
+                        .alpha(if (passwordValid) 1f else 0.38f)
+                        .clickable(enabled = passwordValid) { onShare(resolvedPassword()) },
+                )
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
+        },
+    )
 }
 
 // ─── Section helpers ──────────────────────────────────────────────────────────

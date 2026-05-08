@@ -3,11 +3,16 @@ package com.parra.misdineros.domain.usecase
 import android.content.Context
 import android.net.Uri
 import android.util.Base64
+import com.parra.misdineros.data.backup.BackupCrypto
+import com.parra.misdineros.data.backup.BackupFormat
 import com.parra.misdineros.data.backup.BackupJson
+import com.parra.misdineros.data.backup.PasswordRequiredException
 import com.parra.misdineros.data.backup.toDomain
 import com.parra.misdineros.domain.repository.BackupRepository
 import com.parra.misdineros.domain.repository.BackupSnapshot
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.File
 import javax.inject.Inject
@@ -18,10 +23,18 @@ class ImportDataUseCase @Inject constructor(
 ) {
     private val lenientJson = Json { ignoreUnknownKeys = true }
 
-    suspend operator fun invoke(uri: Uri): Result<Unit> = runCatching {
-        val jsonStr = context.contentResolver.openInputStream(uri)?.buffered()?.use {
-            it.readBytes().toString(Charsets.UTF_8)
-        } ?: error("No se pudo leer el archivo")
+    suspend operator fun invoke(uri: Uri, password: CharArray? = null): Result<Unit> = runCatching {
+        val blob = context.contentResolver.openInputStream(uri)?.buffered()?.use { it.readBytes() }
+            ?: error("No se pudo leer el archivo")
+
+        val jsonStr = when (BackupCrypto.detectFormat(blob)) {
+            BackupFormat.LegacyJson -> blob.toString(Charsets.UTF_8)
+            BackupFormat.Plain -> blob.copyOfRange(5, blob.size).toString(Charsets.UTF_8)
+            BackupFormat.Encrypted -> {
+                val pwd = password ?: throw PasswordRequiredException()
+                withContext(Dispatchers.Default) { BackupCrypto.decrypt(blob, pwd) }
+            }
+        }
 
         val backupJson = lenientJson.decodeFromString<BackupJson>(jsonStr)
         require(backupJson.version <= CURRENT_VERSION) {
