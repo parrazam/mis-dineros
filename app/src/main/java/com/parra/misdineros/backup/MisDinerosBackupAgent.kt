@@ -9,6 +9,23 @@ import android.os.ParcelFileDescriptor
 import android.util.Log
 import java.io.File
 
+/**
+ * Agente de backup para Mis Dineros.
+ *
+ * La app declara `android:fullBackupOnly="true"` en el manifest, así que el sistema
+ * usa exclusivamente Auto Backup (file-based). Las reglas de qué incluir están en
+ * `res/xml/data_extraction_rules.xml` (Android 12+) y `res/xml/backup_rules.xml`
+ * (Android <12). Este agente NO duplica esas reglas: delega en `super.onFullBackup()`
+ * para que el sistema las aplique.
+ *
+ * Las únicas responsabilidades de este agente son:
+ *   1. Respetar el toggle de usuario (`auto_backup_prefs/enabled`).
+ *   2. Hacer un checkpoint del WAL de SQLite antes de la copia, para que el fichero
+ *      principal `.db` contenga todas las transacciones confirmadas.
+ *
+ * Las claves k/v (onBackup/onRestore) no se usan: con `fullBackupOnly=true` el sistema
+ * no las invoca en Android 6+.
+ */
 class MisDinerosBackupAgent : BackupAgent() {
 
     override fun onBackup(
@@ -16,7 +33,7 @@ class MisDinerosBackupAgent : BackupAgent() {
         data: BackupDataOutput?,
         newState: ParcelFileDescriptor?,
     ) {
-        // Key/value backup no utilizado; todo va por Full Backup.
+        // No-op: usamos Auto Backup (full-data) vía fullBackupOnly=true.
     }
 
     override fun onRestore(
@@ -24,42 +41,24 @@ class MisDinerosBackupAgent : BackupAgent() {
         appVersionCode: Int,
         newState: ParcelFileDescriptor?,
     ) {
-        // Restauración key/value no utilizada.
+        // No-op: la restauración full-data la gestiona el sistema con las reglas XML.
     }
 
     override fun onFullBackup(data: FullBackupDataOutput) {
-        val enabled = isAutoBackupEnabled()
-        Log.i(TAG, "onFullBackup: autoBackupEnabled=$enabled")
-        if (!enabled) return
-
-        // Base de datos Room: checkpoint del WAL antes de copiar para garantizar
-        // que el fichero principal tiene todas las transacciones confirmadas.
-        getDatabasePath(DB_NAME).also { db ->
-            if (db.exists()) {
-                checkpointWal(db)
-                fullBackupFile(db, data)
-                // Incluir WAL y SHM solo si aún existen tras el checkpoint.
-                File("${db.path}-shm").takeIf { it.exists() }?.let { fullBackupFile(it, data) }
-                File("${db.path}-wal").takeIf { it.exists() }?.let { fullBackupFile(it, data) }
-            }
+        if (!isAutoBackupEnabled()) {
+            Log.i(TAG, "onFullBackup: skip (toggle off)")
+            return
         }
 
-        // DataStore (settings.preferences_pb)
-        File(filesDir, "datastore").listFiles()?.forEach { fullBackupFile(it, data) }
+        // Checkpoint del WAL para que el .db sea consistente cuando el sistema lo copie.
+        getDatabasePath(DB_NAME).takeIf { it.exists() }?.let(::checkpointWal)
 
-        // Iconos de usuario
-        File(filesDir, "icons").listFiles()?.forEach { fullBackupFile(it, data) }
-        File(filesDir, "category_icons").listFiles()?.forEach { fullBackupFile(it, data) }
-
-        // Mirror de SharedPreferences para el propio toggle
-        File(applicationInfo.dataDir, "shared_prefs/$PREFS_NAME.xml")
-            .takeIf { it.exists() }?.let { fullBackupFile(it, data) }
+        // Delega en el sistema: aplica las reglas de data_extraction_rules.xml
+        // (cloud-backup / device-transfer) y backup_rules.xml según la versión de Android.
+        super.onFullBackup(data)
 
         Log.i(TAG, "onFullBackup: completado")
     }
-
-    // Restauración de ficheros individuales delegada al sistema.
-    // No bloqueamos restore aunque el usuario haya desactivado el backup.
 
     private fun checkpointWal(dbFile: File) {
         try {
@@ -71,7 +70,9 @@ class MisDinerosBackupAgent : BackupAgent() {
                 Log.i(TAG, "WAL checkpoint completado")
             }
         } catch (e: Exception) {
-            Log.w(TAG, "WAL checkpoint fallido (se incluirán los ficheros WAL): $e")
+            // Si falla, los ficheros -wal y -shm también se incluyen por las reglas XML,
+            // así que el backup sigue siendo válido aunque menos compacto.
+            Log.w(TAG, "WAL checkpoint fallido: $e")
         }
     }
 
