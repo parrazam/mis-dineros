@@ -1,7 +1,9 @@
 package com.parra.misdineros
 
 import android.app.Application
+import android.content.Context
 import androidx.work.Configuration
+import com.parra.misdineros.backup.MisDinerosBackupAgent
 import com.parra.misdineros.domain.repository.SettingsRepository
 import com.parra.misdineros.notifications.NotificationChannelFactory
 import com.parra.misdineros.notifications.NotificationScheduler
@@ -25,6 +27,12 @@ class MisDinerosApplication : Application(), Configuration.Provider {
         NotificationChannelFactory.createChannels(this)
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             val settings = settingsRepository.observe().first()
+            // Asegura que el mirror SharedPreferences que lee MisDinerosBackupAgent
+            // existe desde el primer arranque, aunque el usuario no haya tocado ajustes.
+            getSharedPreferences(MisDinerosBackupAgent.PREFS_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putBoolean(MisDinerosBackupAgent.KEY_ENABLED, settings.autoBackupEnabled)
+                .apply()
             notificationScheduler.schedule(
                 settings.notificationHour,
                 settings.notificationMinute,
