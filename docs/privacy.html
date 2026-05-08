@@ -51,7 +51,7 @@
   <main class="legal">
     <a class="legal__back" href="/">← Volver</a>
 
-    <span class="legal__meta">Última actualización · 4 de mayo de 2026</span>
+    <span class="legal__meta">Última actualización · 8 de mayo de 2026</span>
     <h1>Política de privacidad</h1>
 
     <div class="legal__intro">
@@ -85,7 +85,7 @@
     <ul>
       <li><strong>Notificaciones</strong> (<code>POST_NOTIFICATIONS</code> en Android 13+): para mostrar avisos locales antes de la renovación de cada suscripción y el resumen mensual configurable. Las notificaciones se generan localmente en el dispositivo mediante <code>WorkManager</code>; no involucran servidores externos.</li>
       <li><strong>Lectura de imágenes</strong> (a través del selector de fotos del sistema): solo cuando el usuario decide voluntariamente añadir un icono personalizado a una suscripción. La imagen seleccionada se copia a la zona privada de la aplicación y no se comparte con ningún servicio.</li>
-      <li><strong>Almacenamiento de archivos del sistema</strong> (a través del selector del sistema): solo cuando el usuario solicita exportar o importar manualmente una copia de seguridad en formato JSON. La aplicación no accede al almacenamiento sin acción explícita del usuario.</li>
+      <li><strong>Almacenamiento de archivos del sistema</strong> (a través del selector del sistema o el panel de compartición de Android): solo cuando el usuario solicita exportar o importar manualmente una copia de seguridad. La aplicación no accede al almacenamiento sin acción explícita del usuario.</li>
     </ul>
 
     <h2>5. Servicios de terceros</h2>
@@ -95,18 +95,22 @@
       <li>Servicios de medición de fallos (Crashlytics, Sentry, etc.).</li>
       <li>Plataformas de publicidad o atribución.</li>
       <li>Sistemas de autenticación o cuentas de usuario.</li>
-      <li>Servicios de sincronización en la nube.</li>
+      <li>Servicios de sincronización en la nube de iniciativa propia.</li>
     </ul>
+    <p>Excepción: si el usuario activa la opción <strong>«Copia de seguridad automática»</strong> en los ajustes de la aplicación, Android puede subir los datos de la app a la cuenta Google vinculada al dispositivo mediante el mecanismo estándar <em>Android Auto Backup</em>. Este proceso lo gestiona íntegramente el sistema operativo y Google; los datos se cifran en tránsito y en reposo con las credenciales de la cuenta del usuario. El responsable de la aplicación no tiene acceso a esas copias. Si el usuario no desea este comportamiento, puede desactivarlo desde Ajustes → Datos → Copia de seguridad automática, o desde los ajustes del sistema operativo.</p>
 
     <h2>6. Copias de seguridad</h2>
-    <p>La aplicación permite al usuario exportar una copia de seguridad en formato JSON, que incluye sus suscripciones, categorías, tasas de cambio editadas, ajustes e iconos personalizados (estos últimos codificados en base64 dentro del propio archivo).</p>
-    <p>El archivo de exportación se guarda en la ubicación que el usuario elija mediante el selector de archivos del sistema operativo. El responsable <strong>no tiene acceso a esa copia</strong> ni a su contenido. La gestión, almacenamiento y eventual compartición del archivo es responsabilidad exclusiva del usuario.</p>
+    <p>La aplicación ofrece dos mecanismos de copia de seguridad, ambos bajo control exclusivo del usuario:</p>
+    <ul>
+      <li><strong>Exportación manual:</strong> el usuario genera un archivo que incluye suscripciones, categorías, tasas de cambio, ajustes e iconos personalizados. El archivo puede guardarse en cualquier ubicación del dispositivo o compartirse mediante el panel nativo de Android (LocalSend, Telegram, correo, etc.). El usuario puede protegerlo opcionalmente con una contraseña; en ese caso el contenido se cifra con AES-256-GCM y la clave se deriva mediante PBKDF2 con 200 000 iteraciones. El responsable <strong>no tiene acceso</strong> al archivo ni a su contraseña.</li>
+      <li><strong>Auto Backup de Android</strong> (opcional, desactivado por defecto hasta que el usuario lo habilita): si está activo, el sistema operativo sube periódicamente los datos al almacenamiento cifrado de la cuenta Google del dispositivo. El responsable no controla ni tiene acceso a este proceso.</li>
+    </ul>
 
     <h2>7. Datos de niños</h2>
     <p>La aplicación no está dirigida a menores de 13 años y no recopila intencionadamente datos de menores. Dado que la aplicación no recopila datos personales de ningún tipo, esta política se cumple por diseño.</p>
 
     <h2>8. Conservación y eliminación de datos</h2>
-    <p>Como toda la información se almacena localmente en el dispositivo, su conservación depende del usuario. Para eliminar todos los datos basta con desinstalar la aplicación o utilizar la opción del sistema operativo "Borrar datos" en los ajustes de la aplicación. No existe ninguna copia remota que el responsable deba o pueda eliminar.</p>
+    <p>La información se almacena localmente en el dispositivo. Para eliminar todos los datos basta con desinstalar la aplicación o utilizar la opción del sistema «Borrar datos» en los ajustes de la aplicación. Si el usuario tenía activo el Auto Backup de Android, la copia almacenada en su cuenta Google se elimina automáticamente al desinstalar la app, conforme al comportamiento estándar del sistema operativo. El responsable no tiene capacidad de acceder ni eliminar esa copia de forma independiente.</p>
 
     <h2>9. Derechos del usuario</h2>
     <p>De acuerdo con el Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD), el usuario tiene derecho de acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad respecto a sus datos personales.</p>

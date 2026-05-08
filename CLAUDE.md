@@ -35,6 +35,7 @@ Single-module Clean Architecture by packages. Dependency flow: `presentation →
 core/           — utilities with no Android/domain dependencies (MoneyFormatter, DateUtils, AppError)
 domain/         — pure Kotlin: models, repository interfaces, use cases
 data/           — Room entities+DAOs, repository impls, DataStore, mappers, seeding
+backup/         — MisDinerosBackupAgent (Auto Backup), BackupCrypto (AES-256-GCM)
 designsystem/   — MisDinerosTheme, Color, Typography, Shape, reusable Compose components
 presentation/   — screens + ViewModels (one sub-package per screen)
 notifications/  — WorkManager workers + scheduler
@@ -56,6 +57,12 @@ di/             — Hilt modules (DatabaseModule, RepositoryModule, WorkerModule
 **Theme.** `MisDinerosTheme` accepts an `AppTheme` enum (SYSTEM/LIGHT/DARK) and an optional `dynamicColor` flag (Android 12+). Seed color `#0077B6` (Blue Snorkel). Light/dark palettes are in `Color.kt` as `md_theme_light_*` / `md_theme_dark_*` constants.
 
 **Navigation.** Single-activity, Compose NavHost. All routes are defined in `Destination` sealed class (`presentation/navigation/Destinations.kt`). `SubscriptionEdit` and `SubscriptionDetail` take an optional/required `id` string argument.
+
+**Backup file format.** Exported files carry a 5-byte header: magic `MDB1` (4 bytes) + flags byte (`0x00` = plain, `0x01` = AES-256-GCM encrypted). Files without this header are treated as legacy plain JSON (full backward compatibility). Encryption key is derived with PBKDF2WithHmacSHA256 (200 000 iterations, 16-byte random salt, 12-byte random IV). `BackupCrypto` (`data/backup/BackupCrypto.kt`) is a pure `object` with no Android dependencies — unit-testable on JVM. The CPU-heavy PBKDF2 call runs on `Dispatchers.Default` inside the use cases.
+
+**Auto Backup.** `allowBackup="true"` with a custom `MisDinerosBackupAgent` (`backup/MisDinerosBackupAgent.kt`). The agent reads `SharedPreferences("auto_backup_prefs").getBoolean("enabled", true)` in `onFullBackup` and skips the backup if disabled. It explicitly calls `fullBackupFile()` for each file (Room DB + WAL/SHM, DataStore, icons) instead of delegating to `super.onFullBackup()`, which avoids relying on XML rule parsing at runtime. Restore is never blocked. The `autoBackupEnabled` flag is mirrored from DataStore to `SharedPreferences` on every `SettingsRepository.update()` call because `BackupAgent` runs outside Hilt's lifecycle and cannot call suspend functions.
+
+**FileProvider for share exports.** Temporary export files are written to `cacheDir/exports/` and shared via `${applicationId}.fileprovider` (authority defined in `AndroidManifest.xml`, paths in `res/xml/file_provider_paths.xml`). The exports directory is not included in Auto Backup. The pending encryption password between the export dialog and the SAF callback is stored as `CharArray?` in `SettingsViewModel` and zeroed out immediately after use.
 
 ### Instrumented test runner
 

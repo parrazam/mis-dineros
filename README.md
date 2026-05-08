@@ -15,7 +15,8 @@ Gestor de suscripciones personal para Android. Sin servidores, sin telemetría, 
 - **Estadísticas** — donut por categoría, barras mensual/anual y ranking
 - **Divisas** — conversión automática a moneda global con tasas de cambio editables y bundled
 - **Notificaciones locales** — aviso configurable N días antes por suscripción + resumen mensual
-- **Export/Import JSON** — copia de seguridad versionada con iconos custom embebidos en base64
+- **Exportación e importación** — copia de seguridad con iconos embebidos, cifrado AES-256-GCM opcional y share sheet nativo (LocalSend, Telegram, Drive…)
+- **Copia de seguridad automática** — Android Auto Backup a cuenta Google, activable/desactivable desde Ajustes
 - **Temas** — claro / oscuro / sistema, seed color Blue Snorkel `#0077B6`
 - **Categorías** — 9 predefinidas + creación libre
 
@@ -70,12 +71,23 @@ app/src/main/java/com/parra/misdineros/
 
 ## Backup
 
-El formato de exportación es JSON versionado (`version: 1`):
+### Exportación/importación manual
+
+El fichero exportado tiene una cabecera de 5 bytes (`MDB1` + flags) seguida del payload:
+
+| Formato | Flags | Payload |
+|---|---|---|
+| Plano | `0x00` | JSON UTF-8 |
+| Cifrado | `0x01` | salt (16B) + IV (12B) + AES-256-GCM ciphertext |
+
+El cifrado es opcional: el usuario lo activa al exportar e introduce una contraseña. La clave se deriva con PBKDF2WithHmacSHA256 (200 000 iteraciones). Los ficheros exportados antes de esta versión (JSON sin cabecera) se importan sin cambios — compatibilidad total hacia atrás.
+
+El JSON embebido tiene esta estructura (`version: 1`):
 
 ```json
 {
   "version": 1,
-  "exportedAt": "2026-04-27T10:00:00Z",
+  "exportedAt": "2026-05-08T10:00:00Z",
   "subscriptions": [...],
   "categories": [...],
   "fxRates": [...],
@@ -84,7 +96,13 @@ El formato de exportación es JSON versionado (`version: 1`):
 }
 ```
 
-Los iconos subidos por el usuario se embeben en `assets` como base64 y se restauran en `filesDir/icons/` al importar.
+Los iconos de usuario se embeben en `assets` como base64 y se restauran en `filesDir/icons/` al importar.
+
+El share sheet nativo permite enviar el fichero directamente a Telegram, LocalSend, Drive, etc. La opción "Guardar en archivos" usa SAF (`CreateDocument`) para elegir ubicación en el dispositivo.
+
+### Android Auto Backup
+
+Con `allowBackup="true"` y `MisDinerosBackupAgent`, el sistema sube automáticamente la BD Room, DataStore, iconos de usuario y preferencias a la cuenta Google del dispositivo (máx. 25 MB, cifrado por Google). El usuario puede desactivarlo desde Ajustes → Datos. La flag se persiste en `SharedPreferences("auto_backup_prefs")` además de DataStore, para que el agente pueda leerla de forma síncrona.
 
 ## CI/CD
 
