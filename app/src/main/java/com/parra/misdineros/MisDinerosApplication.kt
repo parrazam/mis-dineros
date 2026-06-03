@@ -3,6 +3,7 @@ package com.parra.misdineros
 import android.app.Application
 import androidx.work.Configuration
 import com.parra.misdineros.domain.repository.SettingsRepository
+import com.parra.misdineros.domain.usecase.AdvanceDueRenewalsUseCase
 import com.parra.misdineros.notifications.NotificationChannelFactory
 import com.parra.misdineros.notifications.NotificationScheduler
 import dagger.hilt.android.HiltAndroidApp
@@ -19,11 +20,16 @@ class MisDinerosApplication : Application(), Configuration.Provider {
     @Inject lateinit var workerFactory: androidx.hilt.work.HiltWorkerFactory
     @Inject lateinit var notificationScheduler: NotificationScheduler
     @Inject lateinit var settingsRepository: SettingsRepository
+    @Inject lateinit var advanceDueRenewals: AdvanceDueRenewalsUseCase
 
     override fun onCreate() {
         super.onCreate()
         NotificationChannelFactory.createChannels(this)
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            // Avanza las renovaciones vencidas antes de programar las notificaciones, de modo que
+            // las fechas estén actualizadas aunque las notificaciones estén desactivadas (en ese
+            // caso el worker periódico no se programa).
+            advanceDueRenewals()
             val settings = settingsRepository.observe().first()
             notificationScheduler.schedule(
                 settings.notificationHour,

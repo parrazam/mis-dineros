@@ -21,6 +21,7 @@ class BackupDtoTest {
         id = "sub1", name = "Netflix", iconRef = iconRef,
         amountMinor = 1299L, currencyCode = "EUR",
         billingCycle = BillingCycle.MONTHLY, nextRenewalDate = date,
+        billingAnchorDay = date.dayOfMonth,
         categoryId = "cat1", isPaused = false,
         notifyDaysBefore = 3, notes = "nota", createdAt = ts, updatedAt = ts,
     )

@@ -39,6 +39,7 @@ class CalcMonthlySpendUseCaseTest {
         amountMinor = amountMinor, currencyCode = currency,
         billingCycle = cycle,
         nextRenewalDate = LocalDate.now().plusMonths(1),
+        billingAnchorDay = LocalDate.now().plusMonths(1).dayOfMonth,
         categoryId = "cat1", isPaused = paused, notifyDaysBefore = null, notes = null,
         createdAt = 0L, updatedAt = 0L,
     )

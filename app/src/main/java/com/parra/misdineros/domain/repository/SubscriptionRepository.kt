@@ -11,4 +11,5 @@ interface SubscriptionRepository {
     suspend fun upsert(subscription: Subscription)
     suspend fun delete(id: String)
     suspend fun togglePause(id: String)
+    suspend fun updateRenewalDate(id: String, newDate: String, now: Long)
 }

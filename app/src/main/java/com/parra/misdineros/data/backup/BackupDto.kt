@@ -113,6 +113,7 @@ fun SubscriptionDto.toDomain(resolvedIconRef: String = iconRef) = Subscription(
     currencyCode = currencyCode,
     billingCycle = BillingCycle.valueOf(billingCycle),
     nextRenewalDate = LocalDate.parse(nextRenewalDate),
+    billingAnchorDay = LocalDate.parse(nextRenewalDate).dayOfMonth,
     categoryId = categoryId,
     isPaused = isPaused,
     notifyDaysBefore = notifyDaysBefore,

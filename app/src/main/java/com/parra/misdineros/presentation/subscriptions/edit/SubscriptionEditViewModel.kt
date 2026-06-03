@@ -182,6 +182,7 @@ class SubscriptionEditViewModel @Inject constructor(
                 currencyCode = state.currencyCode,
                 billingCycle = state.billingCycle,
                 nextRenewalDate = state.nextRenewalDate,
+                billingAnchorDay = state.nextRenewalDate.dayOfMonth,
                 categoryId = state.categoryId,
                 isPaused = false,
                 notifyDaysBefore = state.notifyDaysBefore,

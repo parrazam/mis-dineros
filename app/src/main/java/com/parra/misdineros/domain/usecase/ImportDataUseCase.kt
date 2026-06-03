@@ -20,6 +20,7 @@ import javax.inject.Inject
 class ImportDataUseCase @Inject constructor(
     @ApplicationContext private val context: Context,
     private val backupRepository: BackupRepository,
+    private val advanceDueRenewals: AdvanceDueRenewalsUseCase,
 ) {
     private val lenientJson = Json { ignoreUnknownKeys = true }
 
@@ -58,6 +59,9 @@ class ImportDataUseCase @Inject constructor(
             settings = backupJson.settings.toDomain(),
         )
         backupRepository.restore(snapshot)
+        // Tras restaurar, avanza las renovaciones que vengan vencidas en el backup importado,
+        // sin esperar a un reinicio de la app.
+        advanceDueRenewals()
     }
 
     companion object {
