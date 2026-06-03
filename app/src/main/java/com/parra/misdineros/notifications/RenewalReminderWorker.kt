@@ -16,6 +16,7 @@ import com.parra.misdineros.core.money.MoneyFormatter
 import com.parra.misdineros.domain.model.Subscription
 import com.parra.misdineros.domain.repository.SettingsRepository
 import com.parra.misdineros.domain.repository.SubscriptionRepository
+import com.parra.misdineros.domain.usecase.AdvanceDueRenewalsUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
@@ -29,10 +30,14 @@ class RenewalReminderWorker @AssistedInject constructor(
     @Assisted workerParams: WorkerParameters,
     private val subscriptionRepository: SubscriptionRepository,
     private val settingsRepository: SettingsRepository,
+    private val advanceDueRenewals: AdvanceDueRenewalsUseCase,
 ) : CoroutineWorker(appContext, workerParams) {
 
     @SuppressLint("MissingPermission")
     override suspend fun doWork(): Result {
+        // Avanza primero las renovaciones vencidas para evaluar las notificaciones con fechas frescas.
+        advanceDueRenewals()
+
         val settings = settingsRepository.observe().first()
         if (!settings.notificationsEnabled) return Result.success()
 

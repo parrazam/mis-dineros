@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -65,6 +66,7 @@ import com.parra.misdineros.domain.model.BillingCycle
 import com.parra.misdineros.presentation.subscriptions.iconpicker.IconPickerBottomSheet
 import kotlinx.coroutines.launch
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -239,6 +241,8 @@ fun SubscriptionEditScreen(
                     value = state.nextRenewalDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)),
                     onValueChange = {},
                     readOnly = true,
+                    isError = state.dateError != null,
+                    supportingText = state.dateError?.let { { Text(it) } },
                     label = { Text(stringResource(R.string.field_renewal_date)) },
                     trailingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = null) },
                     modifier = Modifier.fillMaxWidth(),
@@ -355,11 +359,23 @@ fun SubscriptionEditScreen(
 
     // Date picker dialog
     if (showDatePicker) {
+        val today = remember { LocalDate.now() }
+        val todayUtcMillis = remember(today) {
+            today.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+        }
         val datePickerState = rememberDatePickerState(
             initialSelectedDateMillis = state.nextRenewalDate
                 .atStartOfDay(ZoneOffset.UTC)
                 .toInstant()
                 .toEpochMilli(),
+            // No se permite seleccionar fechas de renovación en el pasado.
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean =
+                    utcTimeMillis >= todayUtcMillis
+
+                override fun isSelectableYear(year: Int): Boolean =
+                    year >= today.year
+            },
         )
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },

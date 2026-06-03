@@ -36,4 +36,8 @@ class SubscriptionRepositoryImpl @Inject constructor(
     override suspend fun togglePause(id: String) {
         dao.togglePause(id, System.currentTimeMillis())
     }
+
+    override suspend fun updateRenewalDate(id: String, newDate: String, now: Long) {
+        dao.updateRenewalDate(id, newDate, now)
+    }
 }

@@ -10,6 +10,7 @@ data class Subscription(
     val currencyCode: String,
     val billingCycle: BillingCycle,
     val nextRenewalDate: LocalDate,
+    val billingAnchorDay: Int,
     val categoryId: String,
     val isPaused: Boolean,
     val notifyDaysBefore: Int?,

@@ -25,6 +25,7 @@ data class SubscriptionEntity(
     val currencyCode: String,
     val billingCycle: String,
     val nextRenewalDate: String,
+    val billingAnchorDay: Int,
     val categoryId: String,
     val isPaused: Boolean,
     val notifyDaysBefore: Int?,

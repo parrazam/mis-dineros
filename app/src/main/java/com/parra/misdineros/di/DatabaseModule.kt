@@ -23,6 +23,7 @@ object DatabaseModule {
             "mis_dineros.db",
         )
             .addCallback(MisDinerosDatabase.seedCallback)
+            .addMigrations(MisDinerosDatabase.MIGRATION_1_2)
             .build()
     }
 
