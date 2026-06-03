@@ -12,6 +12,7 @@ Gestor de suscripciones personal para Android. Sin servidores, sin telemetría, 
 
 - **Suscripciones** — nombre, importe, moneda, ciclo mensual/anual, categoría, notas e icono personalizado
 - **Dashboard** — gasto mensual real, equivalente anual, próximas renovaciones (7 días) y top 5 más caras
+- **Renovaciones automáticas** — al vencer una fecha de renovación, la suscripción avanza sola al siguiente ciclo (reanclando el día de facturación original), de modo que nunca queda anclada en el pasado ni deja de notificarse
 - **Estadísticas** — donut por categoría, barras mensual/anual y ranking
 - **Divisas** — conversión automática a moneda global con tasas de cambio editables y bundled
 - **Notificaciones locales** — aviso configurable N días antes por suscripción + resumen mensual
@@ -110,6 +111,8 @@ Hay dos workflows de GitHub Actions:
 
 - **`android.yml`** — corre en cada push/PR a `master`: tests JVM, lint y `assembleDebug`. Sube APK de debug, resultados de tests e informe de lint como artifacts (7 días).
 - **`release.yml`** — se dispara con tags `v*`. Construye el APK y AAB firmados, verifica la firma con `apksigner` y publica una GitHub Release con ambos artefactos.
+
+Dependabot (`.github/dependabot.yml`) mantiene actualizadas las dependencias de Gradle (agrupando minor/patch en un solo PR) y las acciones de los workflows, con revisión semanal.
 
 Buenas prácticas aplicadas:
 - Todas las acciones están pinneadas a SHA (no a tags movibles).
