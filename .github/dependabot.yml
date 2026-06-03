@@ -5,7 +5,36 @@
 
 version: 2
 updates:
-  - package-ecosystem: "gradle" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  # Dependencias Gradle (build.gradle.kts + gradle/libs.versions.toml en la raíz)
+  - package-ecosystem: "gradle"
+    directory: "/"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "deps"
+    groups:
+      # Agrupa actualizaciones menores y de parche en un solo PR para reducir ruido.
+      gradle-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Acciones usadas en los workflows de .github/workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+    groups:
+      github-actions:
+        update-types:
+          - "minor"
+          - "patch"
