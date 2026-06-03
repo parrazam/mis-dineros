@@ -47,6 +47,7 @@ data class SubscriptionEditUiState(
     val currencyCode: String = "EUR",
     val billingCycle: BillingCycle = BillingCycle.MONTHLY,
     val nextRenewalDate: LocalDate = LocalDate.now().plusMonths(1),
+    val dateError: String? = null,
     val categoryId: String = "builtin_otros",
     val categories: List<Category> = emptyList(),
     val notifyDaysBefore: Int? = null,
@@ -137,7 +138,7 @@ class SubscriptionEditViewModel @Inject constructor(
     fun onAmountChange(value: String) = _uiState.update { it.copy(amountText = value, amountError = null) }
     fun onCurrencyChange(value: String) = _uiState.update { it.copy(currencyCode = value) }
     fun onBillingCycleChange(value: BillingCycle) = _uiState.update { it.copy(billingCycle = value) }
-    fun onRenewalDateChange(value: LocalDate) = _uiState.update { it.copy(nextRenewalDate = value) }
+    fun onRenewalDateChange(value: LocalDate) = _uiState.update { it.copy(nextRenewalDate = value, dateError = null) }
     fun onCategoryChange(value: String) = _uiState.update { it.copy(categoryId = value) }
     fun onNotifyDaysChange(value: Int?) = _uiState.update { it.copy(notifyDaysBefore = value) }
     fun onNotesChange(value: String) = _uiState.update { it.copy(notes = value) }
@@ -167,6 +168,11 @@ class SubscriptionEditViewModel @Inject constructor(
         val amountMinor = parseAmountMinor(state.amountText, state.currencyCode)
         if (amountMinor == null || amountMinor <= 0) {
             _uiState.update { it.copy(amountError = "Introduce un importe válido") }
+            hasError = true
+        }
+
+        if (state.nextRenewalDate.isBefore(LocalDate.now())) {
+            _uiState.update { it.copy(dateError = "La fecha de renovación no puede estar en el pasado") }
             hasError = true
         }
 
