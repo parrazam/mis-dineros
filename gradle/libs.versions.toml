@@ -27,7 +27,7 @@ workManager = "2.11.2"
 hiltWork = "1.2.0"
 
 # Gráficos
-vico = "2.0.0"
+vico = "3.2.1"
 
 # Tests
 junit = "4.13.2"
