@@ -73,6 +73,7 @@ class SettingsViewModel @Inject constructor(
 
     fun setCurrency(code: String) = update { it.copy(globalCurrencyCode = code) }
     fun setTheme(theme: AppTheme) = update { it.copy(appTheme = theme) }
+    fun setDynamicColorEnabled(enabled: Boolean) = update { it.copy(dynamicColorEnabled = enabled) }
 
     fun setNotifsEnabled(enabled: Boolean) {
         update { it.copy(notificationsEnabled = enabled) }

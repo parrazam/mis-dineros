@@ -81,6 +81,8 @@
     <string name="settings_theme_system">Sistema</string>
     <string name="settings_theme_light">Claro</string>
     <string name="settings_theme_dark">Oscuro</string>
+    <string name="settings_dynamic_color">Colores dinámicos</string>
+    <string name="settings_dynamic_color_support">Usa la paleta de tu fondo de pantalla (Material You)</string>
 
     <!-- Copia de seguridad -->
     <string name="backup_import_confirm_title">Importar copia de seguridad</string>
