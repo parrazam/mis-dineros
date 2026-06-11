@@ -20,7 +20,7 @@ Gestor de suscripciones personal para Android. Sin servidores, sin telemetría, 
 - **Notificaciones locales** — aviso configurable N días antes por suscripción + resumen mensual
 - **Exportación e importación** — copia de seguridad con iconos embebidos, cifrado AES-256-GCM opcional y share sheet nativo (LocalSend, Telegram, Drive…)
 - **Copia de seguridad automática** — Android Auto Backup a cuenta Google, activable/desactivable desde Ajustes
-- **Temas** — claro / oscuro / sistema, seed color Blue Snorkel `#0077B6`
+- **Temas** — claro / oscuro / sistema, seed color Blue Snorkel `#0077B6`, y colores dinámicos opcionales (Material You, Android 12+)
 - **Categorías** — 9 predefinidas + creación libre
 
 ## Requisitos

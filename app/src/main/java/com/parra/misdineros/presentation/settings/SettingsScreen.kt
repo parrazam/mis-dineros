@@ -2,6 +2,7 @@ package com.parra.misdineros.presentation.settings
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -304,6 +306,15 @@ fun SettingsScreen(
                 current = settings.appTheme,
                 onSelect = viewModel::setTheme,
             )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                SwitchSettingsItem(
+                    title = stringResource(R.string.settings_dynamic_color),
+                    supportingText = stringResource(R.string.settings_dynamic_color_support),
+                    checked = settings.dynamicColorEnabled,
+                    onCheckedChange = viewModel::setDynamicColorEnabled,
+                    leadingIcon = Icons.Default.Palette,
+                )
+            }
             HorizontalDivider()
 
             // ── Notificaciones ────────────────────────────────────────────────────

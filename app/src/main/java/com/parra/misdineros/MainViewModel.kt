@@ -10,9 +10,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
+data class ThemeConfig(
+    val appTheme: AppTheme = AppTheme.SYSTEM,
+    val dynamicColor: Boolean = false,
+)
+
 @HiltViewModel
 class MainViewModel @Inject constructor(settingsRepository: SettingsRepository) : ViewModel() {
-    val appTheme = settingsRepository.observe()
-        .map { it.appTheme }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, AppTheme.SYSTEM)
+    val themeConfig = settingsRepository.observe()
+        .map { ThemeConfig(appTheme = it.appTheme, dynamicColor = it.dynamicColorEnabled) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, ThemeConfig())
 }

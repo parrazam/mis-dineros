@@ -56,7 +56,7 @@ di/             — Hilt modules (DatabaseModule, RepositoryModule, WorkerModule
 
 **Hilt + WorkManager.** `MisDinerosApplication` implements `Configuration.Provider` and injects `HiltWorkerFactory` to wire Hilt into WorkManager. Do not call `WorkManager.initialize()` elsewhere.
 
-**Theme.** `MisDinerosTheme` accepts an `AppTheme` enum (SYSTEM/LIGHT/DARK) and an optional `dynamicColor` flag (Android 12+). Seed color `#0077B6` (Blue Snorkel). Light/dark palettes are in `Color.kt` as `md_theme_light_*` / `md_theme_dark_*` constants.
+**Theme.** `MisDinerosTheme` accepts an `AppTheme` enum (SYSTEM/LIGHT/DARK) and an optional `dynamicColor` flag (Android 12+). The flag is driven by the `dynamicColorEnabled` setting (`AppSettings`, default `false`), toggleable from Settings → Apariencia (the switch is hidden below Android 12); `MainViewModel` exposes both as a `ThemeConfig` flow. Seed color `#0077B6` (Blue Snorkel). Light/dark palettes are in `Color.kt` as `md_theme_light_*` / `md_theme_dark_*` constants.
 
 **Navigation.** Single-activity, Compose NavHost. All routes are defined in `Destination` sealed class (`presentation/navigation/Destinations.kt`). `SubscriptionEdit` and `SubscriptionDetail` take an optional/required `id` string argument.
 

@@ -52,8 +52,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val appTheme by mainViewModel.appTheme.collectAsStateWithLifecycle()
-            MisDinerosTheme(appTheme = appTheme) {
+            val themeConfig by mainViewModel.themeConfig.collectAsStateWithLifecycle()
+            MisDinerosTheme(appTheme = themeConfig.appTheme, dynamicColor = themeConfig.dynamicColor) {
                 val navController = rememberNavController().also { this@MainActivity.navController = it }
                 val currentEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = currentEntry?.destination

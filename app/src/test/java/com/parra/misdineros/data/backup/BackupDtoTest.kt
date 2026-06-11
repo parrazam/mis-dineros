@@ -103,10 +103,23 @@ class BackupDtoTest {
     fun `appSettings round-trip con configuracion personalizada`() {
         val s = AppSettings(
             globalCurrencyCode = "USD", notificationsEnabled = false,
-            notificationHour = 22, defaultNotifyDaysBefore = 7,
+            notificationHour = 22, notificationMinute = 30, defaultNotifyDaysBefore = 7,
             monthlySummaryEnabled = false, appTheme = AppTheme.DARK,
+            dynamicColorEnabled = true,
         )
         assertEquals(s, s.toDto().toDomain())
+    }
+
+    @Test
+    fun `settingsDto sin campos nuevos aplica defaults al deserializar backup antiguo`() {
+        val jsonAntiguo = """
+            {"globalCurrencyCode":"EUR","notificationsEnabled":true,
+             "notificationHour":9,"defaultNotifyDaysBefore":3,
+             "monthlySummaryEnabled":true,"appTheme":"SYSTEM"}
+        """.trimIndent()
+        val dto = Json.decodeFromString<SettingsDto>(jsonAntiguo)
+        assertEquals(0, dto.notificationMinute)
+        assertEquals(false, dto.dynamicColorEnabled)
     }
 
     // ─── BackupJson serialización ─────────────────────────────────────────────

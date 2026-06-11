@@ -33,6 +33,7 @@ class SettingsDataStore @Inject constructor(
         val NOTIFY_DAYS = intPreferencesKey("notify_days")
         val SUMMARY_ENABLED = booleanPreferencesKey("summary_enabled")
         val THEME = stringPreferencesKey("app_theme")
+        val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color_enabled")
         val AUTO_BACKUP = booleanPreferencesKey("auto_backup_enabled")
     }
 
@@ -51,6 +52,7 @@ class SettingsDataStore @Inject constructor(
             monthlySummaryEnabled = prefs[Keys.SUMMARY_ENABLED] ?: true,
             appTheme = prefs[Keys.THEME]?.let { runCatching { AppTheme.valueOf(it) }.getOrNull() }
                 ?: AppTheme.SYSTEM,
+            dynamicColorEnabled = prefs[Keys.DYNAMIC_COLOR] ?: false,
             autoBackupEnabled = prefs[Keys.AUTO_BACKUP] ?: true,
         )
     }
@@ -64,6 +66,7 @@ class SettingsDataStore @Inject constructor(
             prefs[Keys.NOTIFY_DAYS] = settings.defaultNotifyDaysBefore
             prefs[Keys.SUMMARY_ENABLED] = settings.monthlySummaryEnabled
             prefs[Keys.THEME] = settings.appTheme.name
+            prefs[Keys.DYNAMIC_COLOR] = settings.dynamicColorEnabled
             prefs[Keys.AUTO_BACKUP] = settings.autoBackupEnabled
         }
         // Mirror síncrono para que BackupAgent lo lea sin corrutinas.

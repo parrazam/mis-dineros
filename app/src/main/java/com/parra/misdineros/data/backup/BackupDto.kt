@@ -60,9 +60,12 @@ data class SettingsDto(
     val globalCurrencyCode: String,
     val notificationsEnabled: Boolean,
     val notificationHour: Int,
+    // Con default para importar backups anteriores que no incluían estos campos.
+    val notificationMinute: Int = 0,
     val defaultNotifyDaysBefore: Int,
     val monthlySummaryEnabled: Boolean,
     val appTheme: String,
+    val dynamicColorEnabled: Boolean = false,
 )
 
 // ─── Domain → DTO ─────────────────────────────────────────────────────────────
@@ -98,9 +101,11 @@ fun AppSettings.toDto() = SettingsDto(
     globalCurrencyCode = globalCurrencyCode,
     notificationsEnabled = notificationsEnabled,
     notificationHour = notificationHour,
+    notificationMinute = notificationMinute,
     defaultNotifyDaysBefore = defaultNotifyDaysBefore,
     monthlySummaryEnabled = monthlySummaryEnabled,
     appTheme = appTheme.name,
+    dynamicColorEnabled = dynamicColorEnabled,
 )
 
 // ─── DTO → Domain ─────────────────────────────────────────────────────────────
@@ -137,7 +142,9 @@ fun SettingsDto.toDomain() = AppSettings(
     globalCurrencyCode = globalCurrencyCode,
     notificationsEnabled = notificationsEnabled,
     notificationHour = notificationHour,
+    notificationMinute = notificationMinute,
     defaultNotifyDaysBefore = defaultNotifyDaysBefore,
     monthlySummaryEnabled = monthlySummaryEnabled,
     appTheme = AppTheme.valueOf(appTheme),
+    dynamicColorEnabled = dynamicColorEnabled,
 )
