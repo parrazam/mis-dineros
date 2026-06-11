@@ -54,6 +54,7 @@ app/src/main/java/com/parra/misdineros/
 ├── core/           utilidades sin dependencias Android (MoneyFormatter, DateUtils, AppError)
 ├── domain/         modelos, interfaces de repositorio, use cases (Kotlin puro)
 ├── data/           Room, DataStore, mappers, backup, seeding
+├── backup/         MisDinerosBackupAgent (Auto Backup)
 ├── notifications/  WorkManager workers y scheduler
 ├── presentation/   Screens + ViewModels por pantalla
 ├── designsystem/   MisDinerosTheme, paleta, componentes reutilizables
@@ -109,7 +110,7 @@ Con `allowBackup="true"` y `MisDinerosBackupAgent`, el sistema sube automáticam
 
 Hay dos workflows de GitHub Actions:
 
-- **`android.yml`** — corre en cada push/PR a `master`: tests JVM, lint y `assembleDebug`. Sube APK de debug, resultados de tests e informe de lint como artifacts (7 días).
+- **`android.yml`** — corre en cada push a `master`/`develop` y en cada PR a `master`: tests JVM, lint y `assembleDebug`. Sube APK de debug, resultados de tests e informe de lint como artifacts (7 días).
 - **`release.yml`** — se dispara con tags `v*`. Construye el APK y AAB firmados, verifica la firma con `apksigner` y publica una GitHub Release con ambos artefactos.
 
 Dependabot (`.github/dependabot.yml`) mantiene actualizadas las dependencias de Gradle (agrupando minor/patch en un solo PR) y las acciones de los workflows, con revisión semanal.
