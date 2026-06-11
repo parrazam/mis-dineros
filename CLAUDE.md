@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Build & test commands
 
-The project requires Android SDK (not present in this dev machine). Use Android Studio to build locally, or rely on GitHub Actions CI for automated builds. On machines with the SDK available:
+The Android SDK is at `~/Android/Sdk` (not in `PATH`; `ANDROID_HOME` unset). Prefix Gradle invocations with `ANDROID_HOME=$HOME/Android/Sdk`, and use `~/Android/Sdk/platform-tools/adb` and `~/Android/Sdk/emulator/emulator` directly. The machine has KVM and headless emulators work (`-no-window -gpu swiftshader_indirect`); AVDs `Pixel_9a`, `Phone_Screenshots` (1080x2160) and `Tablet_MisDineros` (2560x1600) exist under `~/.android/avd/`. There is no `cmdline-tools` (no `avdmanager`/`sdkmanager`) — create AVDs by cloning an existing `.avd` dir and editing `config.ini`.
 
 ```bash
 # Unit tests (JVM, no device needed)

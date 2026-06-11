@@ -1,6 +1,6 @@
-# Mis Dineros
-
-<img src="docs/icon.png" alt="Icono de Mis Dineros" width="128" align="right">
+<p align="center">
+  <img src="art/feature-graphic.png" alt="Mis Dineros — Tus suscripciones, bajo control" width="640">
+</p>
 
 [![Android CI](https://github.com/parrazam/mis-dineros/actions/workflows/android.yml/badge.svg)](https://github.com/parrazam/mis-dineros/actions/workflows/android.yml)
 [![Release](https://img.shields.io/github/v/release/parrazam/mis-dineros)](https://github.com/parrazam/mis-dineros/releases/latest)
