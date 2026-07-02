@@ -19,6 +19,7 @@ import com.parra.misdineros.domain.repository.SubscriptionRepository
 import com.parra.misdineros.domain.usecase.AdvanceDueRenewalsUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -31,30 +32,53 @@ class RenewalReminderWorker @AssistedInject constructor(
     private val subscriptionRepository: SubscriptionRepository,
     private val settingsRepository: SettingsRepository,
     private val advanceDueRenewals: AdvanceDueRenewalsUseCase,
+    private val scheduler: NotificationScheduler,
 ) : CoroutineWorker(appContext, workerParams) {
 
     @SuppressLint("MissingPermission")
     override suspend fun doWork(): Result {
-        // Avanza primero las renovaciones vencidas para evaluar las notificaciones con fechas frescas.
-        advanceDueRenewals()
-
-        val settings = settingsRepository.observe().first()
+        val settings = try {
+            // Avanza primero las renovaciones vencidas para evaluar las notificaciones con fechas frescas.
+            advanceDueRenewals()
+            settingsRepository.observe().first()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // Sin settings no se puede re-anclar la cadena; reintenta este mismo trabajo con backoff
+            // en vez de fallar (un fallo terminal dejaría de notificar hasta el próximo arranque).
+            return Result.retry()
+        }
         if (!settings.notificationsEnabled) return Result.success()
 
-        val today = LocalDate.now()
-        subscriptionRepository.observeAll().first()
-            .filter { !it.isPaused }
-            .forEach { sub ->
-                val notifyDays = (sub.notifyDaysBefore ?: settings.defaultNotifyDaysBefore).toLong()
-                val targetDate = sub.nextRenewalDate.minusDays(notifyDays)
-                // Margen de ±1 día para absorber retrasos de WorkManager/Doze
-                val daysDiff = java.time.temporal.ChronoUnit.DAYS.between(targetDate, today)
-                if (daysDiff in 0..1 && !sub.nextRenewalDate.isBefore(today)) {
-                    sendNotification(sub)
+        try {
+            val today = LocalDate.now()
+            subscriptionRepository.observeAll().first()
+                .filter { !it.isPaused }
+                .forEach { sub ->
+                    val notifyDays = (sub.notifyDaysBefore ?: settings.defaultNotifyDaysBefore).toLong()
+                    val targetDate = sub.nextRenewalDate.minusDays(notifyDays)
+                    // Margen de ±1 día para absorber retrasos de WorkManager/Doze
+                    val daysDiff = java.time.temporal.ChronoUnit.DAYS.between(targetDate, today)
+                    if (daysDiff in 0..1 && !sub.nextRenewalDate.isBefore(today)) {
+                        sendNotification(sub)
+                    }
                 }
+            return Result.success()
+        } finally {
+            // Re-encola la siguiente ejecución diaria como última instrucción: el REPLACE puede
+            // cancelar esta instancia aún RUNNING, inocuo porque ya no queda trabajo pendiente.
+            // Si nos han parado desde fuera (cancel/REPLACE de Ajustes, o el sistema, que ya
+            // re-encola él mismo), no re-programar: pisaríamos la programación nueva con la vieja.
+            // No aplica al lanzamiento puntual del botón de prueba, que no debe tocar la cadena.
+            if (!isStopped && !inputData.getBoolean(KEY_ONE_SHOT, false)) {
+                scheduler.scheduleRenewal(settings.notificationHour, settings.notificationMinute)
             }
+        }
+    }
 
-        return Result.success()
+    companion object {
+        /** Marca un lanzamiento manual (botón de prueba) que no debe re-anclar la cadena diaria. */
+        const val KEY_ONE_SHOT = "one_shot"
     }
 
     @SuppressLint("MissingPermission")
