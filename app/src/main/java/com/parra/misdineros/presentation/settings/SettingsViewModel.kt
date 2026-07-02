@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.parra.misdineros.data.backup.PasswordRequiredException
 import com.parra.misdineros.data.backup.WrongPasswordException
 import com.parra.misdineros.designsystem.theme.AppTheme
@@ -158,7 +159,9 @@ class SettingsViewModel @Inject constructor(
 
     fun testNotificationNow() {
         WorkManager.getInstance(context).enqueue(
-            OneTimeWorkRequestBuilder<RenewalReminderWorker>().build()
+            OneTimeWorkRequestBuilder<RenewalReminderWorker>()
+                .setInputData(workDataOf(RenewalReminderWorker.KEY_ONE_SHOT to true))
+                .build()
         )
     }
 }
