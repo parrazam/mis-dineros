@@ -39,7 +39,7 @@ android {
     defaultConfig {
         applicationId = "com.parra.misdineros"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = gitVersionCode
         versionName = gitVersionName
 
