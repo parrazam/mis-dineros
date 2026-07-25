@@ -119,8 +119,12 @@ private fun PorCategoriaTab(state: StatsUiState) {
     var selectedCategoryId by remember { mutableStateOf<String?>(null) }
     // containerSize da el tamaño real del contenedor en píxeles, sin el redondeo ni la
     // dependencia del targetSdk que tiene Configuration.screenWidthDp con los insets.
-    val containerWidthPx = LocalWindowInfo.current.containerSize.width
-    val isWideScreen = with(LocalDensity.current) { containerWidthPx.toDp() } >= 600.dp
+    // Además del ancho mínimo se exige que la ventana sea apaisada: el donut del layout
+    // de dos columnas se dimensiona con fillMaxHeight().aspectRatio(1f), así que en una
+    // ventana más alta que ancha se comería todo el ancho y dejaría la leyenda en 0 px.
+    val containerSize = LocalWindowInfo.current.containerSize
+    val isWideScreen = with(LocalDensity.current) { containerSize.width.toDp() >= 600.dp } &&
+        containerSize.width >= containerSize.height
 
     val onCategoryClick: (String) -> Unit = { categoryId ->
         selectedCategoryId = if (selectedCategoryId == categoryId) null else categoryId
