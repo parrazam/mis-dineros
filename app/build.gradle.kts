@@ -135,9 +135,8 @@ dependencies {
     implementation(libs.hilt.work)
     ksp(libs.hilt.compiler)
 
-    // Room
+    // Room (room-ktx quedó fusionado en room-runtime desde 2.7.0)
     implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
     // DataStore
