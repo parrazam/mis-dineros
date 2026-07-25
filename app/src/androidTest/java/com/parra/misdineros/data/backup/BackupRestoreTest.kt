@@ -53,14 +53,14 @@ class BackupRestoreTest {
     // ─── Bug regression: FK ordering ──────────────────────────────────────────
 
     @Test
-    fun `restore inserta categorias antes que suscripciones, sin FK violation`() = runTest {
+    fun restoreInsertaCategoriasAntesQueSuscripcionesSinFkViolation() = runTest {
         val snapshot = BackupSnapshot(
             subscriptions = listOf(
                 Subscription(
                     id = "sub1", name = "Netflix", iconRef = "bundled:netflix",
                     amountMinor = 1299L, currencyCode = "EUR",
                     billingCycle = BillingCycle.MONTHLY,
-                    nextRenewalDate = LocalDate.of(2026, 5, 27),
+                    nextRenewalDate = LocalDate.of(2026, 5, 27), billingAnchorDay = 27,
                     categoryId = "cat1", isPaused = false,
                     notifyDaysBefore = null, notes = null, createdAt = 0L, updatedAt = 0L,
                 )
@@ -80,7 +80,7 @@ class BackupRestoreTest {
     // ─── Round-trip ───────────────────────────────────────────────────────────
 
     @Test
-    fun `snapshot y restore round-trip preserva suscripciones y categorias`() = runTest {
+    fun snapshotYRestoreRoundTripPreservaSuscripcionesYCategorias() = runTest {
         db.categoryDao().upsert(
             CategoryEntity("cat1", "Streaming", "play_circle", 0xFFE53935.toInt(), false, 1)
         )
@@ -88,7 +88,7 @@ class BackupRestoreTest {
             SubscriptionEntity(
                 id = "sub1", name = "Netflix", iconRef = "bundled:netflix",
                 amountMinor = 1299L, currencyCode = "EUR", billingCycle = "MONTHLY",
-                nextRenewalDate = "2026-05-27", categoryId = "cat1",
+                nextRenewalDate = "2026-05-27", billingAnchorDay = 27, categoryId = "cat1",
                 isPaused = false, notifyDaysBefore = 3, notes = "nota",
                 createdAt = 0L, updatedAt = 0L,
             )
@@ -111,7 +111,7 @@ class BackupRestoreTest {
     }
 
     @Test
-    fun `snapshot y restore round-trip preserva tasas de cambio`() = runTest {
+    fun snapshotYRestoreRoundTripPreservaTasasDeCambio() = runTest {
         db.fxRateDao().upsertAll(
             listOf(
                 FxRateEntity("EUR", "USD", 1.08, 0L),
@@ -131,7 +131,7 @@ class BackupRestoreTest {
     // ─── Sobreescritura ───────────────────────────────────────────────────────
 
     @Test
-    fun `restore sobreescribe datos existentes completamente`() = runTest {
+    fun restoreSobreescribeDatosExistentesCompletamente() = runTest {
         db.categoryDao().upsert(
             CategoryEntity("old_cat", "Old", "settings", 0xFF000000.toInt(), false, 1)
         )
@@ -152,7 +152,7 @@ class BackupRestoreTest {
     }
 
     @Test
-    fun `restore con snapshot vacio deja todas las tablas vacias`() = runTest {
+    fun restoreConSnapshotVacioDejaTodasLasTablasVacias() = runTest {
         db.categoryDao().upsert(
             CategoryEntity("cat1", "X", "home", 0xFF000000.toInt(), false, 1)
         )
@@ -169,14 +169,14 @@ class BackupRestoreTest {
     // ─── Multiples suscripciones y categorias ─────────────────────────────────
 
     @Test
-    fun `restore multiples suscripciones referenciando distintas categorias`() = runTest {
+    fun restoreMultiplesSuscripcionesReferenciandoDistintasCategorias() = runTest {
         val snapshot = BackupSnapshot(
             subscriptions = listOf(
                 Subscription(
                     id = "s1", name = "Netflix", iconRef = "initial",
                     amountMinor = 1299L, currencyCode = "EUR",
                     billingCycle = BillingCycle.MONTHLY,
-                    nextRenewalDate = LocalDate.of(2026, 6, 1),
+                    nextRenewalDate = LocalDate.of(2026, 6, 1), billingAnchorDay = 1,
                     categoryId = "cat_stream", isPaused = false,
                     notifyDaysBefore = null, notes = null, createdAt = 0L, updatedAt = 0L,
                 ),
@@ -184,7 +184,7 @@ class BackupRestoreTest {
                     id = "s2", name = "Spotify", iconRef = "initial",
                     amountMinor = 999L, currencyCode = "EUR",
                     billingCycle = BillingCycle.MONTHLY,
-                    nextRenewalDate = LocalDate.of(2026, 6, 15),
+                    nextRenewalDate = LocalDate.of(2026, 6, 15), billingAnchorDay = 15,
                     categoryId = "cat_music", isPaused = true,
                     notifyDaysBefore = 1, notes = null, createdAt = 0L, updatedAt = 0L,
                 ),
