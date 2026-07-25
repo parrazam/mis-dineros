@@ -1,6 +1,7 @@
 package com.parra.misdineros.presentation.settings
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -140,7 +141,7 @@ fun CategoryEditorScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    val imageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+    val imageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             scope.launch {
                 val path = withContext(Dispatchers.IO) {
@@ -168,7 +169,9 @@ fun CategoryEditorScreen(
             onNameChange = { dialog = dialog.copy(name = it) },
             onIconChange = { dialog = dialog.copy(iconKey = it) },
             onColorChange = { dialog = dialog.copy(colorArgb = it) },
-            onPickImage = { imageLauncher.launch("image/*") },
+            onPickImage = {
+                imageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            },
             onConfirm = {
                 val cat = dialog.editing?.copy(
                     name = dialog.name.trim(),

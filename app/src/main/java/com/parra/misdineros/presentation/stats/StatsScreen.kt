@@ -45,7 +45,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -116,7 +117,10 @@ private fun PorCategoriaTab(state: StatsUiState) {
     }
 
     var selectedCategoryId by remember { mutableStateOf<String?>(null) }
-    val isWideScreen = LocalConfiguration.current.screenWidthDp >= 600
+    // containerSize da el tamaño real del contenedor en píxeles, sin el redondeo ni la
+    // dependencia del targetSdk que tiene Configuration.screenWidthDp con los insets.
+    val containerWidthPx = LocalWindowInfo.current.containerSize.width
+    val isWideScreen = with(LocalDensity.current) { containerWidthPx.toDp() } >= 600.dp
 
     val onCategoryClick: (String) -> Unit = { categoryId ->
         selectedCategoryId = if (selectedCategoryId == categoryId) null else categoryId

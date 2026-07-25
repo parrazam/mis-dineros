@@ -1,6 +1,7 @@
 package com.parra.misdineros.presentation.subscriptions.edit
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.relocation.BringIntoViewRequester
@@ -95,7 +96,7 @@ fun SubscriptionEditScreen(
     val iconSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
+        contract = ActivityResultContracts.PickVisualMedia(),
     ) { uri -> uri?.let { viewModel.onImagePicked(it) } }
 
     Scaffold(
@@ -353,7 +354,11 @@ fun SubscriptionEditScreen(
                 scope.launch { iconSheetState.hide() }.invokeOnCompletion { showIconPicker = false }
             },
             onIconSelected = { viewModel.onIconRefChange(it) },
-            onPickFromGallery = { imagePickerLauncher.launch("image/*") },
+            onPickFromGallery = {
+                imagePickerLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                )
+            },
         )
     }
 

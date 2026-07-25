@@ -3,6 +3,7 @@ package com.parra.misdineros
 import android.Manifest
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -25,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -50,6 +52,7 @@ class MainActivity : ComponentActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
         enableEdgeToEdge()
+        requestNotificationPermissionIfNeeded()
 
         setContent {
             val themeConfig by mainViewModel.themeConfig.collectAsStateWithLifecycle()
@@ -136,9 +139,16 @@ class MainActivity : ComponentActivity() {
         navController?.handleDeepLink(intent)
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    /**
+     * Se pide una sola vez por creación de la activity y solo si falta el permiso. Lanzarlo en
+     * cada onResume gastaba el cupo de diálogos del sistema, que tras un par de descartes deja
+     * de mostrarlos y deniega en silencio.
+     */
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        if (!granted) {
             notifPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
