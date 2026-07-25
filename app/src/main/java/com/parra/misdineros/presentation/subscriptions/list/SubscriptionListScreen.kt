@@ -138,7 +138,9 @@ fun SubscriptionListScreen(
                         LazyColumn(
                             state = listState,
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                            // El FAB flota sobre la lista y el innerPadding del Scaffold no
+                            // reserva su espacio: 56.dp de FAB + 16.dp de margen + holgura.
+                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 88.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             items(state.items, key = { it.subscription.id }) { item ->

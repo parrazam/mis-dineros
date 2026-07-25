@@ -71,7 +71,10 @@ fun IconPickerBottomSheet(
 
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 72.dp),
-                contentPadding = PaddingValues(bottom = 32.dp),
+                // ModalBottomSheet ya aplica safeDrawing (Top+Bottom) a su contenido
+                // (BottomSheetDefaults.windowInsets), así que aquí solo hace falta
+                // el respiro visual al final del grid, no el alto de la barra.
+                contentPadding = PaddingValues(bottom = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {

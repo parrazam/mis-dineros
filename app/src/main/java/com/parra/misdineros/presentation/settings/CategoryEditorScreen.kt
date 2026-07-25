@@ -9,6 +9,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -216,7 +217,11 @@ fun CategoryEditorScreen(
             }
         },
     ) { innerPadding ->
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            // El FAB flota sobre la lista y el innerPadding del Scaffold no reserva su espacio.
+            contentPadding = PaddingValues(bottom = 88.dp),
+        ) {
             items(categories, key = { it.id }) { category ->
                 CategoryRow(
                     category = category,
