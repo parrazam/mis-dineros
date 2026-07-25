@@ -25,7 +25,9 @@ The Android SDK is at `~/Android/Sdk` (not in `PATH`; `ANDROID_HOME` unset). Pre
 
 Gradle wrapper requires JDK 21. The CI uses `actions/setup-java@v5` with `temurin` JDK 21.
 
-Room schema files are exported to `app/schemas/` (tracked in git). When changing any `@Entity` or `@Database` version, bump `version` in `@Database` and add a migration or `fallbackToDestructiveMigration`.
+Room schema files are exported to `app/schemas/` (tracked in git). When changing any `@Entity` or `@Database` version, bump `version` in `@Database` and add a migration or `fallbackToDestructiveMigration`. When bumping the Room dependency itself, diff `app/schemas/` afterwards: if the exported JSON is byte-identical the `identityHash` is unchanged and existing installs open their database untouched.
+
+Instrumented test names must be plain identifiers, **not** backticked names with spaces. D8 rejects those below DEX 040 (`Space characters in SimpleName are not allowed`), which needs minSdk 35. Backticks are fine in `src/test/` (JVM) but break `connectedAndroidTest`. The CI runs only `test`/`lint`/`assembleDebug`, so instrumented breakage is not caught automatically — run `connectedAndroidTest` locally after touching `androidTest/` or any model it constructs.
 
 ## Architecture
 
@@ -61,6 +63,12 @@ di/             — Hilt modules (DatabaseModule, RepositoryModule, WorkerModule
 **Theme.** `MisDinerosTheme` accepts an `AppTheme` enum (SYSTEM/LIGHT/DARK) and an optional `dynamicColor` flag (Android 12+). The flag is driven by the `dynamicColorEnabled` setting (`AppSettings`, default `false`), toggleable from Settings → Apariencia (the switch is hidden below Android 12); `MainViewModel` exposes both as a `ThemeConfig` flow. Seed color `#0077B6` (Blue Snorkel). Light/dark palettes are in `Color.kt` as `md_theme_light_*` / `md_theme_dark_*` constants.
 
 **Navigation.** Single-activity, Compose NavHost. All routes are defined in `Destination` sealed class (`presentation/navigation/Destinations.kt`). `SubscriptionEdit` and `SubscriptionDetail` take an optional/required `id` string argument.
+
+**targetSdk 36 (Android 16).** Required by Play for updates from 2026-08-31. The two hard behaviour changes were already satisfied: edge-to-edge is enforced (the app calls `enableEdgeToEdge()` and drives bar appearance through `WindowInsetsControllerCompat` in `MisDinerosTheme`, never `setStatusBarColor`), and orientation/resizeability restrictions are ignored on displays ≥ 600 dp — the portrait lock in `MainActivity` is already gated by `R.bool.lock_portrait_orientation`, which is `false` in `values-sw600dp/`. `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY` (the opt-out available until API 37) is deliberately not declared. `android:enableOnBackInvokedCallback="true"` is declared explicitly: it is the default at target 36 but this equalises behaviour on API 33–35, and it is safe because nothing in the app intercepts back (no `BackHandler`, no `onBackPressed()`).
+
+**Layout must not assume portrait on large screens.** Since the system now ignores orientation restrictions above 600 dp, two-column layouts need to check the aspect ratio, not just the width. `StatsScreen` picks its wide layout with `LocalWindowInfo.current.containerSize` requiring **both** ≥ 600 dp wide **and** width ≥ height; with the width check alone, the donut's `fillMaxHeight().aspectRatio(1f)` consumed the full width on a portrait tablet and the legend's `weight(1f)` collapsed to 0 px. Prefer `LocalWindowInfo.containerSize` over `LocalConfiguration.screenWidthDp`, whose inset behaviour depends on the targetSdk (lint: `ConfigurationScreenWidthHeight`).
+
+**16 KB page size.** The app ships no `jniLibs` of its own, but the AAB does contain `libandroidx.graphics.path.so` and `libdatastore_shared_counter.so` from transitive AndroidX dependencies. Both are already 16 KB-aligned (`objdump -p` reports `align 2**14` on every LOAD segment), so Play's requirement is met. Re-check with `unzip -l <aab> | grep '\.so$'` after upgrading Compose or DataStore.
 
 **Backup file format.** Exported files carry a 5-byte header: magic `MDB1` (4 bytes) + flags byte (`0x00` = plain, `0x01` = AES-256-GCM encrypted). Files without this header are treated as legacy plain JSON (full backward compatibility). Encryption key is derived with PBKDF2WithHmacSHA256 (200 000 iterations, 16-byte random salt, 12-byte random IV). `BackupCrypto` (`data/backup/BackupCrypto.kt`) is a pure `object` with no Android dependencies — unit-testable on JVM. The CPU-heavy PBKDF2 call runs on `Dispatchers.Default` inside the use cases.
 
