@@ -1,6 +1,7 @@
 package com.parra.misdineros.presentation.settings
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,6 +10,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -139,7 +141,7 @@ fun CategoryEditorScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    val imageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+    val imageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             scope.launch {
                 val path = withContext(Dispatchers.IO) {
@@ -167,7 +169,9 @@ fun CategoryEditorScreen(
             onNameChange = { dialog = dialog.copy(name = it) },
             onIconChange = { dialog = dialog.copy(iconKey = it) },
             onColorChange = { dialog = dialog.copy(colorArgb = it) },
-            onPickImage = { imageLauncher.launch("image/*") },
+            onPickImage = {
+                imageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            },
             onConfirm = {
                 val cat = dialog.editing?.copy(
                     name = dialog.name.trim(),
@@ -216,7 +220,11 @@ fun CategoryEditorScreen(
             }
         },
     ) { innerPadding ->
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            // El FAB flota sobre la lista y el innerPadding del Scaffold no reserva su espacio.
+            contentPadding = PaddingValues(bottom = 88.dp),
+        ) {
             items(categories, key = { it.id }) { category ->
                 CategoryRow(
                     category = category,

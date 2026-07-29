@@ -39,7 +39,7 @@ android {
     defaultConfig {
         applicationId = "com.parra.misdineros"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = gitVersionCode
         versionName = gitVersionName
 
@@ -135,9 +135,8 @@ dependencies {
     implementation(libs.hilt.work)
     ksp(libs.hilt.compiler)
 
-    // Room
+    // Room (room-ktx quedó fusionado en room-runtime desde 2.7.0)
     implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
     // DataStore
@@ -171,6 +170,7 @@ dependencies {
     androidTestImplementation(libs.room.testing)
     androidTestImplementation(libs.workmanager.testing)
     androidTestImplementation(libs.hilt.android)
+    androidTestImplementation(libs.hilt.android.testing)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     kspAndroidTest(libs.hilt.android.compiler)
 }
