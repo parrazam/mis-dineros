@@ -69,7 +69,10 @@ jobs:
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           name: "Mis Dineros ${{ github.ref_name }}"
-          generate_notes: true
+          # El nombre correcto del input es generate_release_notes; con generate_notes
+          # la action lo ignoraba en silencio (v3 ya avisa) y el cuerpo de la release
+          # era solo el mensaje del tag anotado, que sigue usándose como body.
+          generate_release_notes: true
           files: |
             app/build/outputs/apk/release/mis-dineros-${{ github.ref_name }}.apk
             app/build/outputs/bundle/release/mis-dineros-${{ github.ref_name }}.aab
