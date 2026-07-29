@@ -93,7 +93,10 @@ fun HomeScreen(
                         .fillMaxSize()
                         .padding(innerPadding),
                 ) {
-                    val isWide = maxWidth >= 600.dp
+                    // Además del ancho mínimo se exige que la ventana sea apaisada: en una
+                    // tablet en vertical las dos columnas quedan estrechas y dejan media
+                    // pantalla vacía (mismo criterio que StatsScreen).
+                    val isWide = maxWidth >= 600.dp && maxWidth >= maxHeight
                     if (isWide) {
                         Row(
                             modifier = Modifier
