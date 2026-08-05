@@ -108,7 +108,7 @@ kotlin {
 
 dependencies {
     // Core library desugaring (for java.time on API < 26 if needed, and LocalDate support)
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
     // Core
     implementation(libs.androidx.core.ktx)
