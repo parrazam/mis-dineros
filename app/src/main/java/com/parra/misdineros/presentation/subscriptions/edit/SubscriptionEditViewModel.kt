@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.parra.misdineros.core.money.MoneyFormatter
 import com.parra.misdineros.domain.model.BillingCycle
 import com.parra.misdineros.domain.model.Category
 import com.parra.misdineros.domain.model.Subscription
@@ -48,12 +49,41 @@ data class SubscriptionEditUiState(
     val billingCycle: BillingCycle = BillingCycle.MONTHLY,
     val nextRenewalDate: LocalDate = LocalDate.now().plusMonths(1),
     val dateError: String? = null,
-    val categoryId: String = "builtin_otros",
+    val categoryId: String = Category.FALLBACK_ID,
     val categories: List<Category> = emptyList(),
     val notifyDaysBefore: Int? = null,
     val notes: String = "",
-    val originalCreatedAt: Long = System.currentTimeMillis(),
+    /** Suscripción que se está editando, o `null` si se crea una nueva. */
+    val original: Subscription? = null,
 )
+
+/**
+ * Construye la suscripción a persistir a partir del formulario. Es una función pura para poder
+ * probar sin Android las reglas de conservación al editar:
+ *  - `isPaused` se mantiene (antes `save()` reactivaba en silencio una suscripción pausada).
+ *  - `billingAnchorDay` solo se recalcula si el usuario cambió la fecha; si no, una suscripción
+ *    anclada al 31 que hoy muestra el 28 de febrero se quedaría anclada al 28 para siempre.
+ */
+internal fun SubscriptionEditUiState.toSubscription(newId: String, amountMinor: Long, now: Long): Subscription {
+    val original = original
+    val dateChanged = original == null || nextRenewalDate != original.nextRenewalDate
+    return Subscription(
+        id = original?.id ?: newId,
+        name = name.trim(),
+        iconRef = iconRef,
+        amountMinor = amountMinor,
+        currencyCode = currencyCode,
+        billingCycle = billingCycle,
+        nextRenewalDate = nextRenewalDate,
+        billingAnchorDay = if (dateChanged) nextRenewalDate.dayOfMonth else original.billingAnchorDay,
+        categoryId = categoryId,
+        isPaused = original?.isPaused ?: false,
+        notifyDaysBefore = notifyDaysBefore,
+        notes = notes.takeIf { it.isNotBlank() },
+        createdAt = original?.createdAt ?: now,
+        updatedAt = now,
+    )
+}
 
 sealed interface SubscriptionEditUiEvent {
     data object Saved : SubscriptionEditUiEvent
@@ -88,7 +118,7 @@ class SubscriptionEditViewModel @Inject constructor(
                     state.copy(
                         categories = cats,
                         categoryId = if (state.categoryId.isEmpty() || cats.none { it.id == state.categoryId })
-                            cats.firstOrNull()?.id ?: "builtin_otros"
+                            cats.firstOrNull()?.id ?: Category.FALLBACK_ID
                         else state.categoryId,
                     )
                 }
@@ -124,7 +154,7 @@ class SubscriptionEditViewModel @Inject constructor(
                         categoryId = sub.categoryId,
                         notifyDaysBefore = sub.notifyDaysBefore,
                         notes = sub.notes ?: "",
-                        originalCreatedAt = sub.createdAt,
+                        original = sub,
                     )
                 }
             } else {
@@ -165,7 +195,7 @@ class SubscriptionEditViewModel @Inject constructor(
             hasError = true
         }
 
-        val amountMinor = parseAmountMinor(state.amountText, state.currencyCode)
+        val amountMinor = MoneyFormatter.parseToMinor(state.amountText, state.currencyCode)
         if (amountMinor == null || amountMinor <= 0) {
             _uiState.update { it.copy(amountError = "Introduce un importe válido") }
             hasError = true
@@ -179,33 +209,13 @@ class SubscriptionEditViewModel @Inject constructor(
         if (hasError) return
 
         viewModelScope.launch {
-            val now = System.currentTimeMillis()
-            val subscription = Subscription(
-                id = subscriptionId ?: UUID.randomUUID().toString(),
-                name = state.name.trim(),
-                iconRef = state.iconRef,
+            val subscription = state.toSubscription(
+                newId = subscriptionId ?: UUID.randomUUID().toString(),
                 amountMinor = amountMinor!!,
-                currencyCode = state.currencyCode,
-                billingCycle = state.billingCycle,
-                nextRenewalDate = state.nextRenewalDate,
-                billingAnchorDay = state.nextRenewalDate.dayOfMonth,
-                categoryId = state.categoryId,
-                isPaused = false,
-                notifyDaysBefore = state.notifyDaysBefore,
-                notes = state.notes.takeIf { it.isNotBlank() },
-                createdAt = state.originalCreatedAt,
-                updatedAt = now,
+                now = System.currentTimeMillis(),
             )
             upsertSubscription(subscription)
             _events.send(SubscriptionEditUiEvent.Saved)
         }
     }
-
-    private fun parseAmountMinor(text: String, currencyCode: String): Long? = runCatching {
-        val fractionDigits = java.util.Currency.getInstance(currencyCode).defaultFractionDigits
-        val cleaned = text.replace(",", ".").replace("[^0-9.]".toRegex(), "")
-        val amount = cleaned.toDouble()
-        if (fractionDigits > 0) (amount * Math.pow(10.0, fractionDigits.toDouble())).toLong()
-        else amount.toLong()
-    }.getOrNull()
 }

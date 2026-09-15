@@ -2,6 +2,7 @@ package com.parra.misdineros.data.fx
 
 import android.graphics.Color
 import com.parra.misdineros.data.db.entity.CategoryEntity
+import com.parra.misdineros.domain.model.Category
 
 object BuiltInCategories {
 
@@ -71,7 +72,7 @@ object BuiltInCategories {
             sortOrder = 7,
         ),
         CategoryEntity(
-            id = "builtin_otros",
+            id = Category.FALLBACK_ID,
             name = "Otros",
             iconKey = "category",
             colorArgb = Color.parseColor("#546E7A"),

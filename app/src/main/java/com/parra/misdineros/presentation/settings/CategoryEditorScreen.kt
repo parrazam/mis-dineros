@@ -190,7 +190,7 @@ fun CategoryEditorScreen(
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
             title = { Text("Eliminar categoría") },
-            text = { Text("¿Eliminar «${target.name}»? Las suscripciones que la usen conservarán su id de categoría.") },
+            text = { Text("¿Eliminar «${target.name}»? Las suscripciones que la usen pasarán a la categoría «Otros».") },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.delete(target.id)
