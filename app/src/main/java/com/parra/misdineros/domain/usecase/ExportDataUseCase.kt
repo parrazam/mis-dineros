@@ -2,7 +2,6 @@ package com.parra.misdineros.domain.usecase
 
 import android.content.Context
 import android.net.Uri
-import android.util.Base64
 import com.parra.misdineros.data.backup.BackupCrypto
 import com.parra.misdineros.data.backup.BackupJson
 import com.parra.misdineros.data.backup.toDto
@@ -14,6 +13,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.time.Instant
+import java.util.Base64
 import javax.inject.Inject
 
 class ExportDataUseCase @Inject constructor(
@@ -47,7 +47,7 @@ class ExportDataUseCase @Inject constructor(
             if (sub.iconRef.startsWith("file:")) {
                 val file = File(sub.iconRef.removePrefix("file:"))
                 if (file.exists()) {
-                    assets[file.name] = Base64.encodeToString(file.readBytes(), Base64.NO_WRAP)
+                    assets[file.name] = Base64.getEncoder().encodeToString(file.readBytes())
                     sub.copy(iconRef = "asset:${file.name}")
                 } else {
                     sub.copy(iconRef = "initial")
