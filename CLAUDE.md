@@ -56,6 +56,8 @@ di/             — Hilt modules (DatabaseModule, RepositoryModule, WorkerModule
 
 **Editing preserves `isPaused` and `billingAnchorDay`.** `SubscriptionEditUiState.toSubscription()` is a pure function: the anchor is recomputed only when the user changed `nextRenewalDate`, otherwise the original anchor is kept (an anchor-31 subscription showing 28 Feb must not become anchor-28). Paused state is never reset by an edit.
 
+**Startup must degrade, never crash-loop.** The settings `DataStore<Preferences>` is provided by `DataStoreModule` through `SettingsDataStore.create(file)`, which installs a `ReplaceFileCorruptionHandler` (a corrupt `settings.preferences_pb` is replaced by defaults instead of throwing `CorruptionException` on every read), and `observe()` catches `IOException` and emits defaults. The background coroutine in `MisDinerosApplication.onCreate` carries a `CoroutineExceptionHandler` that logs; without it any exception there (failed Room migration, unreadable DB) reaches the thread's default handler and kills the app on every launch. `ImportDataUseCase` calls `NotificationScheduler.schedule()` with the imported settings so the daily chain re-anchors immediately, not at the next launch.
+
 **Lazy seeding.** Categories (`CategoryRepositoryImpl`) and FX rates (`FxRepositoryImpl`) seed their data on first access via `Flow.onStart { seedIfEmpty() }`, not in `RoomDatabase.Callback`. The `seedCallback` in `MisDinerosDatabase` is intentionally empty.
 
 **FX rates.** `BundledFxRates.generateEntities()` produces ~650 cross-rate pairs (NxN via EUR triangulation) from 25 hard-coded base rates. These are seeded once to Room and are then editable. All conversion goes through `FxRepository.convert()`.

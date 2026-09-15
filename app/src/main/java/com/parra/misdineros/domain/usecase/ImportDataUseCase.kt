@@ -10,6 +10,7 @@ import com.parra.misdineros.data.backup.PasswordRequiredException
 import com.parra.misdineros.data.backup.toDomain
 import com.parra.misdineros.domain.repository.BackupRepository
 import com.parra.misdineros.domain.repository.BackupSnapshot
+import com.parra.misdineros.notifications.NotificationScheduler
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -21,6 +22,7 @@ class ImportDataUseCase @Inject constructor(
     @ApplicationContext private val context: Context,
     private val backupRepository: BackupRepository,
     private val advanceDueRenewals: AdvanceDueRenewalsUseCase,
+    private val notificationScheduler: NotificationScheduler,
 ) {
     private val lenientJson = Json { ignoreUnknownKeys = true }
 
@@ -62,6 +64,11 @@ class ImportDataUseCase @Inject constructor(
         // Tras restaurar, avanza las renovaciones que vengan vencidas en el backup importado,
         // sin esperar a un reinicio de la app.
         advanceDueRenewals()
+        // Los ajustes importados traen hora y estado de las notificaciones; sin esto la cadena
+        // diaria seguiría con la programación anterior hasta el siguiente arranque.
+        with(snapshot.settings) {
+            notificationScheduler.schedule(notificationHour, notificationMinute, notificationsEnabled)
+        }
     }
 
     companion object {
