@@ -1,6 +1,7 @@
 package com.parra.misdineros.di
 
 import com.parra.misdineros.data.backup.BackupRepositoryImpl
+import com.parra.misdineros.data.icons.IconStorage
 import com.parra.misdineros.data.repository.CategoryRepositoryImpl
 import com.parra.misdineros.data.repository.FxRepositoryImpl
 import com.parra.misdineros.data.repository.SubscriptionRepositoryImpl
@@ -8,6 +9,7 @@ import com.parra.misdineros.data.settings.SettingsDataStore
 import com.parra.misdineros.domain.repository.BackupRepository
 import com.parra.misdineros.domain.repository.CategoryRepository
 import com.parra.misdineros.domain.repository.FxRepository
+import com.parra.misdineros.domain.repository.IconStore
 import com.parra.misdineros.domain.repository.SettingsRepository
 import com.parra.misdineros.domain.repository.SubscriptionRepository
 import dagger.Binds
@@ -39,4 +41,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindBackupRepository(impl: BackupRepositoryImpl): BackupRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindIconStore(impl: IconStorage): IconStore
 }

@@ -7,6 +7,7 @@ import androidx.work.Configuration
 import com.parra.misdineros.backup.MisDinerosBackupAgent
 import com.parra.misdineros.domain.repository.SettingsRepository
 import com.parra.misdineros.domain.usecase.AdvanceDueRenewalsUseCase
+import com.parra.misdineros.domain.usecase.PruneOrphanIconsUseCase
 import com.parra.misdineros.notifications.NotificationChannelFactory
 import com.parra.misdineros.notifications.NotificationScheduler
 import dagger.hilt.android.HiltAndroidApp
@@ -25,6 +26,7 @@ class MisDinerosApplication : Application(), Configuration.Provider {
     @Inject lateinit var notificationScheduler: NotificationScheduler
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var advanceDueRenewals: AdvanceDueRenewalsUseCase
+    @Inject lateinit var pruneOrphanIcons: PruneOrphanIconsUseCase
 
     /**
      * Sin handler, una excepción en el arranque en segundo plano (migración de Room fallida,
@@ -44,6 +46,7 @@ class MisDinerosApplication : Application(), Configuration.Provider {
             // las fechas estén actualizadas aunque las notificaciones estén desactivadas (en ese
             // caso el worker periódico no se programa).
             advanceDueRenewals()
+            pruneOrphanIcons()
             val settings = settingsRepository.observe().first()
             // Asegura que el mirror SharedPreferences que lee MisDinerosBackupAgent
             // existe desde el primer arranque, aunque el usuario no haya tocado ajustes.

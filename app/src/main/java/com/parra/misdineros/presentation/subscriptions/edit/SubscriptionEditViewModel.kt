@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.parra.misdineros.core.money.MoneyFormatter
+import com.parra.misdineros.data.icons.IconStorage
 import com.parra.misdineros.domain.model.BillingCycle
 import com.parra.misdineros.domain.model.Category
 import com.parra.misdineros.domain.model.Subscription
@@ -16,7 +17,6 @@ import com.parra.misdineros.domain.usecase.UpsertSubscriptionUseCase
 import com.parra.misdineros.presentation.navigation.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.File
 import java.time.LocalDate
 import java.util.UUID
 import javax.inject.Inject
@@ -96,6 +95,7 @@ class SubscriptionEditViewModel @Inject constructor(
     private val subscriptionRepository: SubscriptionRepository,
     private val categoryRepository: CategoryRepository,
     private val upsertSubscription: UpsertSubscriptionUseCase,
+    private val iconStorage: IconStorage,
 ) : ViewModel() {
 
     private val subscriptionId: String? = savedStateHandle.toRoute<Destination.SubscriptionEdit>().id
@@ -174,15 +174,12 @@ class SubscriptionEditViewModel @Inject constructor(
     fun onNotesChange(value: String) = _uiState.update { it.copy(notes = value) }
 
     fun onImagePicked(uri: Uri) {
-        viewModelScope.launch(Dispatchers.IO) {
-            runCatching {
-                val iconsDir = File(context.filesDir, "icons").also { it.mkdirs() }
-                val destFile = File(iconsDir, "${UUID.randomUUID()}.jpg")
-                context.contentResolver.openInputStream(uri)?.use { input ->
-                    destFile.outputStream().use { output -> input.copyTo(output) }
-                }
-                _uiState.update { it.copy(iconRef = "file:${destFile.absolutePath}") }
-            }
+        viewModelScope.launch {
+            val newRef = iconStorage.importFromUri(uri, IconStorage.Kind.SUBSCRIPTION) ?: return@launch
+            val previous = _uiState.value.iconRef
+            _uiState.update { it.copy(iconRef = newRef) }
+            // Una imagen elegida antes en esta misma edición y aún no guardada ya no sirve.
+            if (previous != _uiState.value.original?.iconRef) iconStorage.delete(previous)
         }
     }
 

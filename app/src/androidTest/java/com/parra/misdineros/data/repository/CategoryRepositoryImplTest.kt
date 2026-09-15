@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.parra.misdineros.data.db.MisDinerosDatabase
 import com.parra.misdineros.data.db.entity.CategoryEntity
 import com.parra.misdineros.data.db.entity.SubscriptionEntity
+import com.parra.misdineros.data.icons.IconStorage
 import com.parra.misdineros.domain.model.Category
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -33,7 +34,7 @@ class CategoryRepositoryImplTest {
         db = Room.inMemoryDatabaseBuilder(ctx, MisDinerosDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        repo = CategoryRepositoryImpl(db, db.categoryDao(), db.subscriptionDao())
+        repo = CategoryRepositoryImpl(db, db.categoryDao(), db.subscriptionDao(), IconStorage(ctx))
     }
 
     @After

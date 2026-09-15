@@ -43,6 +43,16 @@ object BackupAssets {
         else -> "initial"
     }
 
+    /** Clave de icono de categoría por defecto cuando la importada no es utilizable. */
+    const val DEFAULT_CATEGORY_ICON = "category"
+
+    /**
+     * Las categorías no exportan su imagen (solo la clave), así que un `file:` importado
+     * apuntaría a una ruta de otro dispositivo o, peor, a un fichero arbitrario de este.
+     */
+    fun resolveCategoryIconKey(iconKey: String): String =
+        if (iconKey.startsWith("file:")) DEFAULT_CATEGORY_ICON else iconKey
+
     private fun ascii(bytes: ByteArray, offset: Int, len: Int) =
         String(bytes, offset, len, Charsets.US_ASCII)
 }

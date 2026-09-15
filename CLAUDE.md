@@ -64,7 +64,9 @@ di/             — Hilt modules (DatabaseModule, RepositoryModule, WorkerModule
 
 **FX rates.** `BundledFxRates.generateEntities()` produces ~650 cross-rate pairs (NxN via EUR triangulation) from 25 hard-coded base rates. These are seeded once to Room and are then editable. All conversion goes through `FxRepository.convert()`.
 
-**Icon references.** `Subscription.iconRef` is a string discriminated union: `"bundled:<key>"` for catalog icons, `"file:<absolutePath>"` for user-uploaded images, `"initial"` fallback.
+**Icon references.** `Subscription.iconRef` is a string discriminated union: `"bundled:<key>"` for catalog icons, `"file:<absolutePath>"` for user-uploaded images, `"initial"` fallback. `Category.iconKey` uses `"emoji:<char>"`, a Material key, or `"file:<absolutePath>"`.
+
+**User images go through `IconStorage`, never raw copies.** `IconStorage.importFromUri` decodes with sampling (`ImageDecoder` on API 28+, which also applies EXIF rotation), scales to `ImageSizing.STORED_MAX_SIDE` (512 px) and re-encodes as JPEG 85 into `files/icons/` or `files/category_icons/`. Raw copies of camera photos weighed several MB each, were decoded at full size on the main thread in every list, and a handful blew the 25 MB Auto Backup quota (both dirs are in the backup rules), silently stopping backups. Files are deleted when no longer referenced: `SubscriptionRepositoryImpl`/`CategoryRepositoryImpl` delete the previous file on `upsert` with a different ref and on `delete`; `PruneOrphanIconsUseCase` (app start and after import) removes anything in the managed dirs not referenced by a subscription or category. `IconStorage.delete` only touches files whose canonical parent is a managed dir. UI decoding goes through `rememberFileBitmap` (`designsystem/component/FileBitmaps.kt`), off the main thread and sampled to the drawn size.
 
 **Hilt + WorkManager.** `MisDinerosApplication` implements `Configuration.Provider` and injects `HiltWorkerFactory` to wire Hilt into WorkManager. Do not call `WorkManager.initialize()` elsewhere.
 

@@ -79,7 +79,7 @@ class ExportImportRoundTripTest {
             // BackupCrypto borra el CharArray tras derivar la clave: cada llamada recibe su copia,
             // igual que en la app (cada diálogo crea su propio toCharArray()).
             assertTrue(ExportDataUseCase(context, repo)(uri, password?.copyOf()).isSuccess)
-            val result = ImportDataUseCase(context, repo, mockk(relaxed = true), mockk<NotificationScheduler>(relaxed = true))(uri, password?.copyOf())
+            val result = ImportDataUseCase(context, repo, mockk(relaxed = true), mockk<NotificationScheduler>(relaxed = true), mockk(relaxed = true))(uri, password?.copyOf())
             assertTrue(result.exceptionOrNull()?.toString() ?: "", result.isSuccess)
             coVerify { repo.restore(capture(captured)) }
         }

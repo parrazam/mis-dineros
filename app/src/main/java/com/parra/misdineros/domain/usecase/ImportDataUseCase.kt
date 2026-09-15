@@ -27,6 +27,7 @@ class ImportDataUseCase @Inject constructor(
     private val backupRepository: BackupRepository,
     private val advanceDueRenewals: AdvanceDueRenewalsUseCase,
     private val notificationScheduler: NotificationScheduler,
+    private val pruneOrphanIcons: PruneOrphanIconsUseCase,
 ) {
     private val lenientJson = Json { ignoreUnknownKeys = true }
 
@@ -55,11 +56,15 @@ class ImportDataUseCase @Inject constructor(
             subscriptions = backupJson.subscriptions.map { dto ->
                 dto.toDomain(BackupAssets.resolveIconRef(dto.iconRef, writtenAssets))
             },
-            categories = backupJson.categories.map { it.toDomain() },
+            categories = backupJson.categories.map { dto ->
+                dto.toDomain().let { it.copy(iconKey = BackupAssets.resolveCategoryIconKey(it.iconKey)) }
+            },
             fxRates = backupJson.fxRates.map { it.toDomain() },
             settings = backupJson.settings.toDomain(),
         )
         backupRepository.restore(snapshot)
+        // Los iconos de las suscripciones sustituidas ya no tienen dueño.
+        pruneOrphanIcons()
         // Tras restaurar, avanza las renovaciones que vengan vencidas en el backup importado,
         // sin esperar a un reinicio de la app.
         advanceDueRenewals()

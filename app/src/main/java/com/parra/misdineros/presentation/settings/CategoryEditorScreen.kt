@@ -53,7 +53,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -62,12 +61,8 @@ import com.parra.misdineros.R
 import com.parra.misdineros.designsystem.component.CategoryIconContent
 import com.parra.misdineros.designsystem.component.categoryIconVector
 import com.parra.misdineros.domain.model.Category
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
 import java.text.BreakIterator
-import java.util.UUID
 
 private fun isValidSingleEmoji(text: String): Boolean {
     if (text.isEmpty()) return false
@@ -139,22 +134,12 @@ fun CategoryEditorScreen(
     var deleteTarget by remember { mutableStateOf<Category?>(null) }
 
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     val imageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             scope.launch {
-                val path = withContext(Dispatchers.IO) {
-                    runCatching {
-                        val dir = File(context.filesDir, "category_icons").also { it.mkdirs() }
-                        val dest = File(dir, "${UUID.randomUUID()}.jpg")
-                        context.contentResolver.openInputStream(uri)!!.use { i ->
-                            dest.outputStream().use { o -> i.copyTo(o) }
-                        }
-                        dest.absolutePath
-                    }.getOrNull()
-                }
-                if (path != null) dialog = dialog.copy(iconKey = "file:$path")
+                val key = viewModel.importIcon(uri, current = dialog.iconKey, saved = dialog.editing?.iconKey)
+                if (key != null) dialog = dialog.copy(iconKey = key)
             }
         }
     }

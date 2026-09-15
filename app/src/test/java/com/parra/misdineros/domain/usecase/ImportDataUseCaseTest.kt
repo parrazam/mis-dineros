@@ -42,6 +42,7 @@ class ImportDataUseCaseTest {
     private lateinit var backupRepository: BackupRepository
     private lateinit var advanceDueRenewals: AdvanceDueRenewalsUseCase
     private lateinit var scheduler: NotificationScheduler
+    private lateinit var pruneOrphanIcons: PruneOrphanIconsUseCase
     private lateinit var useCase: ImportDataUseCase
     private val uri: Uri = mockk()
 
@@ -55,7 +56,8 @@ class ImportDataUseCaseTest {
         backupRepository = mockk(relaxed = true)
         advanceDueRenewals = mockk(relaxed = true)
         scheduler = mockk(relaxed = true)
-        useCase = ImportDataUseCase(context, backupRepository, advanceDueRenewals, scheduler)
+        pruneOrphanIcons = mockk(relaxed = true)
+        useCase = ImportDataUseCase(context, backupRepository, advanceDueRenewals, scheduler, pruneOrphanIcons)
     }
 
     private fun givenFile(bytes: ByteArray) {
@@ -249,5 +251,29 @@ class ImportDataUseCaseTest {
         val file = File(subs.single().iconRef.removePrefix("file:"))
         assertTrue(file.exists())
         assertTrue(file.readBytes().contentEquals(jpegBytes))
+    }
+
+    // ─── Fase 4: iconos ────────────────────────────────────────────────────────
+
+    @Test
+    fun `tras restaurar se podan los iconos huerfanos`() = runTest {
+        givenFile(BackupCrypto.wrapPlain(backup()))
+
+        useCase(uri)
+
+        coVerify(exactly = 1) { pruneOrphanIcons() }
+    }
+
+    @Test
+    fun `iconKey file de una categoria importada cae a la clave por defecto`() = runTest {
+        val json = backup().replace("\"categories\":[]", "\"categories\":[{\"id\":\"c1\",\"name\":\"X\",\"iconKey\":\"file:/etc/hosts\",\"colorArgb\":0,\"isBuiltIn\":false,\"sortOrder\":0},{\"id\":\"c2\",\"name\":\"Y\",\"iconKey\":\"emoji:🎬\",\"colorArgb\":0,\"isBuiltIn\":false,\"sortOrder\":1}]")
+        givenFile(BackupCrypto.wrapPlain(json))
+        val snapshot = slot<BackupSnapshot>()
+
+        val result = useCase(uri)
+
+        assertTrue(result.exceptionOrNull()?.toString() ?: "", result.isSuccess)
+        coVerify { backupRepository.restore(capture(snapshot)) }
+        assertEquals(listOf("category", "emoji:🎬"), snapshot.captured.categories.map { it.iconKey })
     }
 }
