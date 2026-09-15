@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.parra.misdineros.R
+import com.parra.misdineros.data.backup.BackupCrypto
 import com.parra.misdineros.designsystem.theme.AppTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -408,7 +409,7 @@ private fun ExportModeDialog(
     var passwordConfirm by remember { mutableStateOf("") }
 
     val passwordsMatch = password == passwordConfirm
-    val passwordValid = !encryptEnabled || (password.length >= 6 && passwordsMatch)
+    val passwordValid = !encryptEnabled || (password.length >= BackupCrypto.MIN_PASSWORD_LENGTH && passwordsMatch)
 
     fun resolvedPassword(): CharArray? = if (encryptEnabled) password.toCharArray() else null
 
@@ -449,8 +450,8 @@ private fun ExportModeDialog(
                             supportingText = when {
                                 passwordConfirm.isNotEmpty() && !passwordsMatch ->
                                     { { Text("Las contraseñas no coinciden") } }
-                                password.isNotEmpty() && password.length < 6 ->
-                                    { { Text("Mínimo 6 caracteres") } }
+                                password.isNotEmpty() && password.length < BackupCrypto.MIN_PASSWORD_LENGTH ->
+                                    { { Text("Mínimo ${BackupCrypto.MIN_PASSWORD_LENGTH} caracteres") } }
                                 else -> null
                             },
                         )

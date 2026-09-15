@@ -128,7 +128,7 @@ Buenas prácticas aplicadas:
 Tanto `versionName` como `versionCode` se derivan automáticamente del repositorio:
 
 - `versionName` — `git describe --tags --always`, sin la `v` inicial. Ej.: tag `v1.0.0` → `1.0.0`.
-- `versionCode` — `git rev-list --count HEAD`. Estrictamente creciente, lo que satisface el requisito de Play Console.
+- `versionCode` — derivado de `git describe --tags --long`: `major*1000000 + minor*10000 + patch*100 + commits desde la etiqueta` (tope 99). Ej.: tag `v1.5.1` → `1050100`. Crece con cada etiqueta, que es lo que exige Play Console, y a diferencia de `git rev-list --count` no baja con un rebase o un force-push.
 
 Por eso el workflow de release hace `fetch-depth: 0` y `fetch-tags: true`: sin el historial completo, ambos comandos darían valores erróneos en el runner.
 

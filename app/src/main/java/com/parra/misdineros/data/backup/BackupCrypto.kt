@@ -12,22 +12,34 @@ import javax.crypto.spec.SecretKeySpec
 /**
  * Formato de fichero (cabecera 5 bytes):
  *   [4] "MDB1"  magic
- *   [1] flags   0x00=plano, 0x01=cifrado AES-256-GCM
+ *   [1] flags   0x00=plano, 0x01=cifrado (formato inicial), 0x02=cifrado con cabecera autenticada
  * Si cifrado:
  *   [16] salt  PBKDF2WithHmacSHA256
  *   [12] IV    GCM nonce
  *   [N]  ciphertext + tag GCM (16 bytes)
  * Sin cabecera MDB1 → JSON legacy (compatibilidad con exports anteriores).
+ *
+ * Con flags 0x02 los 33 bytes de cabecera (magic, flags, salt, IV) entran como AAD en GCM, de
+ * modo que cualquier cambio en ellos (por ejemplo, degradar el byte de flags o los parámetros
+ * del KDF que se añadan en el futuro) invalida el tag. Los ficheros 0x01 ya exportados se
+ * siguen descifrando sin AAD; solo se escriben ficheros 0x02.
+ *
+ * `encrypt`/`decrypt` borran el `CharArray` de la contraseña tras derivar la clave.
  */
 object BackupCrypto {
 
     private val MAGIC = "MDB1".toByteArray(Charsets.US_ASCII)
     private const val FLAG_PLAIN: Byte = 0x00
-    private const val FLAG_ENCRYPTED: Byte = 0x01
+    private const val FLAG_ENCRYPTED_V1: Byte = 0x01
+    private const val FLAG_ENCRYPTED_V2: Byte = 0x02
     private const val SALT_LEN = 16
     private const val IV_LEN = 12
+    private const val HEADER_LEN = 4 + 1 + SALT_LEN + IV_LEN
     private const val PBKDF2_ITERATIONS = 200_000
     private const val KEY_BITS = 256
+
+    /** Longitud mínima de contraseña exigida por la UI de exportación. */
+    const val MIN_PASSWORD_LENGTH = 8
 
     fun wrapPlain(json: String): ByteArray =
         MAGIC + byteArrayOf(FLAG_PLAIN) + json.toByteArray(Charsets.UTF_8)
@@ -35,22 +47,26 @@ object BackupCrypto {
     fun encrypt(json: String, password: CharArray): ByteArray {
         val salt = ByteArray(SALT_LEN).also { SecureRandom().nextBytes(it) }
         val iv = ByteArray(IV_LEN).also { SecureRandom().nextBytes(it) }
+        val header = MAGIC + byteArrayOf(FLAG_ENCRYPTED_V2) + salt + iv
         val key = deriveKey(password, salt)
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.ENCRYPT_MODE, key, GCMParameterSpec(128, iv))
-        val ciphertext = cipher.doFinal(json.toByteArray(Charsets.UTF_8))
-        return MAGIC + byteArrayOf(FLAG_ENCRYPTED) + salt + iv + ciphertext
+        cipher.updateAAD(header)
+        return header + cipher.doFinal(json.toByteArray(Charsets.UTF_8))
     }
 
     fun decrypt(blob: ByteArray, password: CharArray): String {
-        val offset = MAGIC.size + 1  // 4 magic + 1 flags = 5
-        val salt = blob.copyOfRange(offset, offset + SALT_LEN)
-        val iv = blob.copyOfRange(offset + SALT_LEN, offset + SALT_LEN + IV_LEN)
-        val ciphertext = blob.copyOfRange(offset + SALT_LEN + IV_LEN, blob.size)
+        if (blob.size < HEADER_LEN) throw WrongPasswordException()
+        val flags = blob[4]
+        val header = blob.copyOfRange(0, HEADER_LEN)
+        val salt = blob.copyOfRange(5, 5 + SALT_LEN)
+        val iv = blob.copyOfRange(5 + SALT_LEN, HEADER_LEN)
+        val ciphertext = blob.copyOfRange(HEADER_LEN, blob.size)
         val key = deriveKey(password, salt)
         return try {
             val cipher = Cipher.getInstance("AES/GCM/NoPadding")
             cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, iv))
+            if (flags == FLAG_ENCRYPTED_V2) cipher.updateAAD(header)
             cipher.doFinal(ciphertext).toString(Charsets.UTF_8)
         } catch (_: AEADBadTagException) {
             throw WrongPasswordException()
@@ -62,7 +78,7 @@ object BackupCrypto {
         if (!blob.copyOfRange(0, 4).contentEquals(MAGIC)) return BackupFormat.LegacyJson
         return when (blob[4]) {
             FLAG_PLAIN -> BackupFormat.Plain
-            FLAG_ENCRYPTED -> BackupFormat.Encrypted
+            FLAG_ENCRYPTED_V1, FLAG_ENCRYPTED_V2 -> BackupFormat.Encrypted
             else -> BackupFormat.LegacyJson
         }
     }
@@ -83,5 +99,6 @@ sealed class BackupFormat {
     data object LegacyJson : BackupFormat()
 }
 
-class WrongPasswordException : Exception("Contraseña incorrecta")
+/** GCM no distingue contraseña incorrecta de fichero manipulado: el tag falla en ambos casos. */
+class WrongPasswordException : Exception("Contraseña incorrecta o archivo dañado")
 class PasswordRequiredException : Exception("Este archivo está cifrado. Introduce la contraseña para importarlo.")

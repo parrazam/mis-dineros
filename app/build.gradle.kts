@@ -26,8 +26,20 @@ val gitVersionName: String = gitOutput("describe", "--tags", "--always")
     .map { it.removePrefix("v").ifEmpty { "dev" } }
     .getOrElse("dev")
 
-val gitVersionCode: Int = gitOutput("rev-list", "--count", "HEAD")
-    .map { it.toIntOrNull() ?: 1 }
+// versionCode = major*1_000_000 + minor*10_000 + patch*100 + commits desde la etiqueta (tope 99).
+// Sale de `git describe --tags --long` ("v1.5.0-6-g3d017ee"), no de `rev-list --count`: el
+// recuento de commits baja con un rebase o un force-push y Play rechazaría el AAB, mientras que
+// la etiqueta solo puede crecer. Una release exacta ("v1.5.1") da 1_050_100; una build de
+// desarrollo entre etiquetas queda por encima de la última release y por debajo de la siguiente.
+fun versionCodeFromDescribe(describe: String): Int {
+    val m = Regex("""^v?(\d+)\.(\d+)\.(\d+)(?:-(\d+)-g[0-9a-f]+)?$""").find(describe) ?: return 1
+    val (major, minor, patch, ahead) = m.destructured
+    return major.toInt() * 1_000_000 + minor.toInt() * 10_000 + patch.toInt() * 100 +
+        (ahead.toIntOrNull() ?: 0).coerceAtMost(99)
+}
+
+val gitVersionCode: Int = gitOutput("describe", "--tags", "--long", "--match", "v[0-9]*")
+    .map { versionCodeFromDescribe(it) }
     .getOrElse(1)
 
 println("[mis-dineros] versionCode=$gitVersionCode versionName=$gitVersionName")
