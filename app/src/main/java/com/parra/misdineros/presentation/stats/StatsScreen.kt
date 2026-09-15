@@ -359,9 +359,17 @@ private fun GlobalTab(state: StatsUiState) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        if (state.monthlyTotalMinor == 0L) {
+        if (state.monthlyTotalMinor == 0L && state.excludedCurrencies.isEmpty()) {
             EmptyStats()
             return@Column
+        }
+
+        if (state.excludedCurrencies.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.spend_missing_rates, state.excludedCurrencies.joinToString(", ")),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
         }
 
         Row(

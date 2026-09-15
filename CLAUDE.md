@@ -46,7 +46,7 @@ di/             — Hilt modules (DatabaseModule, RepositoryModule, WorkerModule
 
 ### Key design decisions
 
-**Money as Long (minor units).** All monetary amounts stored and computed as `Long` in minor currency units (e.g., cents). Never use `Double` for money. `MoneyFormatter` handles display conversion. `Subscription.monthlyAmountMinor` normalises annual→monthly inline.
+**Money as Long (minor units).** All monetary amounts stored and computed as `Long` in minor currency units (e.g., cents). Never use `Double` for money. `MoneyFormatter` handles display conversion. `Subscription.monthlyAmountMinor` / `annualAmountMinor` normalise between cycles; use cases must not repeat that arithmetic inline.
 
 **Auto-advancing renewals.** Subscriptions store `billingAnchorDay` (original billing day-of-month) alongside `nextRenewalDate`. `AdvanceDueRenewalsUseCase` recomputes and persists past-due renewal dates for active subscriptions (handles several missed cycles at once) so a subscription never stays anchored in the past, disappears from Home, or stops notifying. `BillingCycle.nextRenewal(from, anchorDay)` re-anchors with `min(anchorDay, daysInMonth)` (a day-31 subscription keeps the 31st across months with fewer days). It runs on app start, in the daily worker, and after an import. The use case is triggered from those three places only. Room DB is at `version = 2`; `MIGRATION_1_2` adds `billingAnchorDay` and backfills it from the day-of-month of the existing `nextRenewalDate`. The backup JSON is unchanged — `toDomain` derives the anchor from the date's day.
 
@@ -62,7 +62,9 @@ di/             — Hilt modules (DatabaseModule, RepositoryModule, WorkerModule
 
 **Lazy seeding.** Categories (`CategoryRepositoryImpl`) and FX rates (`FxRepositoryImpl`) seed their data on first access via `Flow.onStart { seedIfEmpty() }`, not in `RoomDatabase.Callback`. The `seedCallback` in `MisDinerosDatabase` is intentionally empty.
 
-**FX rates.** `BundledFxRates.generateEntities()` produces ~650 cross-rate pairs (NxN via EUR triangulation) from 25 hard-coded base rates. These are seeded once to Room and are then editable. All conversion goes through `FxRepository.convert()`.
+**FX rates.** `BundledFxRates.generateEntities()` produces ~650 cross-rate pairs (NxN via EUR triangulation) from 25 hard-coded base rates. These are seeded once to Room and are then editable. All conversion goes through `FxRepository.convert()`, which returns `null` when the pair is missing (it used to silently apply 1.0). The spend use cases return `SpendTotal(totalMinor, excludedCurrencies)`: unconvertible subscriptions are left out of the total and their currencies are surfaced in Home and Stats. Editing a rate goes through `FxRepository.setRateFromEur()`, which rewrites the inverse and every cross pair through that currency (`FxCrossRates.derive`); upserting only EUR↔X left the other ~50 pairs stale.
+
+**Annual amounts are never reconstructed from the monthly figure.** `Subscription.monthlyAmountMinor` rounds annual/12 and `annualAmountMinor` is exact; `CalcAnnualEquivalentUseCase` sums annual amounts directly, so 100,00/year no longer comes back as 99,96.
 
 **Icon references.** `Subscription.iconRef` is a string discriminated union: `"bundled:<key>"` for catalog icons, `"file:<absolutePath>"` for user-uploaded images, `"initial"` fallback. `Category.iconKey` uses `"emoji:<char>"`, a Material key, or `"file:<absolutePath>"`.
 

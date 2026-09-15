@@ -2,6 +2,7 @@ package com.parra.misdineros.data.repository
 
 import com.parra.misdineros.data.db.dao.FxRateDao
 import com.parra.misdineros.data.fx.BundledFxRates
+import com.parra.misdineros.data.fx.FxCrossRates
 import com.parra.misdineros.data.mapper.toDomain
 import com.parra.misdineros.data.mapper.toEntity
 import com.parra.misdineros.domain.model.FxRate
@@ -39,9 +40,21 @@ class FxRepositoryImpl @Inject constructor(
         dao.upsertAll(BundledFxRates.generateEntities())
     }
 
-    override suspend fun convert(amountMinor: Long, from: String, to: String): Long {
+    override suspend fun setRateFromEur(quote: String, rate: Double) {
+        seedIfEmpty()
+        val eurRates = dao.getAll()
+            .filter { it.base == FxCrossRates.PIVOT }
+            .associate { it.quote to it.rate }
+        dao.upsertAll(FxCrossRates.derive(quote, rate, eurRates, System.currentTimeMillis()).map { it.toEntity() })
+    }
+
+    /**
+     * `null` cuando falta el par: antes se devolvía el importe sin convertir (tasa 1.0), lo que
+     * sumaba dólares como euros sin que nada lo indicara.
+     */
+    override suspend fun convert(amountMinor: Long, from: String, to: String): Long? {
         if (from == to) return amountMinor
-        val rate = getRate(from, to) ?: 1.0
+        val rate = getRate(from, to) ?: return null
         return (amountMinor * rate).roundToLong()
     }
 

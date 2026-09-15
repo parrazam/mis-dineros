@@ -19,7 +19,7 @@ class CalcTopExpensiveUseCaseTest {
     @Before
     fun setUp() {
         fxRepo = mockk()
-        coEvery { fxRepo.convert(any(), any(), any()) } answers { firstArg() }
+        coEvery { fxRepo.convert(any(), any(), any()) } answers { firstArg<Long>() }
         useCase = CalcTopExpensiveUseCase(fxRepo)
     }
 
@@ -59,5 +59,15 @@ class CalcTopExpensiveUseCaseTest {
         val subs = listOf(sub("1", 100L), sub("2", 200L))
         val result = useCase(subs, "EUR", limit = 5)
         assertEquals(2, result.size)
+    }
+
+    @Test
+    fun `una suscripcion sin tipo de cambio queda fuera del ranking`() = runTest {
+        coEvery { fxRepo.convert(any(), "XXX", "EUR") } returns null
+        val subs = listOf(sub("1", 100L), sub("2", 900L).copy(currencyCode = "XXX"))
+
+        val result = useCase(subs, "EUR", limit = 5)
+
+        assertEquals(listOf("1"), result.map { it.subscription.id })
     }
 }

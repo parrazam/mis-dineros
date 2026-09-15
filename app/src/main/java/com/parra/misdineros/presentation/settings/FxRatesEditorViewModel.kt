@@ -25,11 +25,7 @@ class FxRatesEditorViewModel @Inject constructor(
 
     fun saveRate(quote: String, newRate: Double) {
         if (newRate <= 0.0) return
-        viewModelScope.launch {
-            val now = System.currentTimeMillis()
-            fxRepository.upsert(FxRate("EUR", quote, newRate, now))
-            fxRepository.upsert(FxRate(quote, "EUR", 1.0 / newRate, now))
-        }
+        viewModelScope.launch { fxRepository.setRateFromEur(quote, newRate) }
     }
 
     fun resetToDefaults() {

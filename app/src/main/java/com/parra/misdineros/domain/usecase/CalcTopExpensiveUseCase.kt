@@ -1,6 +1,5 @@
 package com.parra.misdineros.domain.usecase
 
-import com.parra.misdineros.domain.model.BillingCycle
 import com.parra.misdineros.domain.model.Subscription
 import com.parra.misdineros.domain.repository.FxRepository
 import javax.inject.Inject
@@ -18,17 +17,13 @@ class CalcTopExpensiveUseCase @Inject constructor(
         targetCurrency: String,
         limit: Int = 5,
     ): List<RankedSubscription> {
+        // Una suscripción sin tipo de cambio no se puede ordenar frente a las demás: se omite.
         return subscriptions
             .filter { !it.isPaused }
-            .map { sub ->
-                val monthly = when (sub.billingCycle) {
-                    BillingCycle.MONTHLY -> sub.amountMinor
-                    BillingCycle.ANNUAL -> sub.amountMinor / 12
-                }
-                RankedSubscription(
-                    subscription = sub,
-                    monthlyAmountInTarget = fxRepo.convert(monthly, sub.currencyCode, targetCurrency),
-                )
+            .mapNotNull { sub ->
+                val converted = fxRepo.convert(sub.monthlyAmountMinor, sub.currencyCode, targetCurrency)
+                    ?: return@mapNotNull null
+                RankedSubscription(subscription = sub, monthlyAmountInTarget = converted)
             }
             .sortedByDescending { it.monthlyAmountInTarget }
             .take(limit)

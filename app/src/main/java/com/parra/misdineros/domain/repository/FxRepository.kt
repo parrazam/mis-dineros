@@ -10,5 +10,9 @@ interface FxRepository {
     suspend fun upsertAll(rates: List<FxRate>)
     suspend fun resetToDefaults()
 
-    suspend fun convert(amountMinor: Long, from: String, to: String): Long
+    /** Fija EUR→[quote] y reescribe el inverso y todos los cruces que pasan por [quote]. */
+    suspend fun setRateFromEur(quote: String, rate: Double)
+
+    /** Convierte [amountMinor] de [from] a [to], o `null` si no hay tipo de cambio para el par. */
+    suspend fun convert(amountMinor: Long, from: String, to: String): Long?
 }

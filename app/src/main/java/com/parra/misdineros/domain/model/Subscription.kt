@@ -18,9 +18,17 @@ data class Subscription(
     val createdAt: Long,
     val updatedAt: Long,
 ) {
+    /** Importe normalizado a un mes. Las anuales se dividen entre 12 con redondeo, no truncado. */
     val monthlyAmountMinor: Long
         get() = when (billingCycle) {
             BillingCycle.MONTHLY -> amountMinor
-            BillingCycle.ANNUAL -> amountMinor / 12
+            BillingCycle.ANNUAL -> Math.round(amountMinor / 12.0)
+        }
+
+    /** Importe normalizado a un año, exacto: las anuales no pasan por la división. */
+    val annualAmountMinor: Long
+        get() = when (billingCycle) {
+            BillingCycle.MONTHLY -> amountMinor * 12
+            BillingCycle.ANNUAL -> amountMinor
         }
 }

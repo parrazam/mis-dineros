@@ -19,7 +19,7 @@ class CalcSpendByCategoryUseCaseTest {
     @Before
     fun setUp() {
         fxRepo = mockk()
-        coEvery { fxRepo.convert(any(), any(), any()) } answers { firstArg() }
+        coEvery { fxRepo.convert(any(), any(), any()) } answers { firstArg<Long>() }
         useCase = CalcSpendByCategoryUseCase(fxRepo)
     }
 

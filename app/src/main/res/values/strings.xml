@@ -15,6 +15,7 @@
     <string name="home_paused_count">%1$d pausadas</string>
     <string name="home_upcoming_renewals">Próximas renovaciones</string>
     <string name="home_top_expensive">Top 5 más caras</string>
+    <string name="spend_missing_rates">Sin tipo de cambio para %1$s: esas suscripciones no se incluyen en los totales. Revísalo en Ajustes › Tasas de cambio.</string>
 
     <!-- Suscripciones -->
     <string name="subscriptions_empty">Sin suscripciones aún.\nPulsa + para añadir la primera.</string>
