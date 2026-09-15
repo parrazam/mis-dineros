@@ -167,7 +167,7 @@ fun SubscriptionEditScreen(
                     onValueChange = { viewModel.onNameChange(it) },
                     label = { Text(stringResource(R.string.field_name)) },
                     isError = state.nameError != null,
-                    supportingText = state.nameError?.let { { Text(it) } },
+                    supportingText = state.nameError?.let { { Text(stringResource(it)) } },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                 )
@@ -180,7 +180,7 @@ fun SubscriptionEditScreen(
                     onValueChange = { viewModel.onAmountChange(it) },
                     label = { Text(stringResource(R.string.field_amount)) },
                     isError = state.amountError != null,
-                    supportingText = state.amountError?.let { { Text(it) } },
+                    supportingText = state.amountError?.let { { Text(stringResource(it)) } },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.weight(1f),
@@ -243,7 +243,7 @@ fun SubscriptionEditScreen(
                     onValueChange = {},
                     readOnly = true,
                     isError = state.dateError != null,
-                    supportingText = state.dateError?.let { { Text(it) } },
+                    supportingText = state.dateError?.let { { Text(stringResource(it)) } },
                     label = { Text(stringResource(R.string.field_renewal_date)) },
                     trailingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = null) },
                     modifier = Modifier.fillMaxWidth(),
@@ -392,7 +392,7 @@ fun SubscriptionEditScreen(
                         )
                     }
                     showDatePicker = false
-                }) { Text("OK") }
+                }) { Text(stringResource(R.string.action_ok)) }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.action_cancel)) }

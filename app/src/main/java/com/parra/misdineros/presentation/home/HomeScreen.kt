@@ -490,7 +490,7 @@ private fun EmptyHomeState(onGoToSubscriptions: () -> Unit, modifier: Modifier =
         )
         Spacer(Modifier.height(24.dp))
         Button(onClick = onGoToSubscriptions) {
-            Text("Añadir suscripción")
+            Text(stringResource(R.string.home_add_subscription))
             Spacer(Modifier.size(8.dp))
             Icon(
                 Icons.AutoMirrored.Filled.ArrowForward,

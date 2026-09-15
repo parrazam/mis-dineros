@@ -2,10 +2,12 @@ package com.parra.misdineros.presentation.subscriptions.edit
 
 import android.content.Context
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.parra.misdineros.R
 import com.parra.misdineros.core.money.MoneyFormatter
 import com.parra.misdineros.data.icons.IconStorage
 import com.parra.misdineros.domain.model.BillingCycle
@@ -40,14 +42,14 @@ data class SubscriptionEditUiState(
     val isLoading: Boolean = false,
     val isEditing: Boolean = false,
     val name: String = "",
-    val nameError: String? = null,
+    @StringRes val nameError: Int? = null,
     val iconRef: String = "initial",
     val amountText: String = "",
-    val amountError: String? = null,
+    @StringRes val amountError: Int? = null,
     val currencyCode: String = "EUR",
     val billingCycle: BillingCycle = BillingCycle.MONTHLY,
     val nextRenewalDate: LocalDate = LocalDate.now().plusMonths(1),
-    val dateError: String? = null,
+    @StringRes val dateError: Int? = null,
     val categoryId: String = Category.FALLBACK_ID,
     val categories: List<Category> = emptyList(),
     val notifyDaysBefore: Int? = null,
@@ -188,18 +190,18 @@ class SubscriptionEditViewModel @Inject constructor(
         var hasError = false
 
         if (state.name.isBlank()) {
-            _uiState.update { it.copy(nameError = "El nombre es obligatorio") }
+            _uiState.update { it.copy(nameError = R.string.error_name_required) }
             hasError = true
         }
 
         val amountMinor = MoneyFormatter.parseToMinor(state.amountText, state.currencyCode)
         if (amountMinor == null || amountMinor <= 0) {
-            _uiState.update { it.copy(amountError = "Introduce un importe válido") }
+            _uiState.update { it.copy(amountError = R.string.error_invalid_amount) }
             hasError = true
         }
 
         if (state.nextRenewalDate.isBefore(LocalDate.now())) {
-            _uiState.update { it.copy(dateError = "La fecha de renovación no puede estar en el pasado") }
+            _uiState.update { it.copy(dateError = R.string.error_date_in_past) }
             hasError = true
         }
 

@@ -206,8 +206,8 @@ fun SubscriptionDetailScreen(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Eliminar suscripción") },
-            text = { Text("¿Seguro que quieres eliminar «${state.subscription?.name}»? Esta acción no se puede deshacer.") },
+            title = { Text(stringResource(R.string.delete_subscription_title)) },
+            text = { Text(stringResource(R.string.delete_subscription_message, state.subscription?.name ?: "")) },
             confirmButton = {
                 TextButton(
                     onClick = { showDeleteConfirm = false; viewModel.delete() },

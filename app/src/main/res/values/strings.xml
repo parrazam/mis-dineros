@@ -46,6 +46,34 @@
     <string name="action_delete">Eliminar</string>
     <string name="action_pause">Pausar</string>
     <string name="action_resume">Reactivar</string>
+    <string name="action_ok">OK</string>
+    <string name="action_edit">Editar</string>
+    <string name="action_reset">Restablecer</string>
+    <string name="delete_subscription_title">Eliminar suscripción</string>
+    <string name="delete_subscription_message">¿Seguro que quieres eliminar «%1$s»? Esta acción no se puede deshacer.</string>
+    <string name="delete_subscription_message_short">¿Seguro que quieres eliminar «%1$s»?</string>
+    <string name="home_add_subscription">Añadir suscripción</string>
+    <string name="icon_picker_title">Elige icono del servicio</string>
+    <string name="icon_picker_from_gallery">Subir imagen de la galería</string>
+
+    <!-- Categorías -->
+    <string name="category_new">Nueva categoría</string>
+    <string name="category_edit">Editar categoría</string>
+    <string name="category_delete_title">Eliminar categoría</string>
+    <string name="category_delete_message">¿Eliminar «%1$s»? Las suscripciones que la usen pasarán a la categoría «Otros».</string>
+    <string name="category_add">Añadir categoría</string>
+    <string name="category_builtin">Predefinida</string>
+    <string name="category_field_name">Nombre</string>
+    <string name="category_field_icon">Icono</string>
+    <string name="category_field_emoji">Emoji</string>
+    <string name="category_emoji_error">Solo se permite un emoji</string>
+    <string name="category_emoji_hint">Escribe o pega un emoji</string>
+    <string name="category_change_image">Cambiar imagen</string>
+    <string name="category_field_color">Color</string>
+
+    <!-- Tasas de cambio -->
+    <string name="fx_reset_title">Restablecer tasas</string>
+    <string name="fx_reset_message">Se restaurarán los valores predeterminados incluidos con la aplicación. ¿Continuar?</string>
 
     <!-- Estadísticas -->
     <string name="stats_by_category">Por categoría</string>
@@ -53,6 +81,9 @@
     <string name="stats_top5">Top 5</string>
     <string name="stats_monthly">Este mes</string>
     <string name="stats_annual">Anual</string>
+    <string name="stats_split_annual_per_month">Anual / mes</string>
+    <string name="stats_active">Activo</string>
+    <string name="stats_total_contracted">Total contratado</string>
 
     <!-- Ajustes -->
     <string name="settings_title">Ajustes</string>
@@ -68,6 +99,8 @@
     <string name="settings_import">Importar datos</string>
     <string name="settings_about">Acerca de</string>
     <string name="settings_version">Versión %1$s</string>
+    <string name="settings_test_notification">Probar notificación ahora</string>
+    <string name="settings_auto_backup">Copia de seguridad automática</string>
 
     <!-- Notificaciones -->
     <string name="notif_channel_renewals">Renovaciones</string>
@@ -91,6 +124,19 @@
     <string name="backup_import_confirm_button">Importar</string>
     <string name="backup_export_success">Datos exportados correctamente</string>
     <string name="backup_import_success">Datos importados correctamente</string>
+    <string name="backup_encrypt_with_password">Cifrar con contraseña</string>
+    <string name="backup_password">Contraseña</string>
+    <string name="backup_password_confirm">Confirmar contraseña</string>
+    <string name="backup_password_mismatch">Las contraseñas no coinciden</string>
+    <string name="backup_password_min_length">Mínimo %1$d caracteres</string>
+    <string name="backup_password_wrong">Contraseña incorrecta</string>
+    <string name="backup_encrypted_title">Archivo cifrado</string>
+    <string name="backup_encrypted_message">Este archivo está protegido con contraseña.</string>
+    <string name="backup_save_to_files">Guardar en archivos</string>
+    <string name="backup_save_to_files_support">Elige dónde guardarlo en el dispositivo</string>
+    <string name="backup_share">Compartir</string>
+    <string name="backup_share_support">Envía el archivo por otra aplicación</string>
+    <string name="backup_share_chooser">Compartir backup</string>
 
     <!-- Accesibilidad -->
     <string name="action_back">Volver</string>
@@ -100,6 +146,7 @@
     <!-- Errores -->
     <string name="error_invalid_amount">Introduce un importe válido</string>
     <string name="error_name_required">El nombre es obligatorio</string>
+    <string name="error_date_in_past">La fecha de renovación no puede estar en el pasado</string>
     <string name="error_import_failed">No se pudo importar el archivo</string>
     <string name="error_export_failed">No se pudo exportar los datos</string>
 </resources>

@@ -482,13 +482,13 @@ private fun BillingCycleSplitCard(
             }
 
             CycleRow(
-                label = "Mensual",
+                label = stringResource(R.string.billing_monthly),
                 amount = MoneyFormatter.format(monthlyFromMonthlyMinor, globalCurrency),
                 pct = "$monthlyPct%",
                 dotColor = MaterialTheme.colorScheme.primary,
             )
             CycleRow(
-                label = "Anual / mes",
+                label = stringResource(R.string.stats_split_annual_per_month),
                 amount = MoneyFormatter.format(monthlyFromAnnualMinor, globalCurrency),
                 pct = "$annualPct%",
                 dotColor = MaterialTheme.colorScheme.inversePrimary,
@@ -547,13 +547,13 @@ private fun ActiveVsTotalCard(
             }
 
             CycleRow(
-                label = "Activo",
+                label = stringResource(R.string.stats_active),
                 amount = MoneyFormatter.format(activeMinor, globalCurrency),
                 pct = "${(fraction * 100).roundToInt()}%",
                 dotColor = MaterialTheme.colorScheme.primary,
             )
             CycleRow(
-                label = "Total contratado",
+                label = stringResource(R.string.stats_total_contracted),
                 amount = MoneyFormatter.format(totalMinor, globalCurrency),
                 pct = "100%",
                 dotColor = MaterialTheme.colorScheme.inversePrimary,
