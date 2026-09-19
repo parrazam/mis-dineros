@@ -35,6 +35,7 @@ data class StatsUiState(
     val monthlyFromMonthlyCycleMinor: Long = 0L,
     val monthlyFromAnnualCycleMinor: Long = 0L,
     val monthlyTotalIncludingPausedMinor: Long = 0L,
+    val excludedCurrencies: Set<String> = emptySet(),
 )
 
 @HiltViewModel
@@ -78,20 +79,21 @@ class StatsViewModel @Inject constructor(
             CategorySpendItem(
                 category = category,
                 monthlyAmountMinor = spend.monthlyAmountMinor,
-                percentage = if (monthly > 0) spend.monthlyAmountMinor.toFloat() / monthly * 100f else 0f,
+                percentage = if (monthly.totalMinor > 0) spend.monthlyAmountMinor.toFloat() / monthly.totalMinor * 100f else 0f,
             )
         }
 
         StatsUiState(
             isLoading = false,
             globalCurrency = currency,
-            monthlyTotalMinor = monthly,
-            annualEquivalentMinor = annual,
+            monthlyTotalMinor = monthly.totalMinor,
+            annualEquivalentMinor = annual.totalMinor,
             categoryItems = categoryItems,
             top5 = top5,
-            monthlyFromMonthlyCycleMinor = monthlyFromMonthly,
-            monthlyFromAnnualCycleMinor = monthlyFromAnnual,
-            monthlyTotalIncludingPausedMinor = totalIncludingPaused,
+            monthlyFromMonthlyCycleMinor = monthlyFromMonthly.totalMinor,
+            monthlyFromAnnualCycleMinor = monthlyFromAnnual.totalMinor,
+            monthlyTotalIncludingPausedMinor = totalIncludingPaused.totalMinor,
+            excludedCurrencies = totalIncludingPaused.excludedCurrencies,
         )
     }.stateIn(
         scope = viewModelScope,

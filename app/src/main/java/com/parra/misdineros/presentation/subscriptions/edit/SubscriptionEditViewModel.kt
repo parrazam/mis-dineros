@@ -2,10 +2,14 @@ package com.parra.misdineros.presentation.subscriptions.edit
 
 import android.content.Context
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.parra.misdineros.R
+import com.parra.misdineros.core.money.MoneyFormatter
+import com.parra.misdineros.data.icons.IconStorage
 import com.parra.misdineros.domain.model.BillingCycle
 import com.parra.misdineros.domain.model.Category
 import com.parra.misdineros.domain.model.Subscription
@@ -15,7 +19,6 @@ import com.parra.misdineros.domain.usecase.UpsertSubscriptionUseCase
 import com.parra.misdineros.presentation.navigation.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +27,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.File
 import java.time.LocalDate
 import java.util.UUID
 import javax.inject.Inject
@@ -40,20 +42,49 @@ data class SubscriptionEditUiState(
     val isLoading: Boolean = false,
     val isEditing: Boolean = false,
     val name: String = "",
-    val nameError: String? = null,
+    @StringRes val nameError: Int? = null,
     val iconRef: String = "initial",
     val amountText: String = "",
-    val amountError: String? = null,
+    @StringRes val amountError: Int? = null,
     val currencyCode: String = "EUR",
     val billingCycle: BillingCycle = BillingCycle.MONTHLY,
     val nextRenewalDate: LocalDate = LocalDate.now().plusMonths(1),
-    val dateError: String? = null,
-    val categoryId: String = "builtin_otros",
+    @StringRes val dateError: Int? = null,
+    val categoryId: String = Category.FALLBACK_ID,
     val categories: List<Category> = emptyList(),
     val notifyDaysBefore: Int? = null,
     val notes: String = "",
-    val originalCreatedAt: Long = System.currentTimeMillis(),
+    /** Suscripción que se está editando, o `null` si se crea una nueva. */
+    val original: Subscription? = null,
 )
+
+/**
+ * Construye la suscripción a persistir a partir del formulario. Es una función pura para poder
+ * probar sin Android las reglas de conservación al editar:
+ *  - `isPaused` se mantiene (antes `save()` reactivaba en silencio una suscripción pausada).
+ *  - `billingAnchorDay` solo se recalcula si el usuario cambió la fecha; si no, una suscripción
+ *    anclada al 31 que hoy muestra el 28 de febrero se quedaría anclada al 28 para siempre.
+ */
+internal fun SubscriptionEditUiState.toSubscription(newId: String, amountMinor: Long, now: Long): Subscription {
+    val original = original
+    val dateChanged = original == null || nextRenewalDate != original.nextRenewalDate
+    return Subscription(
+        id = original?.id ?: newId,
+        name = name.trim(),
+        iconRef = iconRef,
+        amountMinor = amountMinor,
+        currencyCode = currencyCode,
+        billingCycle = billingCycle,
+        nextRenewalDate = nextRenewalDate,
+        billingAnchorDay = if (dateChanged) nextRenewalDate.dayOfMonth else original.billingAnchorDay,
+        categoryId = categoryId,
+        isPaused = original?.isPaused ?: false,
+        notifyDaysBefore = notifyDaysBefore,
+        notes = notes.takeIf { it.isNotBlank() },
+        createdAt = original?.createdAt ?: now,
+        updatedAt = now,
+    )
+}
 
 sealed interface SubscriptionEditUiEvent {
     data object Saved : SubscriptionEditUiEvent
@@ -66,6 +97,7 @@ class SubscriptionEditViewModel @Inject constructor(
     private val subscriptionRepository: SubscriptionRepository,
     private val categoryRepository: CategoryRepository,
     private val upsertSubscription: UpsertSubscriptionUseCase,
+    private val iconStorage: IconStorage,
 ) : ViewModel() {
 
     private val subscriptionId: String? = savedStateHandle.toRoute<Destination.SubscriptionEdit>().id
@@ -88,7 +120,7 @@ class SubscriptionEditViewModel @Inject constructor(
                     state.copy(
                         categories = cats,
                         categoryId = if (state.categoryId.isEmpty() || cats.none { it.id == state.categoryId })
-                            cats.firstOrNull()?.id ?: "builtin_otros"
+                            cats.firstOrNull()?.id ?: Category.FALLBACK_ID
                         else state.categoryId,
                     )
                 }
@@ -124,7 +156,7 @@ class SubscriptionEditViewModel @Inject constructor(
                         categoryId = sub.categoryId,
                         notifyDaysBefore = sub.notifyDaysBefore,
                         notes = sub.notes ?: "",
-                        originalCreatedAt = sub.createdAt,
+                        original = sub,
                     )
                 }
             } else {
@@ -144,15 +176,12 @@ class SubscriptionEditViewModel @Inject constructor(
     fun onNotesChange(value: String) = _uiState.update { it.copy(notes = value) }
 
     fun onImagePicked(uri: Uri) {
-        viewModelScope.launch(Dispatchers.IO) {
-            runCatching {
-                val iconsDir = File(context.filesDir, "icons").also { it.mkdirs() }
-                val destFile = File(iconsDir, "${UUID.randomUUID()}.jpg")
-                context.contentResolver.openInputStream(uri)?.use { input ->
-                    destFile.outputStream().use { output -> input.copyTo(output) }
-                }
-                _uiState.update { it.copy(iconRef = "file:${destFile.absolutePath}") }
-            }
+        viewModelScope.launch {
+            val newRef = iconStorage.importFromUri(uri, IconStorage.Kind.SUBSCRIPTION) ?: return@launch
+            val previous = _uiState.value.iconRef
+            _uiState.update { it.copy(iconRef = newRef) }
+            // Una imagen elegida antes en esta misma edición y aún no guardada ya no sirve.
+            if (previous != _uiState.value.original?.iconRef) iconStorage.delete(previous)
         }
     }
 
@@ -161,51 +190,31 @@ class SubscriptionEditViewModel @Inject constructor(
         var hasError = false
 
         if (state.name.isBlank()) {
-            _uiState.update { it.copy(nameError = "El nombre es obligatorio") }
+            _uiState.update { it.copy(nameError = R.string.error_name_required) }
             hasError = true
         }
 
-        val amountMinor = parseAmountMinor(state.amountText, state.currencyCode)
+        val amountMinor = MoneyFormatter.parseToMinor(state.amountText, state.currencyCode)
         if (amountMinor == null || amountMinor <= 0) {
-            _uiState.update { it.copy(amountError = "Introduce un importe válido") }
+            _uiState.update { it.copy(amountError = R.string.error_invalid_amount) }
             hasError = true
         }
 
         if (state.nextRenewalDate.isBefore(LocalDate.now())) {
-            _uiState.update { it.copy(dateError = "La fecha de renovación no puede estar en el pasado") }
+            _uiState.update { it.copy(dateError = R.string.error_date_in_past) }
             hasError = true
         }
 
         if (hasError) return
 
         viewModelScope.launch {
-            val now = System.currentTimeMillis()
-            val subscription = Subscription(
-                id = subscriptionId ?: UUID.randomUUID().toString(),
-                name = state.name.trim(),
-                iconRef = state.iconRef,
+            val subscription = state.toSubscription(
+                newId = subscriptionId ?: UUID.randomUUID().toString(),
                 amountMinor = amountMinor!!,
-                currencyCode = state.currencyCode,
-                billingCycle = state.billingCycle,
-                nextRenewalDate = state.nextRenewalDate,
-                billingAnchorDay = state.nextRenewalDate.dayOfMonth,
-                categoryId = state.categoryId,
-                isPaused = false,
-                notifyDaysBefore = state.notifyDaysBefore,
-                notes = state.notes.takeIf { it.isNotBlank() },
-                createdAt = state.originalCreatedAt,
-                updatedAt = now,
+                now = System.currentTimeMillis(),
             )
             upsertSubscription(subscription)
             _events.send(SubscriptionEditUiEvent.Saved)
         }
     }
-
-    private fun parseAmountMinor(text: String, currencyCode: String): Long? = runCatching {
-        val fractionDigits = java.util.Currency.getInstance(currencyCode).defaultFractionDigits
-        val cleaned = text.replace(",", ".").replace("[^0-9.]".toRegex(), "")
-        val amount = cleaned.toDouble()
-        if (fractionDigits > 0) (amount * Math.pow(10.0, fractionDigits.toDouble())).toLong()
-        else amount.toLong()
-    }.getOrNull()
 }

@@ -7,6 +7,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.time.LocalDate
@@ -14,14 +15,12 @@ import java.time.LocalDate
 class CalcMonthlySpendUseCaseTest {
 
     private lateinit var fxRepo: FxRepository
-    private lateinit var subscriptionRepo: com.parra.misdineros.domain.repository.SubscriptionRepository
     private lateinit var useCase: CalcMonthlySpendUseCase
 
     @Before
     fun setUp() {
         fxRepo = mockk()
-        subscriptionRepo = mockk()
-        useCase = CalcMonthlySpendUseCase(subscriptionRepo, fxRepo)
+        useCase = CalcMonthlySpendUseCase(fxRepo)
         // Mismo código → tasa 1.0
         coEvery { fxRepo.convert(any(), any(), any()) } answers {
             firstArg<Long>()
@@ -51,7 +50,7 @@ class CalcMonthlySpendUseCaseTest {
             sub("2", 2000L),
         )
         val result = useCase(subs, "EUR")
-        assertEquals(3000L, result)
+        assertEquals(3000L, result.totalMinor)
     }
 
     @Test
@@ -61,7 +60,7 @@ class CalcMonthlySpendUseCaseTest {
             sub("2", 2000L, paused = true),
         )
         val result = useCase(subs, "EUR")
-        assertEquals(1000L, result)
+        assertEquals(1000L, result.totalMinor)
     }
 
     @Test
@@ -70,13 +69,13 @@ class CalcMonthlySpendUseCaseTest {
             sub("1", 1200L, cycle = BillingCycle.ANNUAL),
         )
         val result = useCase(subs, "EUR")
-        assertEquals(100L, result) // 1200 / 12 = 100
+        assertEquals(100L, result.totalMinor) // 1200 / 12 = 100
     }
 
     @Test
     fun `lista vacia devuelve cero`() = runTest {
         val result = useCase(emptyList(), "EUR")
-        assertEquals(0L, result)
+        assertEquals(0L, result.totalMinor)
     }
 
     @Test
@@ -85,6 +84,32 @@ class CalcMonthlySpendUseCaseTest {
         coEvery { fxRepo.convert(1000L, "USD", "EUR") } returns 930L
         val subs = listOf(sub("1", 1000L, currency = "USD"))
         val result = useCase(subs, "EUR")
-        assertEquals(930L, result)
+        assertEquals(930L, result.totalMinor)
+    }
+
+    @Test
+    fun `anual no divisible entre 12 se redondea en vez de truncar`() = runTest {
+        // 10000 / 12 = 833,33 → 833 ; 10007 / 12 = 833,9 → 834
+        assertEquals(833L, useCase(listOf(sub("1", 10000L, cycle = BillingCycle.ANNUAL)), "EUR").totalMinor)
+        assertEquals(834L, useCase(listOf(sub("1", 10007L, cycle = BillingCycle.ANNUAL)), "EUR").totalMinor)
+    }
+
+    @Test
+    fun `sin tipo de cambio la suscripcion se excluye y se senala su divisa`() = runTest {
+        coEvery { fxRepo.convert(any(), "XXX", "EUR") } returns null
+        val subs = listOf(sub("1", 1000L), sub("2", 5000L, currency = "XXX"), sub("3", 700L, currency = "XXX"))
+
+        val result = useCase(subs, "EUR")
+
+        assertEquals(1000L, result.totalMinor)
+        assertEquals(setOf("XXX"), result.excludedCurrencies)
+        assertTrue(result.hasExclusions)
+    }
+
+    @Test
+    fun `una pausada sin tipo de cambio no genera aviso`() = runTest {
+        coEvery { fxRepo.convert(any(), "XXX", "EUR") } returns null
+        val result = useCase(listOf(sub("1", 1000L), sub("2", 5000L, currency = "XXX", paused = true)), "EUR")
+        assertEquals(emptySet<String>(), result.excludedCurrencies)
     }
 }

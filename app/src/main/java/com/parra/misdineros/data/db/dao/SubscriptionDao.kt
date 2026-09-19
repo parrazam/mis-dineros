@@ -36,6 +36,9 @@ interface SubscriptionDao {
     @Query("UPDATE subscriptions SET nextRenewalDate = :newDate, updatedAt = :now WHERE id = :id")
     suspend fun updateRenewalDate(id: String, newDate: String, now: Long)
 
+    @Query("UPDATE subscriptions SET categoryId = :to, updatedAt = :now WHERE categoryId = :from")
+    suspend fun reassignCategory(from: String, to: String, now: Long)
+
     @Query("SELECT * FROM subscriptions ORDER BY name ASC")
     suspend fun getAll(): List<SubscriptionEntity>
 

@@ -49,7 +49,7 @@ class MonthlySummaryWorker @AssistedInject constructor(
             if (!notifManager.areNotificationsEnabled()) return Result.success()
 
             val subscriptions = subscriptionRepository.observeAll().first()
-            val monthlyTotal = calcMonthlySpend(subscriptions, settings.globalCurrencyCode)
+            val monthlyTotal = calcMonthlySpend(subscriptions, settings.globalCurrencyCode).totalMinor
             val activeCount = subscriptions.count { !it.isPaused }
 
             val notification = NotificationCompat.Builder(appContext, NotificationChannelFactory.CHANNEL_SUMMARY)

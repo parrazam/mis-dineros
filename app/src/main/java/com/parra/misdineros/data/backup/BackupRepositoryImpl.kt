@@ -20,12 +20,16 @@ class BackupRepositoryImpl @Inject constructor(
     private val settingsRepository: SettingsRepository,
 ) : BackupRepository {
 
-    override suspend fun snapshot() = BackupSnapshot(
-        subscriptions = subscriptionDao.getAll().map { it.toDomain() },
-        categories = categoryDao.getAll().map { it.toDomain() },
-        fxRates = fxRateDao.getAll().map { it.toDomain() },
-        settings = settingsRepository.observe().first(),
-    )
+    // Las tres tablas se leen en una transacción para que un export durante una escritura
+    // concurrente (worker de renovaciones, edición) no mezcle estados.
+    override suspend fun snapshot() = db.withTransaction {
+        BackupSnapshot(
+            subscriptions = subscriptionDao.getAll().map { it.toDomain() },
+            categories = categoryDao.getAll().map { it.toDomain() },
+            fxRates = fxRateDao.getAll().map { it.toDomain() },
+            settings = settingsRepository.observe().first(),
+        )
+    }
 
     override suspend fun restore(snapshot: BackupSnapshot) {
         db.withTransaction {

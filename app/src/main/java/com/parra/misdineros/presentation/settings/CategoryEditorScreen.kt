@@ -53,7 +53,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -62,12 +61,8 @@ import com.parra.misdineros.R
 import com.parra.misdineros.designsystem.component.CategoryIconContent
 import com.parra.misdineros.designsystem.component.categoryIconVector
 import com.parra.misdineros.domain.model.Category
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
 import java.text.BreakIterator
-import java.util.UUID
 
 private fun isValidSingleEmoji(text: String): Boolean {
     if (text.isEmpty()) return false
@@ -139,22 +134,12 @@ fun CategoryEditorScreen(
     var deleteTarget by remember { mutableStateOf<Category?>(null) }
 
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     val imageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             scope.launch {
-                val path = withContext(Dispatchers.IO) {
-                    runCatching {
-                        val dir = File(context.filesDir, "category_icons").also { it.mkdirs() }
-                        val dest = File(dir, "${UUID.randomUUID()}.jpg")
-                        context.contentResolver.openInputStream(uri)!!.use { i ->
-                            dest.outputStream().use { o -> i.copyTo(o) }
-                        }
-                        dest.absolutePath
-                    }.getOrNull()
-                }
-                if (path != null) dialog = dialog.copy(iconKey = "file:$path")
+                val key = viewModel.importIcon(uri, current = dialog.iconKey, saved = dialog.editing?.iconKey)
+                if (key != null) dialog = dialog.copy(iconKey = key)
             }
         }
     }
@@ -162,7 +147,7 @@ fun CategoryEditorScreen(
     // ── Add/Edit dialog ───────────────────────────────────────────────────────
     if (dialog.isVisible) {
         CategoryDialog(
-            title = if (dialog.editing == null) "Nueva categoría" else "Editar categoría",
+            title = stringResource(if (dialog.editing == null) R.string.category_new else R.string.category_edit),
             name = dialog.name,
             iconKey = dialog.iconKey,
             colorArgb = dialog.colorArgb,
@@ -189,16 +174,16 @@ fun CategoryEditorScreen(
     deleteTarget?.let { target ->
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
-            title = { Text("Eliminar categoría") },
-            text = { Text("¿Eliminar «${target.name}»? Las suscripciones que la usen conservarán su id de categoría.") },
+            title = { Text(stringResource(R.string.category_delete_title)) },
+            text = { Text(stringResource(R.string.category_delete_message, target.name)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.delete(target.id)
                     deleteTarget = null
-                }) { Text("Eliminar") }
+                }) { Text(stringResource(R.string.action_delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { deleteTarget = null }) { Text("Cancelar") }
+                TextButton(onClick = { deleteTarget = null }) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }
@@ -206,7 +191,7 @@ fun CategoryEditorScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Categorías") },
+                title = { Text(stringResource(R.string.settings_categories)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
@@ -216,7 +201,7 @@ fun CategoryEditorScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { dialog = DialogState(isVisible = true) }) {
-                Icon(Icons.Default.Add, contentDescription = "Añadir categoría")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.category_add))
             }
         },
     ) { innerPadding ->
@@ -256,16 +241,16 @@ private fun CategoryRow(category: Category, onEdit: () -> Unit, onDelete: () -> 
             )
         },
         supportingContent = if (category.isBuiltIn) {
-            { Text("Predefinida", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            { Text(stringResource(R.string.category_builtin), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         } else null,
         trailingContent = {
             if (!category.isBuiltIn) {
                 Row {
                     IconButton(onClick = onEdit) {
-                        Icon(Icons.Default.Edit, contentDescription = "Editar")
+                        Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.action_edit))
                     }
                     IconButton(onClick = onDelete) {
-                        Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = MaterialTheme.colorScheme.error)
                     }
                 }
             }
@@ -300,12 +285,12 @@ private fun CategoryDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = onNameChange,
-                    label = { Text("Nombre") },
+                    label = { Text(stringResource(R.string.category_field_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
 
-                Text("Icono", style = MaterialTheme.typography.labelMedium)
+                Text(stringResource(R.string.category_field_icon), style = MaterialTheme.typography.labelMedium)
 
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                     listOf(
@@ -338,12 +323,12 @@ private fun CategoryDialog(
                                 val single = takeFirstGraphemeCluster(raw)
                                 onIconChange("emoji:$single")
                             },
-                            label = { Text("Emoji") },
+                            label = { Text(stringResource(R.string.category_field_emoji)) },
                             placeholder = { Text("🎮") },
                             isError = emojiError,
                             supportingText = {
-                                if (emojiError) Text("Solo se permite un emoji")
-                                else Text("Escribe o pega un emoji")
+                                if (emojiError) Text(stringResource(R.string.category_emoji_error))
+                                else Text(stringResource(R.string.category_emoji_hint))
                             },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
@@ -362,23 +347,23 @@ private fun CategoryDialog(
                                     modifier = Modifier.size(18.dp),
                                 )
                                 Spacer(Modifier.size(8.dp))
-                                Text("Cambiar imagen")
+                                Text(stringResource(R.string.category_change_image))
                             }
                         }
                     }
                 }
 
                 if (mode != IconMode.IMAGE) {
-                    Text("Color", style = MaterialTheme.typography.labelMedium)
+                    Text(stringResource(R.string.category_field_color), style = MaterialTheme.typography.labelMedium)
                     ColorPickerRow(selected = colorArgb, onSelect = onColorChange)
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = onConfirm, enabled = name.isNotBlank() && iconValid) { Text("Guardar") }
+            TextButton(onClick = onConfirm, enabled = name.isNotBlank() && iconValid) { Text(stringResource(R.string.action_save)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         },
     )
 }

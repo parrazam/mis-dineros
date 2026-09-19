@@ -1,6 +1,5 @@
 package com.parra.misdineros.designsystem.component
 
-import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -22,13 +21,10 @@ import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
@@ -63,8 +59,8 @@ fun CategoryChip(category: Category, modifier: Modifier = Modifier) {
 fun CategoryIconContent(
     iconKey: String,
     colorArgb: Int,
-    size: Dp = 36.dp,
     modifier: Modifier = Modifier,
+    size: Dp = 36.dp,
 ) {
     val bgColor = Color(colorArgb)
     when {
@@ -82,10 +78,7 @@ fun CategoryIconContent(
         }
 
         iconKey.startsWith("file:") -> {
-            val path = iconKey.removePrefix("file:")
-            val bitmap: ImageBitmap? = remember(path) {
-                runCatching { BitmapFactory.decodeFile(path)?.asImageBitmap() }.getOrNull()
-            }
+            val bitmap = rememberFileBitmap(iconKey.removePrefix("file:"), size)
             if (bitmap != null) {
                 Image(
                     bitmap = bitmap,

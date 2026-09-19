@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.parra.misdineros.R
+import com.parra.misdineros.data.backup.BackupCrypto
 import com.parra.misdineros.designsystem.theme.AppTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -121,6 +122,7 @@ fun SettingsScreen(
         }
     }
 
+    val shareChooserTitle = stringResource(R.string.backup_share_chooser)
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
@@ -130,7 +132,7 @@ fun SettingsScreen(
                         putExtra(Intent.EXTRA_STREAM, event.uri)
                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
-                    context.startActivity(Intent.createChooser(send, "Compartir backup"))
+                    context.startActivity(Intent.createChooser(send, shareChooserTitle))
                 }
             }
         }
@@ -186,7 +188,7 @@ fun SettingsScreen(
                 TextButton(onClick = {
                     viewModel.setNotifTime(timePickerState.hour, timePickerState.minute)
                     showTimePicker = false
-                }) { Text("OK") }
+                }) { Text(stringResource(R.string.action_ok)) }
             },
             dismissButton = {
                 TextButton(onClick = { showTimePicker = false }) {
@@ -242,20 +244,20 @@ fun SettingsScreen(
                 importPasswordError = false
                 importPasswordInput = ""
             },
-            title = { Text("Archivo cifrado") },
+            title = { Text(stringResource(R.string.backup_encrypted_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Este archivo está protegido con contraseña.")
+                    Text(stringResource(R.string.backup_encrypted_message))
                     OutlinedTextField(
                         value = importPasswordInput,
                         onValueChange = { importPasswordInput = it; importPasswordError = false },
-                        label = { Text("Contraseña") },
+                        label = { Text(stringResource(R.string.backup_password)) },
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         singleLine = true,
                         isError = importPasswordError,
                         supportingText = if (importPasswordError) {
-                            { Text("Contraseña incorrecta") }
+                            { Text(stringResource(R.string.backup_password_wrong)) }
                         } else null,
                     )
                 }
@@ -266,7 +268,7 @@ fun SettingsScreen(
                         viewModel.importData(pendingImportUri!!, importPasswordInput.toCharArray())
                     },
                     enabled = importPasswordInput.isNotEmpty() && !isLoading,
-                ) { Text("Importar") }
+                ) { Text(stringResource(R.string.backup_import_confirm_button)) }
             },
             dismissButton = {
                 TextButton(onClick = {
@@ -346,7 +348,7 @@ fun SettingsScreen(
                     onCheckedChange = viewModel::setSummaryEnabled,
                 )
                 NavSettingsItem(
-                    title = "Probar notificación ahora",
+                    title = stringResource(R.string.settings_test_notification),
                     onClick = viewModel::testNotificationNow,
                 )
             }
@@ -377,7 +379,7 @@ fun SettingsScreen(
                 onClick = { importLauncher.launch(arrayOf("*/*")) },
             )
             SwitchSettingsItem(
-                title = "Copia de seguridad automática",
+                title = stringResource(R.string.settings_auto_backup),
                 supportingText = "Restaura tus datos al reinstalar o cambiar de móvil. Se sube cifrado a tu cuenta de Google. Máx. 25 MB.",
                 checked = settings.autoBackupEnabled,
                 onCheckedChange = viewModel::setAutoBackupEnabled,
@@ -408,7 +410,7 @@ private fun ExportModeDialog(
     var passwordConfirm by remember { mutableStateOf("") }
 
     val passwordsMatch = password == passwordConfirm
-    val passwordValid = !encryptEnabled || (password.length >= 6 && passwordsMatch)
+    val passwordValid = !encryptEnabled || (password.length >= BackupCrypto.MIN_PASSWORD_LENGTH && passwordsMatch)
 
     fun resolvedPassword(): CharArray? = if (encryptEnabled) password.toCharArray() else null
 
@@ -418,7 +420,7 @@ private fun ExportModeDialog(
         text = {
             Column {
                 SwitchSettingsItem(
-                    title = "Cifrar con contraseña",
+                    title = stringResource(R.string.backup_encrypt_with_password),
                     checked = encryptEnabled,
                     onCheckedChange = { enabled ->
                         encryptEnabled = enabled
@@ -433,7 +435,7 @@ private fun ExportModeDialog(
                         OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },
-                            label = { Text("Contraseña") },
+                            label = { Text(stringResource(R.string.backup_password)) },
                             visualTransformation = PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                             singleLine = true,
@@ -441,16 +443,16 @@ private fun ExportModeDialog(
                         OutlinedTextField(
                             value = passwordConfirm,
                             onValueChange = { passwordConfirm = it },
-                            label = { Text("Confirmar contraseña") },
+                            label = { Text(stringResource(R.string.backup_password_confirm)) },
                             visualTransformation = PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                             singleLine = true,
                             isError = passwordConfirm.isNotEmpty() && !passwordsMatch,
                             supportingText = when {
                                 passwordConfirm.isNotEmpty() && !passwordsMatch ->
-                                    { { Text("Las contraseñas no coinciden") } }
-                                password.isNotEmpty() && password.length < 6 ->
-                                    { { Text("Mínimo 6 caracteres") } }
+                                    { { Text(stringResource(R.string.backup_password_mismatch)) } }
+                                password.isNotEmpty() && password.length < BackupCrypto.MIN_PASSWORD_LENGTH ->
+                                    { { Text(stringResource(R.string.backup_password_min_length, BackupCrypto.MIN_PASSWORD_LENGTH)) } }
                                 else -> null
                             },
                         )
@@ -463,8 +465,8 @@ private fun ExportModeDialog(
                 }
                 HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
                 ListItem(
-                    headlineContent = { Text("Guardar en archivos") },
-                    supportingContent = { Text("Elige dónde guardarlo en el dispositivo") },
+                    headlineContent = { Text(stringResource(R.string.backup_save_to_files)) },
+                    supportingContent = { Text(stringResource(R.string.backup_save_to_files_support)) },
                     leadingContent = { Icon(Icons.Default.FolderOpen, contentDescription = null) },
                     modifier = Modifier
                         .alpha(if (passwordValid) 1f else 0.38f)
@@ -472,8 +474,8 @@ private fun ExportModeDialog(
                 )
                 HorizontalDivider()
                 ListItem(
-                    headlineContent = { Text("Compartir") },
-                    supportingContent = { Text("Envía el archivo por otra aplicación") },
+                    headlineContent = { Text(stringResource(R.string.backup_share)) },
+                    supportingContent = { Text(stringResource(R.string.backup_share_support)) },
                     leadingContent = { Icon(Icons.Default.Share, contentDescription = null) },
                     modifier = Modifier
                         .alpha(if (passwordValid) 1f else 0.38f)
@@ -573,7 +575,7 @@ private fun ThemePickerItem(current: AppTheme, onSelect: (AppTheme) -> Unit) {
         AppTheme.DARK to "🌙 Oscuro",
     )
     ListItem(
-        headlineContent = { Text("Tema") },
+        headlineContent = { Text(stringResource(R.string.settings_theme)) },
         supportingContent = {
             Row(
                 modifier = Modifier

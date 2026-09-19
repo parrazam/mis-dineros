@@ -1,6 +1,8 @@
 package com.parra.misdineros.presentation.subscriptions.iconpicker
 
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.res.stringResource
+import com.parra.misdineros.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -46,7 +48,7 @@ fun IconPickerBottomSheet(
                 .padding(horizontal = 16.dp),
         ) {
             Text(
-                text = "Elige icono del servicio",
+                text = stringResource(R.string.icon_picker_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 12.dp),
             )
@@ -64,7 +66,7 @@ fun IconPickerBottomSheet(
                     modifier = Modifier.size(18.dp),
                 )
                 Spacer(Modifier.size(8.dp))
-                Text("Subir imagen de la galería")
+                Text(stringResource(R.string.icon_picker_from_gallery))
             }
 
             Spacer(Modifier.height(16.dp))

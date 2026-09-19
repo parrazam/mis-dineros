@@ -1,10 +1,5 @@
 package com.parra.misdineros.presentation.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
 
 sealed interface Destination {
@@ -35,15 +30,3 @@ sealed interface Destination {
     @Serializable
     data object CategoryEditor : Destination
 }
-
-data class BottomNavItem(
-    val route: Destination,
-    val icon: ImageVector,
-    val labelRes: Int,
-)
-
-val bottomNavItems = listOf(
-    BottomNavItem(Destination.Home, Icons.Default.Home, android.R.string.ok),
-    BottomNavItem(Destination.SubscriptionList, Icons.AutoMirrored.Filled.List, android.R.string.ok),
-    BottomNavItem(Destination.Stats, Icons.Default.BarChart, android.R.string.ok),
-)

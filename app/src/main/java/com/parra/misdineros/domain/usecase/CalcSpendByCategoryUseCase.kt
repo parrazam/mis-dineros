@@ -1,6 +1,5 @@
 package com.parra.misdineros.domain.usecase
 
-import com.parra.misdineros.domain.model.BillingCycle
 import com.parra.misdineros.domain.model.Subscription
 import com.parra.misdineros.domain.repository.FxRepository
 import javax.inject.Inject
@@ -21,13 +20,10 @@ class CalcSpendByCategoryUseCase @Inject constructor(
             .filter { !it.isPaused }
             .groupBy { it.categoryId }
 
+        // Sin tipo de cambio la suscripción no cuenta; el aviso lo da CalcMonthlySpendUseCase.
         return grouped.map { (categoryId, subs) ->
             val total = subs.sumOf { sub ->
-                val monthly = when (sub.billingCycle) {
-                    BillingCycle.MONTHLY -> sub.amountMinor
-                    BillingCycle.ANNUAL -> sub.amountMinor / 12
-                }
-                fxRepo.convert(monthly, sub.currencyCode, targetCurrency)
+                fxRepo.convert(sub.monthlyAmountMinor, sub.currencyCode, targetCurrency) ?: 0L
             }
             CategorySpend(categoryId, total)
         }.sortedByDescending { it.monthlyAmountMinor }

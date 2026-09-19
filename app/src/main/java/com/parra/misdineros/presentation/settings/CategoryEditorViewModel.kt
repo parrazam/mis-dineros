@@ -2,6 +2,8 @@ package com.parra.misdineros.presentation.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.net.Uri
+import com.parra.misdineros.data.icons.IconStorage
 import com.parra.misdineros.domain.model.Category
 import com.parra.misdineros.domain.repository.CategoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CategoryEditorViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
+    private val iconStorage: IconStorage,
 ) : ViewModel() {
 
     val categories: StateFlow<List<Category>> = categoryRepository.observeAll()
@@ -26,6 +29,16 @@ class CategoryEditorViewModel @Inject constructor(
 
     fun delete(id: String) {
         viewModelScope.launch { categoryRepository.delete(id) }
+    }
+
+    /**
+     * Importa la imagen reducida y devuelve su `file:`; borra la elegida antes en este mismo
+     * diálogo ([current]) si no es la que ya tenía la categoría guardada ([saved]).
+     */
+    suspend fun importIcon(uri: Uri, current: String, saved: String?): String? {
+        val newKey = iconStorage.importFromUri(uri, IconStorage.Kind.CATEGORY) ?: return null
+        if (current != saved) iconStorage.delete(current)
+        return newKey
     }
 
     fun newCategory(name: String, iconKey: String, colorArgb: Int): Category = Category(

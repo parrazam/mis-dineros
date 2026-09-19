@@ -55,16 +55,16 @@ fun FxRatesEditorScreen(
     if (showResetDialog) {
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
-            title = { Text("Restablecer tasas") },
-            text = { Text("Se restaurarán los valores predeterminados incluidos con la aplicación. ¿Continuar?") },
+            title = { Text(stringResource(R.string.fx_reset_title)) },
+            text = { Text(stringResource(R.string.fx_reset_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.resetToDefaults()
                     showResetDialog = false
-                }) { Text("Restablecer") }
+                }) { Text(stringResource(R.string.action_reset)) }
             },
             dismissButton = {
-                TextButton(onClick = { showResetDialog = false }) { Text("Cancelar") }
+                TextButton(onClick = { showResetDialog = false }) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }
@@ -72,7 +72,7 @@ fun FxRatesEditorScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Tasas de cambio") },
+                title = { Text(stringResource(R.string.settings_fx_rates)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
@@ -80,7 +80,7 @@ fun FxRatesEditorScreen(
                 },
                 actions = {
                     IconButton(onClick = { showResetDialog = true }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Restablecer")
+                        Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.action_reset))
                     }
                 },
             )

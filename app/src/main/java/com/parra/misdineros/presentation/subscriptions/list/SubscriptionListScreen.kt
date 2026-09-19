@@ -281,8 +281,8 @@ private fun SwipeToDeleteItem(
     if (showConfirm) {
         AlertDialog(
             onDismissRequest = { showConfirm = false },
-            title = { Text("Eliminar suscripción") },
-            text = { Text("¿Seguro que quieres eliminar «${item.subscription.name}»?") },
+            title = { Text(stringResource(R.string.delete_subscription_title)) },
+            text = { Text(stringResource(R.string.delete_subscription_message_short, item.subscription.name)) },
             confirmButton = {
                 TextButton(
                     onClick = { showConfirm = false; onDelete() },

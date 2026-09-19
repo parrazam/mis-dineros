@@ -359,9 +359,17 @@ private fun GlobalTab(state: StatsUiState) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        if (state.monthlyTotalMinor == 0L) {
+        if (state.monthlyTotalMinor == 0L && state.excludedCurrencies.isEmpty()) {
             EmptyStats()
             return@Column
+        }
+
+        if (state.excludedCurrencies.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.spend_missing_rates, state.excludedCurrencies.joinToString(", ")),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
         }
 
         Row(
@@ -474,13 +482,13 @@ private fun BillingCycleSplitCard(
             }
 
             CycleRow(
-                label = "Mensual",
+                label = stringResource(R.string.billing_monthly),
                 amount = MoneyFormatter.format(monthlyFromMonthlyMinor, globalCurrency),
                 pct = "$monthlyPct%",
                 dotColor = MaterialTheme.colorScheme.primary,
             )
             CycleRow(
-                label = "Anual / mes",
+                label = stringResource(R.string.stats_split_annual_per_month),
                 amount = MoneyFormatter.format(monthlyFromAnnualMinor, globalCurrency),
                 pct = "$annualPct%",
                 dotColor = MaterialTheme.colorScheme.inversePrimary,
@@ -539,13 +547,13 @@ private fun ActiveVsTotalCard(
             }
 
             CycleRow(
-                label = "Activo",
+                label = stringResource(R.string.stats_active),
                 amount = MoneyFormatter.format(activeMinor, globalCurrency),
                 pct = "${(fraction * 100).roundToInt()}%",
                 dotColor = MaterialTheme.colorScheme.primary,
             )
             CycleRow(
-                label = "Total contratado",
+                label = stringResource(R.string.stats_total_contracted),
                 amount = MoneyFormatter.format(totalMinor, globalCurrency),
                 pct = "100%",
                 dotColor = MaterialTheme.colorScheme.inversePrimary,

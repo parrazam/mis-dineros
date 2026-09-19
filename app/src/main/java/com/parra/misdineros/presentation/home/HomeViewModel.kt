@@ -34,6 +34,8 @@ data class HomeUiState(
     val upcomingRenewals: List<UpcomingRenewal> = emptyList(),
     val top5: List<RankedSubscription> = emptyList(),
     val categories: Map<String, Category> = emptyMap(),
+    /** Divisas de suscripciones activas sin tipo de cambio a la global; sus importes no están en los totales. */
+    val excludedCurrencies: Set<String> = emptySet(),
 )
 
 @HiltViewModel
@@ -68,8 +70,9 @@ class HomeViewModel @Inject constructor(
         HomeUiState(
             isLoading = false,
             globalCurrency = currency,
-            monthlyTotalMinor = monthly,
-            annualEquivalentMinor = annual,
+            monthlyTotalMinor = monthly.totalMinor,
+            annualEquivalentMinor = annual.totalMinor,
+            excludedCurrencies = monthly.excludedCurrencies,
             activeCount = subscriptions.count { !it.isPaused },
             pausedCount = subscriptions.count { it.isPaused },
             upcomingRenewals = upcoming,

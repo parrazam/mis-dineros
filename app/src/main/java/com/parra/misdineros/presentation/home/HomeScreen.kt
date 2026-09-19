@@ -205,6 +205,14 @@ private fun SummaryCard(state: HomeUiState) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
             )
+            if (state.excludedCurrencies.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.spend_missing_rates, state.excludedCurrencies.joinToString(", ")),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
 
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 16.dp),
@@ -482,7 +490,7 @@ private fun EmptyHomeState(onGoToSubscriptions: () -> Unit, modifier: Modifier =
         )
         Spacer(Modifier.height(24.dp))
         Button(onClick = onGoToSubscriptions) {
-            Text("Añadir suscripción")
+            Text(stringResource(R.string.home_add_subscription))
             Spacer(Modifier.size(8.dp))
             Icon(
                 Icons.AutoMirrored.Filled.ArrowForward,
