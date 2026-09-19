@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Build & test commands
 
-The Android SDK is at `~/Android/Sdk` (not in `PATH`; `ANDROID_HOME` unset). Prefix Gradle invocations with `ANDROID_HOME=$HOME/Android/Sdk`, and use `~/Android/Sdk/platform-tools/adb` and `~/Android/Sdk/emulator/emulator` directly. The machine has KVM and headless emulators work (`-no-window -gpu swiftshader_indirect`); AVDs `Pixel_9a`, `Phone_Screenshots` (1080x2160) and `Tablet_MisDineros` (2560x1600) exist under `~/.android/avd/`. There is no `cmdline-tools` (no `avdmanager`/`sdkmanager`) — create AVDs by cloning an existing `.avd` dir and editing `config.ini`.
+The Android SDK is at `~/Android/Sdk` (not in `PATH`; `ANDROID_HOME` unset). Prefix Gradle invocations with `ANDROID_HOME=$HOME/Android/Sdk`, and use `~/Android/Sdk/platform-tools/adb` and `~/Android/Sdk/emulator/emulator` directly. The machine has KVM and headless emulators work (`-no-window -gpu swiftshader_indirect`); AVDs `Pixel_9a`, `Phone_Screenshots` (1080x2160) and `Tablet_MisDineros` (2560x1600) exist under `~/.android/avd/`. `Pixel_9a` is configured with `hw.ramSize=2048`, which is **not enough** for `connectedAndroidTest` on the `google_apis_playstore` image: the `lowmemorykiller` kills the app process before the first test runs and the only symptom is `Test run failed to complete. Instrumentation run failed due to Process crashed.` with `Starting 0 tests`. It is not an app bug. Launch with `-memory 4096` (or raise `hw.ramSize` in its `config.ini`); the other two AVDs already have 4096. There is no `cmdline-tools` (no `avdmanager`/`sdkmanager`) — create AVDs by cloning an existing `.avd` dir and editing `config.ini`.
 
 ```bash
 # Unit tests (JVM, no device needed)
