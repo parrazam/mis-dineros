@@ -12,11 +12,11 @@ Gestor de suscripciones personal para Android. Sin servidores, sin telemetría, 
 
 ## Características
 
-- **Suscripciones** — nombre, importe, moneda, ciclo mensual/anual, categoría, notas e icono personalizado
+- **Suscripciones** — nombre, importe, moneda, ciclo mensual/anual, categoría, notas e icono personalizado (las imágenes subidas se reescalan a 512 px y se recomprimen a JPEG)
 - **Dashboard** — gasto mensual real, equivalente anual, próximas renovaciones (7 días) y top 5 más caras
 - **Renovaciones automáticas** — al vencer una fecha de renovación, la suscripción avanza sola al siguiente ciclo (reanclando el día de facturación original), de modo que nunca queda anclada en el pasado ni deja de notificarse
 - **Estadísticas** — donut por categoría, barras mensual/anual y ranking
-- **Divisas** — conversión automática a moneda global con tasas de cambio editables y bundled
+- **Divisas** — conversión automática a moneda global con tasas de cambio editables y bundled. Si falta el par de conversión, la suscripción se excluye del total en vez de contarse a 1:1, y la moneda afectada se avisa en Inicio y Estadísticas
 - **Notificaciones locales** — aviso configurable N días antes por suscripción + resumen mensual
 - **Exportación e importación** — copia de seguridad con iconos embebidos, cifrado AES-256-GCM opcional y share sheet nativo (LocalSend, Telegram, Drive…)
 - **Copia de seguridad automática** — Android Auto Backup a cuenta Google, activable/desactivable desde Ajustes
@@ -77,14 +77,17 @@ app/src/main/java/com/parra/misdineros/
 
 ### Exportación/importación manual
 
-El fichero exportado tiene una cabecera de 5 bytes (`MDB1` + flags) seguida del payload:
+El fichero exportado empieza por el magic `MDB1` (4 bytes) y un byte de flags que identifica el formato:
 
-| Formato | Flags | Payload |
-|---|---|---|
-| Plano | `0x00` | JSON UTF-8 |
-| Cifrado | `0x01` | salt (16B) + IV (12B) + AES-256-GCM ciphertext |
+| Formato | Flags | Cabecera | Payload |
+|---|---|---|---|
+| Plano | `0x00` | 5B (magic + flags) | JSON UTF-8 |
+| Cifrado sin AAD | `0x01` | 33B (magic + flags + salt 16B + IV 12B) | AES-256-GCM ciphertext |
+| Cifrado con AAD | `0x02` | 33B (magic + flags + salt 16B + IV 12B) | AES-256-GCM ciphertext |
 
-El cifrado es opcional: el usuario lo activa al exportar e introduce una contraseña. La clave se deriva con PBKDF2WithHmacSHA256 (200 000 iteraciones). Los ficheros exportados antes de esta versión (JSON sin cabecera) se importan sin cambios — compatibilidad total hacia atrás.
+Todas las exportaciones cifradas nuevas usan `0x02`, que mete los 33 bytes de cabecera en GCM como AAD: así un byte de flags degradado a `0x01` o unos parámetros de KDF alterados hacen fallar el tag en vez de descifrar algo distinto. Los ficheros `0x01` anteriores se siguen descifrando sin AAD y deben poder leerse siempre; `BackupCryptoTest` guarda un fixture generado por una implementación independiente para garantizarlo.
+
+El cifrado es opcional: el usuario lo activa al exportar e introduce una contraseña de al menos 8 caracteres (`BackupCrypto.MIN_PASSWORD_LENGTH`). La clave se deriva con PBKDF2WithHmacSHA256 (200 000 iteraciones, salt de 16 bytes e IV de 12 bytes aleatorios por fichero). Los ficheros exportados antes de que existiera la cabecera (JSON pelado) se importan sin cambios — compatibilidad total hacia atrás.
 
 El JSON embebido tiene esta estructura (`version: 1`):
 
@@ -106,7 +109,7 @@ El share sheet nativo permite enviar el fichero directamente a Telegram, LocalSe
 
 ### Android Auto Backup
 
-Con `allowBackup="true"` y `MisDinerosBackupAgent`, el sistema sube automáticamente la BD Room, DataStore, iconos de usuario y preferencias a la cuenta Google del dispositivo (máx. 25 MB, cifrado por Google). El usuario puede desactivarlo desde Ajustes → Datos. La flag se persiste en `SharedPreferences("auto_backup_prefs")` además de DataStore, para que el agente pueda leerla de forma síncrona.
+Con `allowBackup="true"` y `MisDinerosBackupAgent`, el sistema sube automáticamente la BD Room, DataStore, iconos de usuario y preferencias a la cuenta Google del dispositivo (máx. 25 MB, cifrado por Google). Por eso los iconos pasan siempre por `IconStorage`, que los reescala a 512 px y los reencoda como JPEG: unas pocas fotos de cámara a tamaño completo agotaban la cuota y dejaban de hacerse copias en silencio. Los ficheros que dejan de estar referenciados se borran al guardar, al eliminar y en el barrido de huérfanos del arranque. El usuario puede desactivarlo desde Ajustes → Datos. La flag se persiste en `SharedPreferences("auto_backup_prefs")` además de DataStore, para que el agente pueda leerla de forma síncrona.
 
 ## CI/CD
 
