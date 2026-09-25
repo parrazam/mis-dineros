@@ -12,15 +12,15 @@ Gestor de suscripciones personal para Android. Sin servidores, sin telemetría, 
 
 ## Características
 
-- **Suscripciones** — nombre, importe, moneda, ciclo mensual/anual, categoría, notas e icono personalizado (las imágenes subidas se reescalan a 512 px y se recomprimen a JPEG)
-- **Dashboard** — gasto mensual real, equivalente anual, próximas renovaciones (7 días) y top 5 más caras
+- **Suscripciones** — nombre, importe, moneda, ciclo mensual/anual, categoría, notas e icono personalizado (las imágenes subidas se reescalan a 512 px y se recomprimen a JPEG). En la lista, deslizar a la derecha pausa y a la izquierda elimina, ambas con confirmación
+- **Dashboard** — gasto mensual real, equivalente anual, activas/pausadas, días hasta el próximo cargo, próximas renovaciones (7 días) y las 5 más caras
 - **Renovaciones automáticas** — al vencer una fecha de renovación, la suscripción avanza sola al siguiente ciclo (reanclando el día de facturación original), de modo que nunca queda anclada en el pasado ni deja de notificarse
-- **Estadísticas** — donut por categoría, barras mensual/anual y ranking
+- **Estadísticas** — donut por categoría, vista global (gasto mensual y anual, reparto por ciclo, activas frente al total contratado) y top 5
 - **Divisas** — conversión automática a moneda global con tasas de cambio editables y bundled. Si falta el par de conversión, la suscripción se excluye del total en vez de contarse a 1:1, y la moneda afectada se avisa en Inicio y Estadísticas
 - **Notificaciones locales** — aviso configurable N días antes por suscripción + resumen mensual
 - **Exportación e importación** — copia de seguridad con iconos embebidos, cifrado AES-256-GCM opcional y share sheet nativo (LocalSend, Telegram, Drive…)
 - **Copia de seguridad automática** — Android Auto Backup a cuenta Google, activable/desactivable desde Ajustes
-- **Temas** — claro / oscuro / sistema, seed color Blue Snorkel `#0077B6`, y colores dinámicos opcionales (Material You, Android 12+)
+- **Temas** — claro / oscuro / sistema, seed color Blue Snorkel `#0077B6` sobre fondo cálido tipo papel, tipografías Bricolage Grotesque y Figtree con cifras tabulares, y colores dinámicos opcionales (Material You, Android 12+)
 - **Categorías** — 9 predefinidas + creación libre
 
 ## Requisitos
@@ -70,7 +70,7 @@ app/src/main/java/com/parra/misdineros/
 | DI | Hilt |
 | Persistencia | Room + DataStore Preferences |
 | Notificaciones | WorkManager |
-| Gráficos | Vico |
+| Gráficos | Compose Canvas (donut y barras propios) |
 | Serialización | kotlinx.serialization |
 
 ## Backup
