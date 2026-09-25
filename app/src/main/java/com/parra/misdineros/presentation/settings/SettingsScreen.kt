@@ -5,33 +5,40 @@ import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Backup
-import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.CurrencyExchange
-import androidx.compose.material.icons.filled.FileDownload
-import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.filled.FolderOpen
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.Backup
+import androidx.compose.material.icons.outlined.Category
+import androidx.compose.material.icons.outlined.Contrast
+import androidx.compose.material.icons.outlined.CurrencyExchange
+import androidx.compose.material.icons.outlined.Event
+import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material.icons.outlined.FileUpload
+import androidx.compose.material.icons.outlined.Insights
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Payments
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -40,7 +47,9 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -49,8 +58,9 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,8 +73,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -72,7 +84,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.parra.misdineros.R
 import com.parra.misdineros.data.backup.BackupCrypto
+import com.parra.misdineros.designsystem.component.AppCard
+import com.parra.misdineros.designsystem.component.AppLargeTopBar
+import com.parra.misdineros.designsystem.component.IconTile
+import com.parra.misdineros.designsystem.component.SectionLabel
+import com.parra.misdineros.designsystem.component.SegmentedControl
 import com.parra.misdineros.designsystem.theme.AppTheme
+import com.parra.misdineros.designsystem.theme.BricolageGrotesque
+import com.parra.misdineros.designsystem.theme.MisDinerosTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -92,6 +111,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val backupState by viewModel.backupState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -282,117 +302,156 @@ fun SettingsScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.settings_title)) }) },
+        topBar = { AppLargeTopBar(stringResource(R.string.settings_title), scrollBehavior) },
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .padding(horizontal = 20.dp),
         ) {
             // ── General ──────────────────────────────────────────────────────────
-            SettingsSectionTitle("General")
-            DropdownSettingsItem(
-                title = stringResource(R.string.settings_currency),
-                value = settings.globalCurrencyCode,
-                options = SUPPORTED_CURRENCIES,
-                onSelect = viewModel::setCurrency,
-                leadingIcon = Icons.Default.CurrencyExchange,
-            )
-            HorizontalDivider()
+            SettingsGroup(stringResource(R.string.settings_section_general)) {
+                DropdownSettingsItem(
+                    title = stringResource(R.string.settings_currency),
+                    value = settings.globalCurrencyCode,
+                    options = SUPPORTED_CURRENCIES,
+                    onSelect = viewModel::setCurrency,
+                    leadingIcon = Icons.Outlined.Payments,
+                )
+            }
 
             // ── Apariencia ────────────────────────────────────────────────────────
-            SettingsSectionTitle("Apariencia")
-            ThemePickerItem(
-                current = settings.appTheme,
-                onSelect = viewModel::setTheme,
-            )
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                SwitchSettingsItem(
-                    title = stringResource(R.string.settings_dynamic_color),
-                    supportingText = stringResource(R.string.settings_dynamic_color_support),
-                    checked = settings.dynamicColorEnabled,
-                    onCheckedChange = viewModel::setDynamicColorEnabled,
-                    leadingIcon = Icons.Default.Palette,
+            SettingsGroup(stringResource(R.string.settings_section_appearance)) {
+                ThemePickerItem(
+                    current = settings.appTheme,
+                    onSelect = viewModel::setTheme,
                 )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    GroupDivider()
+                    SwitchSettingsItem(
+                        title = stringResource(R.string.settings_dynamic_color),
+                        supportingText = stringResource(R.string.settings_dynamic_color_support),
+                        checked = settings.dynamicColorEnabled,
+                        onCheckedChange = viewModel::setDynamicColorEnabled,
+                        leadingIcon = Icons.Outlined.Palette,
+                    )
+                }
             }
-            HorizontalDivider()
 
             // ── Notificaciones ────────────────────────────────────────────────────
-            SettingsSectionTitle(stringResource(R.string.settings_notifications))
-            SwitchSettingsItem(
-                title = stringResource(R.string.settings_notif_enabled),
-                checked = settings.notificationsEnabled,
-                onCheckedChange = viewModel::setNotifsEnabled,
-                leadingIcon = Icons.Default.Notifications,
-            )
-            if (settings.notificationsEnabled) {
-                ListItem(
-                    headlineContent = { Text(stringResource(R.string.settings_notif_hour)) },
-                    supportingContent = {
-                        Text("%02d:%02d".format(settings.notificationHour, settings.notificationMinute))
-                    },
-                    modifier = Modifier.clickable { showTimePicker = true },
-                )
-                DropdownSettingsItem(
-                    title = stringResource(R.string.settings_notif_default_days),
-                    value = settings.defaultNotifyDaysBefore.toString(),
-                    options = NOTIFY_DAYS_OPTIONS.map { it.toString() },
-                    onSelect = { viewModel.setNotifyDays(it.toInt()) },
-                    optionLabel = { "$it días" },
-                )
+            SettingsGroup(stringResource(R.string.settings_notifications)) {
                 SwitchSettingsItem(
-                    title = stringResource(R.string.settings_monthly_summary),
-                    checked = settings.monthlySummaryEnabled,
-                    onCheckedChange = viewModel::setSummaryEnabled,
+                    title = stringResource(R.string.settings_notif_enabled),
+                    checked = settings.notificationsEnabled,
+                    onCheckedChange = viewModel::setNotifsEnabled,
+                    leadingIcon = Icons.Outlined.Notifications,
                 )
-                NavSettingsItem(
-                    title = stringResource(R.string.settings_test_notification),
-                    onClick = viewModel::testNotificationNow,
-                )
+                if (settings.notificationsEnabled) {
+                    GroupDivider()
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.settings_notif_hour)) },
+                        leadingContent = { IconTile(Icons.Outlined.Schedule) },
+                        trailingContent = {
+                            ValuePill("%02d:%02d".format(settings.notificationHour, settings.notificationMinute))
+                        },
+                        colors = transparentListItemColors(),
+                        modifier = Modifier.clickable { showTimePicker = true },
+                    )
+                    GroupDivider()
+                    DropdownSettingsItem(
+                        title = stringResource(R.string.settings_notif_default_days),
+                        value = settings.defaultNotifyDaysBefore.toString(),
+                        options = NOTIFY_DAYS_OPTIONS.map { it.toString() },
+                        onSelect = { viewModel.setNotifyDays(it.toInt()) },
+                        leadingIcon = Icons.Outlined.Event,
+                        optionLabel = { "$it días" },
+                    )
+                    GroupDivider()
+                    SwitchSettingsItem(
+                        title = stringResource(R.string.settings_monthly_summary),
+                        checked = settings.monthlySummaryEnabled,
+                        onCheckedChange = viewModel::setSummaryEnabled,
+                        leadingIcon = Icons.Outlined.Insights,
+                    )
+                    GroupDivider()
+                    OutlinedButton(
+                        onClick = viewModel::testNotificationNow,
+                        shape = MaterialTheme.shapes.medium,
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.secondary),
+                        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.secondary),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                    ) {
+                        Icon(Icons.AutoMirrored.Outlined.Send, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.size(8.dp))
+                        Text(stringResource(R.string.settings_test_notification))
+                    }
+                }
             }
-            HorizontalDivider()
 
             // ── Datos ─────────────────────────────────────────────────────────────
-            SettingsSectionTitle("Datos")
-            NavSettingsItem(
-                title = stringResource(R.string.settings_categories),
-                leadingIcon = Icons.Default.Category,
-                onClick = onNavigateToCategories,
-            )
-            NavSettingsItem(
-                title = stringResource(R.string.settings_fx_rates),
-                leadingIcon = Icons.Default.CurrencyExchange,
-                onClick = onNavigateToFxRates,
-            )
-            NavSettingsItem(
-                title = stringResource(R.string.settings_export),
-                leadingIcon = Icons.Default.FileUpload,
-                enabled = !isLoading,
-                onClick = { showExportModeDialog = true },
-            )
-            NavSettingsItem(
-                title = stringResource(R.string.settings_import),
-                leadingIcon = Icons.Default.FileDownload,
-                enabled = !isLoading,
-                onClick = { importLauncher.launch(arrayOf("*/*")) },
-            )
-            SwitchSettingsItem(
-                title = stringResource(R.string.settings_auto_backup),
-                supportingText = "Restaura tus datos al reinstalar o cambiar de móvil. Se sube cifrado a tu cuenta de Google. Máx. 25 MB.",
-                checked = settings.autoBackupEnabled,
-                onCheckedChange = viewModel::setAutoBackupEnabled,
-                leadingIcon = Icons.Default.Backup,
-            )
-            HorizontalDivider()
+            SettingsGroup(stringResource(R.string.settings_section_data)) {
+                NavSettingsItem(
+                    title = stringResource(R.string.settings_categories),
+                    leadingIcon = Icons.Outlined.Category,
+                    onClick = onNavigateToCategories,
+                )
+                GroupDivider()
+                NavSettingsItem(
+                    title = stringResource(R.string.settings_fx_rates),
+                    leadingIcon = Icons.Outlined.CurrencyExchange,
+                    onClick = onNavigateToFxRates,
+                )
+                GroupDivider()
+                NavSettingsItem(
+                    title = stringResource(R.string.settings_export),
+                    leadingIcon = Icons.Outlined.FileUpload,
+                    enabled = !isLoading,
+                    onClick = { showExportModeDialog = true },
+                )
+                GroupDivider()
+                NavSettingsItem(
+                    title = stringResource(R.string.settings_import),
+                    supportingText = stringResource(R.string.settings_import_warning),
+                    leadingIcon = Icons.Outlined.FileDownload,
+                    enabled = !isLoading,
+                    warning = true,
+                    onClick = { importLauncher.launch(arrayOf("*/*")) },
+                )
+                GroupDivider()
+                SwitchSettingsItem(
+                    title = stringResource(R.string.settings_auto_backup),
+                    supportingText = "Restaura tus datos al reinstalar o cambiar de móvil. Se sube cifrado a tu cuenta de Google. Máx. 25 MB.",
+                    checked = settings.autoBackupEnabled,
+                    onCheckedChange = viewModel::setAutoBackupEnabled,
+                    leadingIcon = Icons.Outlined.Backup,
+                )
+            }
 
             // ── Acerca de ─────────────────────────────────────────────────────────
-            SettingsSectionTitle(stringResource(R.string.settings_about))
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.settings_version, versionName ?: "—")) },
-                leadingContent = { Icon(Icons.Default.Info, contentDescription = null) },
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 28.dp, bottom = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.titleMedium.copy(fontFamily = BricolageGrotesque),
+                    fontWeight = FontWeight.ExtraBold,
+                )
+                Text(
+                    text = stringResource(R.string.settings_version, versionName ?: "—"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
@@ -493,12 +552,35 @@ private fun ExportModeDialog(
 // ─── Section helpers ──────────────────────────────────────────────────────────
 
 @Composable
-private fun SettingsSectionTitle(title: String) {
-    Text(
+private fun SettingsGroup(title: String, content: @Composable ColumnScope.() -> Unit) {
+    SectionLabel(
         text = title,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 4.dp, end = 16.dp),
+        modifier = Modifier.padding(top = 24.dp, bottom = 8.dp),
+    )
+    AppCard(modifier = Modifier.fillMaxWidth(), content = content)
+}
+
+@Composable
+private fun GroupDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        color = MisDinerosTheme.colors.cardDivider,
+    )
+}
+
+@Composable
+private fun transparentListItemColors() = ListItemDefaults.colors(containerColor = Color.Transparent)
+
+@Composable
+private fun ValuePill(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.small)
+            .background(MisDinerosTheme.colors.cardDivider)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
     )
 }
 
@@ -516,9 +598,14 @@ private fun DropdownSettingsItem(
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
         ListItem(
             headlineContent = { Text(title) },
-            supportingContent = { Text(optionLabel(value)) },
-            leadingContent = leadingIcon?.let { { Icon(it, contentDescription = null) } },
-            trailingContent = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            leadingContent = leadingIcon?.let { { IconTile(it) } },
+            trailingContent = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ValuePill(optionLabel(value))
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                }
+            },
+            colors = transparentListItemColors(),
             modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -544,8 +631,9 @@ private fun SwitchSettingsItem(
     ListItem(
         headlineContent = { Text(title) },
         supportingContent = supportingText?.let { { Text(it) } },
-        leadingContent = leadingIcon?.let { { Icon(it, contentDescription = null) } },
+        leadingContent = leadingIcon?.let { { IconTile(it) } },
         trailingContent = { Switch(checked = checked, onCheckedChange = onCheckedChange) },
+        colors = transparentListItemColors(),
         modifier = Modifier.clickable { onCheckedChange(!checked) },
     )
 }
@@ -557,12 +645,33 @@ private fun NavSettingsItem(
     leadingIcon: ImageVector? = null,
     supportingText: String? = null,
     enabled: Boolean = true,
+    warning: Boolean = false,
 ) {
+    val colors = MisDinerosTheme.colors
+    val disabled = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
     ListItem(
-        headlineContent = { Text(title, color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)) },
-        supportingContent = supportingText?.let { { Text(it) } },
-        leadingContent = leadingIcon?.let { { Icon(it, contentDescription = null, tint = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)) } },
-        trailingContent = { Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)) },
+        headlineContent = { Text(title, color = if (enabled) MaterialTheme.colorScheme.onSurface else disabled) },
+        supportingContent = supportingText?.let {
+            { Text(it, color = if (warning && enabled) colors.onUrgentContainer else MaterialTheme.colorScheme.onSurfaceVariant) }
+        },
+        leadingContent = leadingIcon?.let {
+            {
+                IconTile(
+                    icon = it,
+                    containerColor = if (warning) colors.urgentContainer else colors.iconTile,
+                    contentColor = if (warning) colors.onUrgentContainer else colors.onIconTile,
+                    modifier = Modifier.alpha(if (enabled) 1f else 0.38f),
+                )
+            }
+        },
+        trailingContent = {
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else disabled,
+            )
+        },
+        colors = transparentListItemColors(),
         modifier = if (enabled) Modifier.clickable(onClick = onClick) else Modifier,
     )
 }
@@ -570,51 +679,29 @@ private fun NavSettingsItem(
 @Composable
 private fun ThemePickerItem(current: AppTheme, onSelect: (AppTheme) -> Unit) {
     val options = listOf(
-        AppTheme.SYSTEM to "🌓 Sistema",
-        AppTheme.LIGHT to "☀️ Claro",
-        AppTheme.DARK to "🌙 Oscuro",
+        AppTheme.SYSTEM to stringResource(R.string.settings_theme_system),
+        AppTheme.LIGHT to stringResource(R.string.settings_theme_light),
+        AppTheme.DARK to stringResource(R.string.settings_theme_dark),
     )
-    ListItem(
-        headlineContent = { Text(stringResource(R.string.settings_theme)) },
-        supportingContent = {
-            Row(
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .fillMaxWidth()
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(50),
-                    )
-                    .padding(4.dp),
-            ) {
-                options.forEach { (theme, label) ->
-                    val isSelected = theme == current
-                    val bgColor by animateColorAsState(
-                        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                        label = "pillBg",
-                    )
-                    val textColor by animateColorAsState(
-                        targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                                      else MaterialTheme.colorScheme.onSurfaceVariant,
-                        label = "pillText",
-                    )
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(50))
-                            .background(bgColor)
-                            .clickable { onSelect(theme) }
-                            .padding(horizontal = 14.dp, vertical = 6.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = textColor,
-                        )
-                    }
-                }
-            }
-        },
-    )
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            IconTile(Icons.Outlined.Contrast)
+            Text(
+                text = stringResource(R.string.settings_theme),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+        SegmentedControl(
+            options = options.map { it.second },
+            selectedIndex = options.indexOfFirst { it.first == current }.coerceAtLeast(0),
+            onSelect = { index -> onSelect(options[index].first) },
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }

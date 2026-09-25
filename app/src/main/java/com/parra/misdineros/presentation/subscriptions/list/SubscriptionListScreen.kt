@@ -1,5 +1,8 @@
 package com.parra.misdineros.presentation.subscriptions.list
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,11 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -22,23 +23,16 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,16 +44,21 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.parra.misdineros.R
+import com.parra.misdineros.designsystem.component.AppLargeTopBar
+import com.parra.misdineros.designsystem.component.SectionLabel
+import com.parra.misdineros.designsystem.component.SegmentedControl
 import com.parra.misdineros.designsystem.component.SubscriptionCard
 import com.parra.misdineros.domain.model.BillingCycle
+import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,21 +69,20 @@ fun SubscriptionListScreen(
     viewModel: SubscriptionListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val addLabel = stringResource(R.string.add_subscription)
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
-        topBar = {
-            LargeTopAppBar(
-                title = { Text(stringResource(R.string.nav_subscriptions)) },
-                scrollBehavior = scrollBehavior,
+        topBar = { AppLargeTopBar(stringResource(R.string.nav_subscriptions), scrollBehavior) },
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = onAddNew,
+                icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                text = { Text(stringResource(R.string.subscriptions_add_short)) },
+                modifier = Modifier.semantics { contentDescription = addLabel },
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onAddNew) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_subscription))
-            }
-        },
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { innerPadding ->
         when {
             state.isLoading -> {
@@ -115,7 +113,7 @@ fun SubscriptionListScreen(
                         onFilterChange = viewModel::setFilter,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            .padding(horizontal = 20.dp, vertical = 12.dp),
                     )
 
                     if (state.items.isEmpty()) {
@@ -140,19 +138,33 @@ fun SubscriptionListScreen(
                             modifier = Modifier.fillMaxSize(),
                             // El FAB flota sobre la lista y el innerPadding del Scaffold no
                             // reserva su espacio: 56.dp de FAB + 16.dp de margen + holgura.
-                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 88.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 88.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
-                            items(state.items, key = { it.subscription.id }) { item ->
-                                SwipeToDeleteItem(
-                                    item = item,
-                                    onTap = { onNavigateToDetail(item.subscription.id) },
-                                    onEdit = { onNavigateToEdit(item.subscription.id) },
-                                    onTogglePause = { viewModel.togglePause(item.subscription.id) },
-                                    onDelete = {
-                                        viewModel.delete(item.subscription.id)
-                                    },
-                                )
+                            val active = state.items.filterNot { it.subscription.isPaused }
+                            val paused = state.items.filter { it.subscription.isPaused }
+                            listOf(
+                                Triple("header_active", R.string.subscriptions_section_active, active),
+                                Triple("header_paused", R.string.subscriptions_section_paused, paused),
+                            ).forEach { (headerKey, titleRes, sectionItems) ->
+                                if (sectionItems.isEmpty()) return@forEach
+                                item(key = headerKey) {
+                                    SectionLabel(
+                                        text = stringResource(titleRes),
+                                        modifier = Modifier.padding(top = if (headerKey == "header_active") 0.dp else 14.dp),
+                                    )
+                                }
+                                items(sectionItems, key = { it.subscription.id }) { item ->
+                                    SwipeToDeleteItem(
+                                        item = item,
+                                        onTap = { onNavigateToDetail(item.subscription.id) },
+                                        onEdit = { onNavigateToEdit(item.subscription.id) },
+                                        onTogglePause = { viewModel.togglePause(item.subscription.id) },
+                                        onDelete = {
+                                            viewModel.delete(item.subscription.id)
+                                        },
+                                    )
+                                }
                             }
                         }
                     }
@@ -169,31 +181,16 @@ private fun CycleFilterRow(
     modifier: Modifier = Modifier,
 ) {
     val options = listOf(
+        null to R.string.subscriptions_filter_all,
         BillingCycle.MONTHLY to R.string.subscriptions_filter_monthly,
         BillingCycle.ANNUAL to R.string.subscriptions_filter_annual,
     )
-    Row(
+    SegmentedControl(
+        options = options.map { stringResource(it.second) },
+        selectedIndex = options.indexOfFirst { it.first == activeFilter }.coerceAtLeast(0),
+        onSelect = { index -> onFilterChange(options[index].first) },
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        options.forEach { (cycle, labelRes) ->
-            val selected = activeFilter == cycle
-            FilterChip(
-                selected = selected,
-                onClick = { onFilterChange(if (selected) null else cycle) },
-                label = { Text(stringResource(labelRes)) },
-                leadingIcon = if (selected) {
-                    {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            modifier = Modifier.size(FilterChipDefaults.IconSize),
-                        )
-                    }
-                } else null,
-            )
-        }
-    }
+    )
 }
 
 @Composable
@@ -205,6 +202,7 @@ private fun SwipeToDeleteItem(
     onDelete: () -> Unit,
 ) {
     var showConfirm by remember { mutableStateOf(value = false) }
+    var showPauseConfirm by remember { mutableStateOf(value = false) }
     val scope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
     // Locked to true once the action fires; reset in onDragStart of the next gesture.
@@ -264,7 +262,8 @@ private fun SwipeToDeleteItem(
                                 when {
                                     newOffset >= thresholdPx -> {
                                         actionFired = true
-                                        onTogglePause()
+                                        // Reactivar es inocuo; pausar pide confirmación, como borrar.
+                                        if (item.subscription.isPaused) onTogglePause() else showPauseConfirm = true
                                     }
                                     newOffset <= -thresholdPx -> {
                                         actionFired = true
@@ -291,6 +290,22 @@ private fun SwipeToDeleteItem(
             },
             dismissButton = {
                 TextButton(onClick = { showConfirm = false }) { Text(stringResource(R.string.action_cancel)) }
+            },
+        )
+    }
+
+    if (showPauseConfirm) {
+        AlertDialog(
+            onDismissRequest = { showPauseConfirm = false },
+            title = { Text(stringResource(R.string.pause_subscription_title)) },
+            text = { Text(stringResource(R.string.pause_subscription_message, item.subscription.name)) },
+            confirmButton = {
+                TextButton(onClick = { showPauseConfirm = false; onTogglePause() }) {
+                    Text(stringResource(R.string.action_pause))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPauseConfirm = false }) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }

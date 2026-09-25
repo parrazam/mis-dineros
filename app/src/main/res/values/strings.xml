@@ -14,7 +14,7 @@
     <string name="home_active_count">%1$d activas</string>
     <string name="home_paused_count">%1$d pausadas</string>
     <string name="home_upcoming_renewals">Próximas renovaciones</string>
-    <string name="home_top_expensive">Top 5 más caras</string>
+    <string name="home_top_expensive">Las 5 más caras</string>
     <string name="spend_missing_rates">Sin tipo de cambio para %1$s: esas suscripciones no se incluyen en los totales. Revísalo en Ajustes › Tasas de cambio.</string>
 
     <!-- Suscripciones -->
@@ -52,6 +52,8 @@
     <string name="delete_subscription_title">Eliminar suscripción</string>
     <string name="delete_subscription_message">¿Seguro que quieres eliminar «%1$s»? Esta acción no se puede deshacer.</string>
     <string name="delete_subscription_message_short">¿Seguro que quieres eliminar «%1$s»?</string>
+    <string name="pause_subscription_title">Pausar suscripción</string>
+    <string name="pause_subscription_message">¿Quieres pausar «%1$s»? Dejará de contar en el gasto y de enviar avisos hasta que la reactives.</string>
     <string name="home_add_subscription">Añadir suscripción</string>
     <string name="icon_picker_title">Elige icono del servicio</string>
     <string name="icon_picker_from_gallery">Subir imagen de la galería</string>
@@ -149,4 +151,33 @@
     <string name="error_date_in_past">La fecha de renovación no puede estar en el pasado</string>
     <string name="error_import_failed">No se pudo importar el archivo</string>
     <string name="error_export_failed">No se pudo exportar los datos</string>
+
+    <!-- Rediseño -->
+    <string name="home_see_all">Ver todas</string>
+    <string name="home_per_year">%1$s al año</string>
+    <string name="home_next_charge">próximo cargo</string>
+    <string name="home_annual_note">Importes anuales mostrados en su equivalente mensual.</string>
+    <string name="amount_per_month_suffix">/ mes</string>
+    <string name="amount_per_year_suffix">/ año</string>
+    <string name="amount_per_year_inline">%1$s/año</string>
+    <string name="amount_per_year_and_month">/ año · %1$s/mes</string>
+    <string name="subscriptions_section_active">Activas</string>
+    <string name="subscriptions_section_paused">Pausadas</string>
+    <string name="subscriptions_add_short">Añadir</string>
+    <string name="days_until_today">Hoy</string>
+    <string name="days_until_tomorrow">Mañana</string>
+    <string name="days_until_n">en %1$d días</string>
+    <string name="days_count_n">%1$d días</string>
+    <string name="detail_cycle">Ciclo</string>
+    <string name="detail_per_month">%1$s al mes</string>
+    <string name="detail_billing_day">Día de cobro</string>
+    <string name="detail_billing_day_monthly">%1$d de cada mes</string>
+    <string name="detail_billing_day_annual">%1$s de cada año</string>
+    <string name="detail_notify">Aviso</string>
+    <string name="detail_notify_days">%1$d días antes</string>
+    <string name="detail_cycle_progress">%1$d de %2$d días del ciclo</string>
+    <string name="settings_section_general">General</string>
+    <string name="settings_section_appearance">Apariencia</string>
+    <string name="settings_section_data">Datos</string>
+    <string name="settings_import_warning">Reemplaza todos los datos actuales</string>
 </resources>

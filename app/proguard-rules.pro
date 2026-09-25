@@ -20,6 +20,3 @@
 -keep class * extends androidx.work.ListenableWorker {
     public <init>(android.content.Context,androidx.work.WorkerParameters);
 }
-
-# Vico
--keep class com.patrykandpatrick.vico.** { *; }
