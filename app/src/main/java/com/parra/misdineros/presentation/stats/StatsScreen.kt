@@ -27,10 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -48,6 +45,8 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,6 +57,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.parra.misdineros.R
 import com.parra.misdineros.core.money.MoneyFormatter
+import com.parra.misdineros.designsystem.component.AppCard
+import com.parra.misdineros.designsystem.component.SegmentedControl
 import com.parra.misdineros.designsystem.component.ServiceIcon
 import com.parra.misdineros.domain.usecase.RankedSubscription
 import kotlin.math.roundToInt
@@ -74,22 +75,30 @@ fun StatsScreen(viewModel: StatsViewModel = hiltViewModel()) {
     )
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.nav_stats)) }) },
+        topBar = {
+            Text(
+                text = stringResource(R.string.nav_stats),
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 4.dp)
+                    .semantics { heading() },
+            )
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
-            PrimaryTabRow(selectedTabIndex = selectedTab) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index },
-                        text = { Text(title) },
-                    )
-                }
-            }
+            SegmentedControl(
+                options = tabs,
+                selectedIndex = selectedTab,
+                onSelect = { selectedTab = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+            )
 
             if (state.isLoading) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -302,10 +311,7 @@ private fun DonutLegend(
 ) {
     val highlightColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-    ) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(vertical = 8.dp)) {
             items.forEachIndexed { index, item ->
                 val isSelected = item.category.id == selectedCategoryId
@@ -443,10 +449,7 @@ private fun BillingCycleSplitCard(
     val monthlyPct = (monthlyFraction * 100).roundToInt()
     val annualPct = 100 - monthlyPct
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-    ) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -507,10 +510,7 @@ private fun ActiveVsTotalCard(
     val fraction = (activeMinor.toFloat() / totalMinor).coerceIn(0f, 1f)
     val savedMinor = totalMinor - activeMinor
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-    ) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -626,10 +626,7 @@ private fun Top5Tab(state: StatsUiState) {
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
     ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        ) {
+        AppCard(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
                 state.top5.forEachIndexed { index, item ->
                     if (index > 0) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))

@@ -11,19 +11,27 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.PieChart
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
@@ -67,60 +75,67 @@ class MainActivity : ComponentActivity() {
                     hasRoute<Destination.Stats>() ||
                     hasRoute<Destination.Settings>()
                 } ?: false
+                val homeSelected = currentDestination?.hasRoute<Destination.Home>() == true
+                val listSelected = currentDestination?.hasRoute<Destination.SubscriptionList>() == true
+                val statsSelected = currentDestination?.hasRoute<Destination.Stats>() == true
+                val settingsSelected = currentDestination?.hasRoute<Destination.Settings>() == true
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
                         if (showBottomBar) {
-                            NavigationBar {
-                                NavigationBarItem(
-                                    selected = currentDestination?.hasRoute<Destination.Home>() == true,
-                                    onClick = {
-                                        navController.navigate(Destination.Home) {
-                                            popUpTo<Destination.Home> { saveState = true }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    },
-                                    icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                                    label = { Text(stringResource(R.string.nav_home)) },
-                                )
-                                NavigationBarItem(
-                                    selected = currentDestination?.hasRoute<Destination.SubscriptionList>() == true,
-                                    onClick = {
-                                        navController.navigate(Destination.SubscriptionList) {
-                                            popUpTo<Destination.Home> { saveState = true }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    },
-                                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },
-                                    label = { Text(stringResource(R.string.nav_subscriptions)) },
-                                )
-                                NavigationBarItem(
-                                    selected = currentDestination?.hasRoute<Destination.Stats>() == true,
-                                    onClick = {
-                                        navController.navigate(Destination.Stats) {
-                                            popUpTo<Destination.Home> { saveState = true }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    },
-                                    icon = { Icon(Icons.Default.BarChart, contentDescription = null) },
-                                    label = { Text(stringResource(R.string.nav_stats)) },
-                                )
-                                NavigationBarItem(
-                                    selected = currentDestination?.hasRoute<Destination.Settings>() == true,
-                                    onClick = {
-                                        navController.navigate(Destination.Settings) {
-                                            popUpTo<Destination.Home> { saveState = true }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    },
-                                    icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                                    label = { Text(stringResource(R.string.nav_settings)) },
-                                )
+                            Column {
+                                HorizontalDivider(color = MisDinerosTheme.colors.cardBorder)
+                                NavigationBar(containerColor = MisDinerosTheme.colors.card) {
+                                    NavigationBarItem(
+                                        selected = homeSelected,
+                                        onClick = {
+                                            navController.navigate(Destination.Home) {
+                                                popUpTo<Destination.Home> { saveState = true }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        },
+                                        icon = { TabIcon(selected = homeSelected, filled = Icons.Filled.Home, outlined = Icons.Outlined.Home) },
+                                        label = { Text(stringResource(R.string.nav_home)) },
+                                    )
+                                    NavigationBarItem(
+                                        selected = listSelected,
+                                        onClick = {
+                                            navController.navigate(Destination.SubscriptionList) {
+                                                popUpTo<Destination.Home> { saveState = true }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        },
+                                        icon = { TabIcon(selected = listSelected, filled = Icons.Filled.CreditCard, outlined = Icons.Outlined.CreditCard) },
+                                        label = { Text(stringResource(R.string.nav_subscriptions)) },
+                                    )
+                                    NavigationBarItem(
+                                        selected = statsSelected,
+                                        onClick = {
+                                            navController.navigate(Destination.Stats) {
+                                                popUpTo<Destination.Home> { saveState = true }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        },
+                                        icon = { TabIcon(selected = statsSelected, filled = Icons.Filled.PieChart, outlined = Icons.Outlined.PieChart) },
+                                        label = { Text(stringResource(R.string.nav_stats)) },
+                                    )
+                                    NavigationBarItem(
+                                        selected = settingsSelected,
+                                        onClick = {
+                                            navController.navigate(Destination.Settings) {
+                                                popUpTo<Destination.Home> { saveState = true }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        },
+                                        icon = { TabIcon(selected = settingsSelected, filled = Icons.Filled.Tune, outlined = Icons.Outlined.Tune) },
+                                        label = { Text(stringResource(R.string.nav_settings)) },
+                                    )
+                                }
                             }
                         }
                     },
@@ -152,4 +167,9 @@ class MainActivity : ComponentActivity() {
             notifPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
+}
+
+@Composable
+private fun TabIcon(selected: Boolean, filled: ImageVector, outlined: ImageVector) {
+    Icon(if (selected) filled else outlined, contentDescription = null)
 }
