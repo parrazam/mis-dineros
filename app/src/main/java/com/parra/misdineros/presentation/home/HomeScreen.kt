@@ -282,7 +282,7 @@ private fun SummaryCard(state: HomeUiState) {
                     modifier = Modifier.weight(1f),
                 )
                 StatItem(
-                    value = state.upcomingRenewals.firstOrNull()?.let { daysUntilLabel(it.daysUntil) } ?: "—",
+                    value = state.upcomingRenewals.firstOrNull()?.let { daysUntilLabel(it.daysUntil, short = true) } ?: "—",
                     label = stringResource(R.string.home_next_charge),
                     modifier = Modifier.weight(1f),
                 )
