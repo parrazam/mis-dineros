@@ -26,9 +26,6 @@ kotlinxCoroutines = "1.10.2"
 workManager = "2.11.2"
 hiltWork = "1.2.0"
 
-# Gráficos
-vico = "3.2.1"
-
 # Tests
 junit = "4.13.2"
 junitExt = "1.2.1"
@@ -82,9 +79,6 @@ workmanager-testing = { group = "androidx.work", name = "work-testing", version.
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
-
-# Gráficos
-vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 
 # Tests
 junit = { group = "junit", name = "junit", version.ref = "junit" }
