@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +31,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -40,6 +43,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -52,6 +56,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.parra.misdineros.R
 import com.parra.misdineros.core.money.MoneyFormatter
 import com.parra.misdineros.designsystem.component.AppCard
+import com.parra.misdineros.designsystem.component.AppLargeTopBar
 import com.parra.misdineros.designsystem.component.ProportionBar
 import com.parra.misdineros.designsystem.component.ServiceIcon
 import com.parra.misdineros.designsystem.component.StatusPill
@@ -63,6 +68,7 @@ import com.parra.misdineros.domain.usecase.RankedSubscription
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToSubscriptions: () -> Unit,
@@ -70,9 +76,11 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
-        topBar = { HomeHeader() },
+        topBar = { AppLargeTopBar(stringResource(R.string.app_name), scrollBehavior) },
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { innerPadding ->
         when {
             state.isLoading -> {
@@ -111,7 +119,10 @@ fun HomeScreen(
                                     .verticalScroll(rememberScrollState()),
                                 verticalArrangement = Arrangement.spacedBy(28.dp),
                             ) {
-                                SummaryCard(state = state)
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    MonthLabel()
+                                    SummaryCard(state = state)
+                                }
                                 Spacer(Modifier.height(8.dp))
                             }
                             Column(
@@ -145,7 +156,10 @@ fun HomeScreen(
                                 .padding(horizontal = 20.dp, vertical = 8.dp),
                             verticalArrangement = Arrangement.spacedBy(28.dp),
                         ) {
-                            SummaryCard(state = state)
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                MonthLabel()
+                                SummaryCard(state = state)
+                            }
 
                             if (state.upcomingRenewals.isNotEmpty()) {
                                 UpcomingSection(
@@ -172,31 +186,20 @@ fun HomeScreen(
     }
 }
 
-// ─── Header ───────────────────────────────────────────────────────────────────
+// ─── Month ────────────────────────────────────────────────────────────────────
 
+/** Mes en curso sobre la tarjeta principal; se va con el scroll, el título queda en la barra. */
 @Composable
-private fun HomeHeader() {
+private fun MonthLabel() {
     val month = remember {
         LocalDate.now().format(DateTimeFormatter.ofPattern("LLLL yyyy")).uppercase()
     }
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        Text(
-            text = month,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = stringResource(R.string.app_name),
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.semantics { heading() },
-        )
-    }
+    Text(
+        text = month,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 4.dp),
+    )
 }
 
 // ─── Summary card ─────────────────────────────────────────────────────────────
