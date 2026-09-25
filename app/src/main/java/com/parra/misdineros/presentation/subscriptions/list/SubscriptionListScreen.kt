@@ -202,6 +202,7 @@ private fun SwipeToDeleteItem(
     onDelete: () -> Unit,
 ) {
     var showConfirm by remember { mutableStateOf(value = false) }
+    var showPauseConfirm by remember { mutableStateOf(value = false) }
     val scope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
     // Locked to true once the action fires; reset in onDragStart of the next gesture.
@@ -261,7 +262,8 @@ private fun SwipeToDeleteItem(
                                 when {
                                     newOffset >= thresholdPx -> {
                                         actionFired = true
-                                        onTogglePause()
+                                        // Reactivar es inocuo; pausar pide confirmación, como borrar.
+                                        if (item.subscription.isPaused) onTogglePause() else showPauseConfirm = true
                                     }
                                     newOffset <= -thresholdPx -> {
                                         actionFired = true
@@ -288,6 +290,22 @@ private fun SwipeToDeleteItem(
             },
             dismissButton = {
                 TextButton(onClick = { showConfirm = false }) { Text(stringResource(R.string.action_cancel)) }
+            },
+        )
+    }
+
+    if (showPauseConfirm) {
+        AlertDialog(
+            onDismissRequest = { showPauseConfirm = false },
+            title = { Text(stringResource(R.string.pause_subscription_title)) },
+            text = { Text(stringResource(R.string.pause_subscription_message, item.subscription.name)) },
+            confirmButton = {
+                TextButton(onClick = { showPauseConfirm = false; onTogglePause() }) {
+                    Text(stringResource(R.string.action_pause))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPauseConfirm = false }) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }

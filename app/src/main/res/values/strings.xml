@@ -52,6 +52,8 @@
     <string name="delete_subscription_title">Eliminar suscripción</string>
     <string name="delete_subscription_message">¿Seguro que quieres eliminar «%1$s»? Esta acción no se puede deshacer.</string>
     <string name="delete_subscription_message_short">¿Seguro que quieres eliminar «%1$s»?</string>
+    <string name="pause_subscription_title">Pausar suscripción</string>
+    <string name="pause_subscription_message">¿Quieres pausar «%1$s»? Dejará de contar en el gasto y de enviar avisos hasta que la reactives.</string>
     <string name="home_add_subscription">Añadir suscripción</string>
     <string name="icon_picker_title">Elige icono del servicio</string>
     <string name="icon_picker_from_gallery">Subir imagen de la galería</string>
@@ -165,6 +167,7 @@
     <string name="days_until_today">Hoy</string>
     <string name="days_until_tomorrow">Mañana</string>
     <string name="days_until_n">en %1$d días</string>
+    <string name="days_count_n">%1$d días</string>
     <string name="detail_cycle">Ciclo</string>
     <string name="detail_per_month">%1$s al mes</string>
     <string name="detail_billing_day">Día de cobro</string>
