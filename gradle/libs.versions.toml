@@ -1,7 +1,7 @@
 [versions]
-agp = "8.13.2"
-kotlin = "2.2.21"
-ksp = "2.2.21-2.0.5"
+agp = "9.4.1"
+kotlin = "2.4.21"
+ksp = "2.3.12"
 
 # Jetpack
 composeBom = "2026.04.01"
@@ -11,7 +11,7 @@ activityCompose = "1.13.0"
 navigationCompose = "2.9.8"
 
 # DI
-hilt = "2.57.2"
+hilt = "2.60.1"
 hiltNavigationCompose = "1.2.0"
 
 # Persistencia
@@ -87,9 +87,11 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 
+# Plugins de Gradle que van en el classpath del buildscript raíz
+kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
