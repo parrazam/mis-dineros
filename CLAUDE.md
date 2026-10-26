@@ -23,7 +23,7 @@ The Android SDK is at `~/Android/Sdk` (not in `PATH`; `ANDROID_HOME` unset). Pre
 ./gradlew connectedAndroidTest
 ```
 
-`versionCode` is derived from `git describe --tags --long` (`major*1_000_000 + minor*10_000 + patch*100 + commits-since-tag`, see `versionCodeFromDescribe` in `app/build.gradle.kts`), never from `rev-list --count`, which can go backwards after a rebase. Gradle wrapper requires JDK 21. The CI uses `actions/setup-java@v5` with `temurin` JDK 21.
+`versionCode` is derived from `git describe --tags --long` (`major*1_000_000 + minor*10_000 + patch*100 + commits-since-tag`, see `versionCodeFromDescribe` in `app/build.gradle.kts`), never from `rev-list --count`, which can go backwards after a rebase. Gradle wrapper requires JDK 21. The CI uses `actions/setup-java@v6` with `temurin` JDK 21.
 
 AGP 9 uses **built-in Kotlin**: the `org.jetbrains.kotlin.android` plugin must not be applied (AGP fails if it is), and `jvmTarget` comes from `compileOptions.targetCompatibility`. AGP drags its own Kotlin Gradle plugin version at runtime (2.3.10 since AGP 9.2), so the root `build.gradle.kts` pins `libs.kotlin.gradle.plugin` on the buildscript classpath to keep the compiler, the compose/serialization plugins and KSP on `libs.versions.kotlin`. Upgrade AGP and the Gradle wrapper together (AGP 9.4 needs Gradle ≥ 9.6; AGP 8.x breaks on Gradle ≥ 9.6), and Hilt must stay ≥ 2.59 (older Hilt Gradle plugins use the legacy `BaseExtension` API that AGP 9's new DSL removes).
 
