@@ -22,7 +22,9 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Sync
@@ -50,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -146,6 +149,28 @@ fun SubscriptionDetailScreen(
 
             AppCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 4.dp)) {
+                    if (subscription.isShared) {
+                        InfoRow(
+                            icon = Icons.Outlined.Group,
+                            label = stringResource(R.string.detail_shared),
+                            value = pluralStringResource(
+                                R.plurals.shared_between_people,
+                                subscription.sharedWith,
+                                subscription.sharedWith,
+                            ),
+                        )
+                        InfoDivider()
+                        InfoRow(
+                            icon = Icons.AutoMirrored.Outlined.ReceiptLong,
+                            label = stringResource(R.string.detail_full_price),
+                            value = MoneyFormatter.format(subscription.amountMinor, subscription.currencyCode) + " " +
+                                when (subscription.billingCycle) {
+                                    BillingCycle.MONTHLY -> stringResource(R.string.amount_per_month_suffix)
+                                    BillingCycle.ANNUAL -> stringResource(R.string.amount_per_year_suffix)
+                                },
+                        )
+                        InfoDivider()
+                    }
                     InfoRow(
                         icon = Icons.Outlined.Sync,
                         label = stringResource(R.string.detail_cycle),
@@ -323,7 +348,7 @@ private fun DetailHeader(subscription: Subscription, category: Category?) {
             modifier = Modifier.padding(top = 6.dp),
         ) {
             Text(
-                text = MoneyFormatter.format(subscription.amountMinor, subscription.currencyCode),
+                text = MoneyFormatter.format(subscription.myShareMinor, subscription.currencyCode),
                 style = MaterialTheme.typography.displayMedium,
             )
             Text(
@@ -336,17 +361,18 @@ private fun DetailHeader(subscription: Subscription, category: Category?) {
                 modifier = Modifier.padding(bottom = 8.dp),
             )
         }
+        val equivalent = when (subscription.billingCycle) {
+            BillingCycle.MONTHLY -> stringResource(
+                R.string.home_per_year,
+                MoneyFormatter.format(subscription.myAnnualShareMinor, subscription.currencyCode),
+            )
+            BillingCycle.ANNUAL -> stringResource(
+                R.string.detail_per_month,
+                MoneyFormatter.format(subscription.myMonthlyShareMinor, subscription.currencyCode),
+            )
+        }
         Text(
-            text = when (subscription.billingCycle) {
-                BillingCycle.MONTHLY -> stringResource(
-                    R.string.home_per_year,
-                    MoneyFormatter.format(subscription.annualAmountMinor, subscription.currencyCode),
-                )
-                BillingCycle.ANNUAL -> stringResource(
-                    R.string.detail_per_month,
-                    MoneyFormatter.format(subscription.monthlyAmountMinor, subscription.currencyCode),
-                )
-            },
+            text = if (subscription.isShared) stringResource(R.string.detail_your_share, equivalent) else equivalent,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

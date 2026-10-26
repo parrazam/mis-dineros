@@ -59,6 +59,7 @@ import com.parra.misdineros.designsystem.component.AppCard
 import com.parra.misdineros.designsystem.component.AppLargeTopBar
 import com.parra.misdineros.designsystem.component.ProportionBar
 import com.parra.misdineros.designsystem.component.ServiceIcon
+import com.parra.misdineros.designsystem.component.SharedPill
 import com.parra.misdineros.designsystem.component.StatusPill
 import com.parra.misdineros.designsystem.component.URGENT_RENEWAL_DAYS
 import com.parra.misdineros.designsystem.component.daysUntilLabel
@@ -388,15 +389,25 @@ private fun UpcomingRenewalCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Text(
-                    text = subscription.nextRenewalDate.format(UpcomingDateFormat),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                // La tarjeta mide 152 dp: el chip va junto a la fecha para no robar ancho al importe.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        text = subscription.nextRenewalDate.format(UpcomingDateFormat),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (subscription.isShared) SharedPill(sharedWith = subscription.sharedWith)
+                }
             }
 
             Text(
-                text = MoneyFormatter.format(subscription.amountMinor, subscription.currencyCode),
+                text = MoneyFormatter.format(subscription.myShareMinor, subscription.currencyCode),
                 style = MaterialTheme.typography.titleLarge,
                 maxLines = 1,
             )
@@ -496,11 +507,12 @@ private fun Top5Item(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f, fill = false),
                         )
+                        if (subscription.isShared) SharedPill(sharedWith = subscription.sharedWith)
                         if (subscription.billingCycle == BillingCycle.ANNUAL) {
                             Text(
                                 text = "· " + stringResource(
                                     R.string.amount_per_year_inline,
-                                    MoneyFormatter.format(subscription.amountMinor, subscription.currencyCode),
+                                    MoneyFormatter.format(subscription.myAnnualShareMinor, subscription.currencyCode),
                                 ),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,

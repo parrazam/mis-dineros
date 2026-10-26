@@ -41,6 +41,10 @@ data class Subscription(
             BillingCycle.ANNUAL -> amountMinor
         }
 
+    /** Parte del usuario en cada cobro (por ciclo): es [amountMinor] si no se comparte. */
+    val myShareMinor: Long
+        get() = shareOf(amountMinor, sharedWith)
+
     /**
      * Parte del usuario en el importe mensual. Una sola división desde [amountMinor] para no
      * encadenar dos redondeos (anual → mensual → parte). Los importes son positivos, así que
@@ -48,16 +52,19 @@ data class Subscription(
      */
     val myMonthlyShareMinor: Long
         get() = when (billingCycle) {
-            BillingCycle.MONTHLY -> Math.round(amountMinor / sharedWith.toDouble())
+            BillingCycle.MONTHLY -> shareOf(amountMinor, sharedWith)
             BillingCycle.ANNUAL -> Math.round(amountMinor / (12.0 * sharedWith))
         }
 
     /** Parte del usuario en el importe anual, calculada desde el anual exacto. */
     val myAnnualShareMinor: Long
-        get() = Math.round(annualAmountMinor / sharedWith.toDouble())
+        get() = shareOf(annualAmountMinor, sharedWith)
 
     companion object {
         /** Máximo de personas con las que se puede compartir; acota también el backup importado. */
         const val MAX_SHARED_WITH = 10
+
+        /** Reparto a partes iguales de [amountMinor] entre [sharedWith] personas (HALF_UP). */
+        fun shareOf(amountMinor: Long, sharedWith: Int): Long = Math.round(amountMinor / sharedWith.toDouble())
     }
 }

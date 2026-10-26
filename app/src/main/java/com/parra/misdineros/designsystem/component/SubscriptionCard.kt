@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -30,7 +31,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -102,13 +106,21 @@ fun SubscriptionCard(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Text(
-                    text = subscription.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = if (paused) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                // El chip va junto al nombre: en la fila de categoría y fecha recortaba la categoría.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        text = subscription.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = if (paused) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (subscription.isShared) SharedPill(sharedWith = subscription.sharedWith)
+                }
 
                 if (paused) {
                     StatusPill(
@@ -168,17 +180,22 @@ fun SubscriptionCard(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Text(
-                    text = MoneyFormatter.format(subscription.amountMinor, subscription.currencyCode),
+                    text = MoneyFormatter.format(subscription.myShareMinor, subscription.currencyCode),
                     style = MaterialTheme.typography.titleLarge.copy(
                         textDecoration = if (paused) TextDecoration.LineThrough else null,
                     ),
                     color = if (paused) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                 )
+                val fullAmount = MoneyFormatter.format(subscription.amountMinor, subscription.currencyCode)
                 Text(
-                    text = when (subscription.billingCycle) {
-                        BillingCycle.MONTHLY -> stringResource(R.string.amount_per_month_suffix)
-                        BillingCycle.ANNUAL -> stringResource(
+                    text = when {
+                        subscription.isShared -> when (subscription.billingCycle) {
+                            BillingCycle.MONTHLY -> stringResource(R.string.amount_per_month_of_full, fullAmount)
+                            BillingCycle.ANNUAL -> stringResource(R.string.amount_per_year_of_full, fullAmount)
+                        }
+                        subscription.billingCycle == BillingCycle.MONTHLY -> stringResource(R.string.amount_per_month_suffix)
+                        else -> stringResource(
                             R.string.amount_per_year_and_month,
                             MoneyFormatter.format(subscription.monthlyAmountMinor, subscription.currencyCode),
                         )
@@ -213,4 +230,18 @@ fun SubscriptionCard(
             )
         }
     }
+}
+
+/** Chip «compartida» con el número de personas; lo lee TalkBack como «Entre N personas». */
+@Composable
+fun SharedPill(sharedWith: Int, modifier: Modifier = Modifier) {
+    val colors = MisDinerosTheme.colors
+    val description = pluralStringResource(R.plurals.shared_between_people, sharedWith, sharedWith)
+    StatusPill(
+        text = sharedWith.toString(),
+        containerColor = colors.soonContainer,
+        contentColor = colors.onSoonContainer,
+        leadingIcon = Icons.Outlined.Group,
+        modifier = modifier.clearAndSetSemantics { contentDescription = description },
+    )
 }

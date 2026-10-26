@@ -103,7 +103,14 @@ class RenewalReminderWorker @AssistedInject constructor(
         val notification = NotificationCompat.Builder(appContext, NotificationChannelFactory.CHANNEL_RENEWALS)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(appContext.getString(R.string.notif_renewal_title, sub.name))
-            .setContentText(appContext.getString(R.string.notif_renewal_body, dateStr, amountStr))
+            .setContentText(
+                if (sub.isShared) {
+                    val shareStr = MoneyFormatter.format(sub.myShareMinor, sub.currencyCode)
+                    appContext.getString(R.string.notif_renewal_body_shared, dateStr, amountStr, shareStr)
+                } else {
+                    appContext.getString(R.string.notif_renewal_body, dateStr, amountStr)
+                },
+            )
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
