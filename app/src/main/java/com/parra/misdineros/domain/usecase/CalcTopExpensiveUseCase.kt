@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 data class RankedSubscription(
     val subscription: Subscription,
-    val monthlyAmountInTarget: Long,
+    val myMonthlyShareInTarget: Long,
 )
 
 class CalcTopExpensiveUseCase @Inject constructor(
@@ -21,11 +21,11 @@ class CalcTopExpensiveUseCase @Inject constructor(
         return subscriptions
             .filter { !it.isPaused }
             .mapNotNull { sub ->
-                val converted = fxRepo.convert(sub.monthlyAmountMinor, sub.currencyCode, targetCurrency)
+                val converted = fxRepo.convert(sub.myMonthlyShareMinor, sub.currencyCode, targetCurrency)
                     ?: return@mapNotNull null
-                RankedSubscription(subscription = sub, monthlyAmountInTarget = converted)
+                RankedSubscription(subscription = sub, myMonthlyShareInTarget = converted)
             }
-            .sortedByDescending { it.monthlyAmountInTarget }
+            .sortedByDescending { it.myMonthlyShareInTarget }
             .take(limit)
     }
 }

@@ -23,10 +23,13 @@ class CalcAnnualEquivalentUseCaseTest {
         useCase = CalcAnnualEquivalentUseCase(fxRepo)
     }
 
-    private fun sub(id: String, amount: Long, cycle: BillingCycle, currency: String = "EUR", paused: Boolean = false) = Subscription(
+    private fun sub(
+        id: String, amount: Long, cycle: BillingCycle, currency: String = "EUR", paused: Boolean = false, sharedWith: Int = 1,
+    ) = Subscription(
         id = id, name = "Sub $id", iconRef = "initial", amountMinor = amount, currencyCode = currency,
         billingCycle = cycle, nextRenewalDate = LocalDate.of(2030, 1, 1), billingAnchorDay = 1,
         categoryId = "cat1", isPaused = paused, notifyDaysBefore = null, notes = null, createdAt = 0L, updatedAt = 0L,
+        sharedWith = sharedWith,
     )
 
     @Test
@@ -50,5 +53,18 @@ class CalcAnnualEquivalentUseCaseTest {
         )
         assertEquals(1200L, result.totalMinor)
         assertEquals(setOf("XXX"), result.excludedCurrencies)
+    }
+
+    @Test
+    fun `una anual compartida suma la parte exacta, no la mensual por 12`() = runTest {
+        // 100,00 / 3 = 33,33; pasando por la mensual (2,78 × 12) saldría 33,36.
+        assertEquals(3333L, useCase(listOf(sub("1", 10000L, BillingCycle.ANNUAL, sharedWith = 3)), "EUR").totalMinor)
+    }
+
+    @Test
+    fun `una mensual compartida suma su parte del anual`() = runTest {
+        // 17,99 × 12 = 215,88 / 4 = 53,97
+        val subs = listOf(sub("1", 1799L, BillingCycle.MONTHLY, sharedWith = 4), sub("2", 1000L, BillingCycle.MONTHLY))
+        assertEquals(5397L + 12000L, useCase(subs, "EUR").totalMinor)
     }
 }

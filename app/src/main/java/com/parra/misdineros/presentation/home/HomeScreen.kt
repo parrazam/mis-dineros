@@ -412,7 +412,7 @@ private fun Top5Section(
     globalCurrency: String,
     onTap: (String) -> Unit,
 ) {
-    val max = ranked.maxOf { it.monthlyAmountInTarget }.coerceAtLeast(1L)
+    val max = ranked.maxOf { it.myMonthlyShareInTarget }.coerceAtLeast(1L)
     val hasAnnual = ranked.any { it.subscription.billingCycle == BillingCycle.ANNUAL }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -432,7 +432,7 @@ private fun Top5Section(
                     }
                     Top5Item(
                         item = item,
-                        fraction = item.monthlyAmountInTarget.toFloat() / max,
+                        fraction = item.myMonthlyShareInTarget.toFloat() / max,
                         globalCurrency = globalCurrency,
                         onClick = { onTap(item.subscription.id) },
                     )
@@ -509,7 +509,7 @@ private fun Top5Item(
                         }
                     }
                     Text(
-                        text = MoneyFormatter.format(item.monthlyAmountInTarget, globalCurrency),
+                        text = MoneyFormatter.format(item.myMonthlyShareInTarget, globalCurrency),
                         style = MaterialTheme.typography.titleSmall,
                     )
                 }

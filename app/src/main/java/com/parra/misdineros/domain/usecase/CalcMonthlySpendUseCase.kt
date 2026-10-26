@@ -11,7 +11,7 @@ class CalcMonthlySpendUseCase @Inject constructor(
     suspend operator fun invoke(
         subscriptions: List<Subscription>,
         targetCurrency: String,
-    ): SpendTotal = sumConverted(subscriptions, targetCurrency, fxRepo) { it.monthlyAmountMinor }
+    ): SpendTotal = sumConverted(subscriptions, targetCurrency, fxRepo) { it.myMonthlyShareMinor }
 }
 
 /**

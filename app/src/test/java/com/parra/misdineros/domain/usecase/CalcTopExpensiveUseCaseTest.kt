@@ -23,7 +23,7 @@ class CalcTopExpensiveUseCaseTest {
         useCase = CalcTopExpensiveUseCase(fxRepo)
     }
 
-    private fun sub(id: String, amount: Long, paused: Boolean = false) = Subscription(
+    private fun sub(id: String, amount: Long, paused: Boolean = false, sharedWith: Int = 1) = Subscription(
         id = id, name = "Sub $id", iconRef = "initial",
         amountMinor = amount, currencyCode = "EUR",
         billingCycle = BillingCycle.MONTHLY,
@@ -31,6 +31,7 @@ class CalcTopExpensiveUseCaseTest {
         billingAnchorDay = LocalDate.now().plusMonths(1).dayOfMonth,
         categoryId = "cat1", isPaused = paused, notifyDaysBefore = null, notes = null,
         createdAt = 0L, updatedAt = 0L,
+        sharedWith = sharedWith,
     )
 
     @Test
@@ -38,8 +39,8 @@ class CalcTopExpensiveUseCaseTest {
         val subs = (1..8).map { sub(it.toString(), it * 100L) }
         val result = useCase(subs, "EUR", limit = 5)
         assertEquals(5, result.size)
-        assertEquals(800L, result[0].monthlyAmountInTarget)
-        assertEquals(400L, result[4].monthlyAmountInTarget)
+        assertEquals(800L, result[0].myMonthlyShareInTarget)
+        assertEquals(400L, result[4].myMonthlyShareInTarget)
     }
 
     @Test
@@ -69,5 +70,13 @@ class CalcTopExpensiveUseCaseTest {
         val result = useCase(subs, "EUR", limit = 5)
 
         assertEquals(listOf("1"), result.map { it.subscription.id })
+    }
+
+    @Test
+    fun `ordena por la parte del usuario, no por el precio completo`() = runTest {
+        // Familiar 17,99 entre 4 = 4,50: queda por debajo de una individual de 9,99.
+        val result = useCase(listOf(sub("familiar", 1799L, sharedWith = 4), sub("individual", 999L)), "EUR")
+        assertEquals(listOf("individual", "familiar"), result.map { it.subscription.id })
+        assertEquals(450L, result.last().myMonthlyShareInTarget)
     }
 }

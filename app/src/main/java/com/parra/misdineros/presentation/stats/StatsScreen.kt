@@ -663,7 +663,7 @@ private fun Top5ListItem(rank: Int, item: RankedSubscription, currency: String) 
         )
         Column(horizontalAlignment = Alignment.End) {
             Text(
-                text = MoneyFormatter.format(item.monthlyAmountInTarget, currency),
+                text = MoneyFormatter.format(item.myMonthlyShareInTarget, currency),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
             )

@@ -8,6 +8,7 @@ import javax.inject.Inject
 /**
  * Gasto anual: mensuales × 12 y anuales tal cual. Antes era el total mensual × 12, y como la
  * mensualización de una anual trunca (100,00/12 = 8,33), 100,00 al año volvía como 99,96.
+ * Suma la parte del usuario en las compartidas, también calculada desde el anual exacto.
  */
 class CalcAnnualEquivalentUseCase @Inject constructor(
     private val fxRepo: FxRepository,
@@ -15,5 +16,5 @@ class CalcAnnualEquivalentUseCase @Inject constructor(
     suspend operator fun invoke(
         subscriptions: List<Subscription>,
         targetCurrency: String,
-    ): SpendTotal = sumConverted(subscriptions, targetCurrency, fxRepo) { it.annualAmountMinor }
+    ): SpendTotal = sumConverted(subscriptions, targetCurrency, fxRepo) { it.myAnnualShareMinor }
 }
