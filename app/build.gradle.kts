@@ -60,6 +60,11 @@ android {
         }
     }
 
+    // Los esquemas exportados de Room alimentan a MigrationTestHelper en los tests instrumentados.
+    sourceSets {
+        getByName("androidTest").assets.directories.add("$projectDir/schemas")
+    }
+
     signingConfigs {
         create("release") {
             val keystoreFile = rootProject.file("keystore/release.jks")

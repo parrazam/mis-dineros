@@ -17,7 +17,7 @@ import com.parra.misdineros.data.db.entity.SubscriptionEntity
         CategoryEntity::class,
         FxRateEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class MisDinerosDatabase : RoomDatabase() {
@@ -35,6 +35,13 @@ abstract class MisDinerosDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE subscriptions ADD COLUMN billingAnchorDay INTEGER NOT NULL DEFAULT 1")
                 db.execSQL("UPDATE subscriptions SET billingAnchorDay = CAST(substr(nextRenewalDate, 9, 2) AS INTEGER)")
+            }
+        }
+
+        /** Añade `sharedWith` (personas que comparten la suscripción); las existentes quedan en 1. */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE subscriptions ADD COLUMN sharedWith INTEGER NOT NULL DEFAULT 1")
             }
         }
     }

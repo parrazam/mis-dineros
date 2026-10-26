@@ -30,7 +30,7 @@ class SubscriptionRepositoryImplTest {
         id = "s1", name = "Sub", iconRef = iconRef, amountMinor = 100L, currencyCode = "EUR",
         billingCycle = "MONTHLY", nextRenewalDate = "2030-01-15", billingAnchorDay = 15,
         categoryId = "builtin_otros", isPaused = false, notifyDaysBefore = null, notes = null,
-        createdAt = 0L, updatedAt = 0L,
+        createdAt = 0L, updatedAt = 0L, sharedWith = 1,
     )
 
     private fun domain(iconRef: String) = Subscription(

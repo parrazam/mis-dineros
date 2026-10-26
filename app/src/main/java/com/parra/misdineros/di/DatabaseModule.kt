@@ -22,7 +22,7 @@ object DatabaseModule {
             MisDinerosDatabase::class.java,
             "mis_dineros.db",
         )
-            .addMigrations(MisDinerosDatabase.MIGRATION_1_2)
+            .addMigrations(MisDinerosDatabase.MIGRATION_1_2, MisDinerosDatabase.MIGRATION_2_3)
             .build()
     }
 

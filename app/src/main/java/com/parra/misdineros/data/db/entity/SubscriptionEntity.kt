@@ -1,5 +1,6 @@
 package com.parra.misdineros.data.db.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -32,4 +33,6 @@ data class SubscriptionEntity(
     val notes: String?,
     val createdAt: Long,
     val updatedAt: Long,
+    // El default debe coincidir con el de MIGRATION_2_3 o Room rechaza el esquema migrado.
+    @ColumnInfo(defaultValue = "1") val sharedWith: Int,
 )

@@ -48,7 +48,7 @@ class CategoryRepositoryImplTest {
         id = id, name = id, iconRef = "initial", amountMinor = 1000L, currencyCode = "EUR",
         billingCycle = "MONTHLY", nextRenewalDate = "2030-01-15", billingAnchorDay = 15,
         categoryId = categoryId, isPaused = false, notifyDaysBefore = null, notes = null,
-        createdAt = 0L, updatedAt = 0L,
+        createdAt = 0L, updatedAt = 0L, sharedWith = 1,
     )
 
     @Test

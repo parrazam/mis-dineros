@@ -20,6 +20,7 @@ fun SubscriptionEntity.toDomain() = Subscription(
     notes = notes,
     createdAt = createdAt,
     updatedAt = updatedAt,
+    sharedWith = sharedWith,
 )
 
 fun Subscription.toEntity() = SubscriptionEntity(
@@ -37,4 +38,5 @@ fun Subscription.toEntity() = SubscriptionEntity(
     notes = notes,
     createdAt = createdAt,
     updatedAt = updatedAt,
+    sharedWith = sharedWith,
 )
