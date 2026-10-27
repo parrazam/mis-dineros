@@ -13,6 +13,7 @@ Gestor de suscripciones personal para Android. Sin servidores, sin telemetría, 
 ## Características
 
 - **Suscripciones** — nombre, importe, moneda, ciclo mensual/anual, categoría, notas e icono personalizado (las imágenes subidas se reescalan a 512 px y se recomprimen a JPEG). En la lista, deslizar a la derecha pausa y a la izquierda elimina, ambas con confirmación
+- **Suscripciones compartidas** — indica entre cuántas personas (hasta 10, contándote a ti) se paga un plan familiar o compartido. Se guarda el precio completo y los totales, estadísticas y top 5 cuentan solo tu parte; las pantallas muestran ambos importes y el aviso de renovación también
 - **Dashboard** — gasto mensual real, equivalente anual, activas/pausadas, días hasta el próximo cargo, próximas renovaciones (7 días) y las 5 más caras
 - **Renovaciones automáticas** — al vencer una fecha de renovación, la suscripción avanza sola al siguiente ciclo (reanclando el día de facturación original), de modo que nunca queda anclada en el pasado ni deja de notificarse
 - **Estadísticas** — donut por categoría, vista global (gasto mensual y anual, reparto por ciclo, activas frente al total contratado) y top 5
