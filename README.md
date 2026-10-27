@@ -117,7 +117,7 @@ Con `allowBackup="true"` y `MisDinerosBackupAgent`, el sistema sube automáticam
 Hay dos workflows de GitHub Actions:
 
 - **`android.yml`** — corre en cada push a `master`/`develop` y en cada PR a `master`: tests JVM, lint y `assembleDebug`. Sube APK de debug, resultados de tests e informe de lint como artifacts (7 días).
-- **`release.yml`** — se dispara con tags `v*`. Construye el APK y AAB firmados, verifica la firma con `apksigner` y publica una GitHub Release con ambos artefactos.
+- **`release.yml`** — se dispara con tags `v*`. Construye el APK y AAB firmados, verifica la firma con `apksigner` y publica una GitHub Release con ambos artefactos. El cuerpo de la release es el mensaje del tag anotado (primera línea como título) seguido de las notas automáticas de GitHub con los PRs desde el tag anterior.
 
 Dependabot (`.github/dependabot.yml`) mantiene actualizadas las dependencias de Gradle (agrupando minor/patch en un solo PR) y las acciones de los workflows, con revisión semanal.
 

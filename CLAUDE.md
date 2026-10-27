@@ -31,6 +31,14 @@ Room schema files are exported to `app/schemas/` (tracked in git). When changing
 
 Instrumented test names must be plain identifiers, **not** backticked names with spaces. D8 rejects those below DEX 040 (`Space characters in SimpleName are not allowed`), which needs minSdk 35. Backticks are fine in `src/test/` (JVM) but break `connectedAndroidTest`. The CI runs only `test`/`lint`/`assembleDebug`, so instrumented breakage is not caught automatically — run `connectedAndroidTest` locally after touching `androidTest/` or any model it constructs.
 
+## Releases
+
+There are no version numbers in the code: `versionName`/`versionCode` come from the tag (see above), so a release is an **annotated tag** `vX.Y.Z` pushed on the merged `master` commit. `release.yml` builds and signs the APK/AAB and creates the GitHub Release. Bump minor for new features, patch for fixes only.
+
+Preparing one (the usual flow): a `release/vX.Y.Z` branch from `master` that updates the user-facing feature lists for whatever shipped since the last tag — `README.md` → Características and the feature cards in `docs/index.html` (keep the 6-card grid; extend an existing card instead of adding one) — then a PR to `master`. `docs/index.html` reads the version from the latest GitHub Release, so it needs no bump.
+
+The release body is the **tag message**, not something the action reads on its own: a step in `release.yml` fetches the annotation through the GitHub API (not git, since `actions/checkout` can leave the tag lightweight) and passes it as `body_path`, and `generate_release_notes: true` appends GitHub's PR list below it. Before that step existed, v1.7.0 shipped with only the PR list even though its tag carried long notes. Write the tag message for users, in Spanish, in the format of `v1.7.0`/`v1.8.0`: first line is the title (rendered `##`), a short paragraph, then sections as a bare line followed by `- ` items (rendered `###`; e.g. Novedades, Cambios de comportamiento, Datos, Interno). Mention backup/DB compatibility whenever the Room version or the backup format changes. Create it with `git tag -a vX.Y.Z -F <file>` and `git push origin vX.Y.Z`. A lightweight tag produces a release with only the PR list.
+
 ## Architecture
 
 Single-module Clean Architecture by packages. Dependency flow: `presentation → domain ← data`.
