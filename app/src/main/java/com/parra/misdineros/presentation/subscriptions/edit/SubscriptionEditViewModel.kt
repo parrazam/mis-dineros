@@ -54,9 +54,22 @@ data class SubscriptionEditUiState(
     val categories: List<Category> = emptyList(),
     val notifyDaysBefore: Int? = null,
     val notes: String = "",
+    val isShared: Boolean = false,
+    /** Personas (contando al usuario). Se conserva al apagar el interruptor para no perderlo. */
+    val sharedWith: Int = MIN_SHARED_WITH,
     /** Suscripción que se está editando, o `null` si se crea una nueva. */
     val original: Subscription? = null,
-)
+) {
+    /** Parte del usuario por cobro con el importe escrito, o `null` si el importe no es válido. */
+    val previewShareMinor: Long?
+        get() = MoneyFormatter.parseToMinor(amountText, currencyCode)
+            ?.takeIf { it > 0 }
+            ?.let { Subscription.shareOf(it, sharedWith) }
+
+    companion object {
+        const val MIN_SHARED_WITH = 2
+    }
+}
 
 /**
  * Construye la suscripción a persistir a partir del formulario. Es una función pura para poder
@@ -64,6 +77,7 @@ data class SubscriptionEditUiState(
  *  - `isPaused` se mantiene (antes `save()` reactivaba en silencio una suscripción pausada).
  *  - `billingAnchorDay` solo se recalcula si el usuario cambió la fecha; si no, una suscripción
  *    anclada al 31 que hoy muestra el 28 de febrero se quedaría anclada al 28 para siempre.
+ *  - `sharedWith` es 1 si el interruptor «Compartida» está apagado, aunque el selector recuerde otro valor.
  */
 internal fun SubscriptionEditUiState.toSubscription(newId: String, amountMinor: Long, now: Long): Subscription {
     val original = original
@@ -83,6 +97,7 @@ internal fun SubscriptionEditUiState.toSubscription(newId: String, amountMinor: 
         notes = notes.takeIf { it.isNotBlank() },
         createdAt = original?.createdAt ?: now,
         updatedAt = now,
+        sharedWith = if (isShared) sharedWith else 1,
     )
 }
 
@@ -156,6 +171,8 @@ class SubscriptionEditViewModel @Inject constructor(
                         categoryId = sub.categoryId,
                         notifyDaysBefore = sub.notifyDaysBefore,
                         notes = sub.notes ?: "",
+                        isShared = sub.isShared,
+                        sharedWith = if (sub.isShared) sub.sharedWith else SubscriptionEditUiState.MIN_SHARED_WITH,
                         original = sub,
                     )
                 }
@@ -174,6 +191,10 @@ class SubscriptionEditViewModel @Inject constructor(
     fun onCategoryChange(value: String) = _uiState.update { it.copy(categoryId = value) }
     fun onNotifyDaysChange(value: Int?) = _uiState.update { it.copy(notifyDaysBefore = value) }
     fun onNotesChange(value: String) = _uiState.update { it.copy(notes = value) }
+    fun onSharedToggle(value: Boolean) = _uiState.update { it.copy(isShared = value) }
+    fun onSharedWithChange(value: Int) = _uiState.update {
+        it.copy(sharedWith = value.coerceIn(SubscriptionEditUiState.MIN_SHARED_WITH, Subscription.MAX_SHARED_WITH))
+    }
 
     fun onImagePicked(uri: Uri) {
         viewModelScope.launch {

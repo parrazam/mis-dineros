@@ -41,6 +41,13 @@
     <string name="field_category">Categoría</string>
     <string name="field_notify_days">Avisar N días antes</string>
     <string name="field_notes">Notas</string>
+    <string name="shared_title">Compartida</string>
+    <string name="shared_subtitle">El importe es el precio completo</string>
+    <string name="shared_people">Personas</string>
+    <string name="shared_people_hint">contándote a ti</string>
+    <string name="shared_your_share">Tu parte</string>
+    <string name="shared_decrease">Quitar una persona</string>
+    <string name="shared_increase">Añadir una persona</string>
     <string name="action_save">Guardar</string>
     <string name="action_cancel">Cancelar</string>
     <string name="action_delete">Eliminar</string>
@@ -109,6 +116,7 @@
     <string name="notif_channel_summary">Resumen mensual</string>
     <string name="notif_renewal_title">Renueva pronto: %1$s</string>
     <string name="notif_renewal_body">Renueva el %1$s · %2$s</string>
+    <string name="notif_renewal_body_shared">Renueva el %1$s · %2$s (tu parte: %3$s)</string>
     <string name="notif_summary_title">Resumen de suscripciones</string>
     <string name="notif_summary_body">Gasto este mes: %1$s · %2$d renovaciones pendientes</string>
 
@@ -161,6 +169,8 @@
     <string name="amount_per_year_suffix">/ año</string>
     <string name="amount_per_year_inline">%1$s/año</string>
     <string name="amount_per_year_and_month">/ año · %1$s/mes</string>
+    <string name="amount_per_month_of_full">/ mes · de %1$s</string>
+    <string name="amount_per_year_of_full">/ año · de %1$s</string>
     <string name="subscriptions_section_active">Activas</string>
     <string name="subscriptions_section_paused">Pausadas</string>
     <string name="subscriptions_add_short">Añadir</string>
@@ -168,6 +178,9 @@
     <string name="days_until_tomorrow">Mañana</string>
     <string name="days_until_n">en %1$d días</string>
     <string name="days_count_n">%1$d días</string>
+    <string name="detail_shared">Compartida</string>
+    <string name="detail_full_price">Precio completo</string>
+    <string name="detail_your_share">Tu parte · %1$s</string>
     <string name="detail_cycle">Ciclo</string>
     <string name="detail_per_month">%1$s al mes</string>
     <string name="detail_billing_day">Día de cobro</string>
@@ -180,4 +193,9 @@
     <string name="settings_section_appearance">Apariencia</string>
     <string name="settings_section_data">Datos</string>
     <string name="settings_import_warning">Reemplaza todos los datos actuales</string>
+    <plurals name="shared_between_people">
+        <item quantity="one">Entre %d persona</item>
+        <item quantity="many">Entre %d personas</item>
+        <item quantity="other">Entre %d personas</item>
+    </plurals>
 </resources>

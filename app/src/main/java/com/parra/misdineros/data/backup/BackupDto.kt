@@ -35,6 +35,8 @@ data class SubscriptionDto(
     val notes: String? = null,
     val createdAt: Long,
     val updatedAt: Long,
+    // Con default para importar backups anteriores a las suscripciones compartidas.
+    val sharedWith: Int = 1,
 )
 
 @Serializable
@@ -84,6 +86,7 @@ fun Subscription.toDto() = SubscriptionDto(
     notes = notes,
     createdAt = createdAt,
     updatedAt = updatedAt,
+    sharedWith = sharedWith,
 )
 
 fun Category.toDto() = CategoryDto(
@@ -125,6 +128,8 @@ fun SubscriptionDto.toDomain(resolvedIconRef: String = iconRef) = Subscription(
     notes = notes,
     createdAt = createdAt,
     updatedAt = updatedAt,
+    // El backup es entrada no fiable: 0 o negativo dividiría por cero o daría importes negativos.
+    sharedWith = sharedWith.coerceIn(1, Subscription.MAX_SHARED_WITH),
 )
 
 fun CategoryDto.toDomain() = Category(

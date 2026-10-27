@@ -62,6 +62,30 @@ class BackupDtoTest {
         assertEquals(noOptionals, noOptionals.toDto().toDomain())
     }
 
+    @Test
+    fun `subscription compartida round-trip`() {
+        val shared = sub().copy(sharedWith = 4)
+        assertEquals(shared, shared.toDto().toDomain())
+    }
+
+    @Test
+    fun `subscriptionDto sin sharedWith de backup antiguo queda sin compartir`() {
+        val jsonAntiguo = """
+            {"id":"s","name":"N","iconRef":"initial","amountMinor":100,"currencyCode":"EUR",
+             "billingCycle":"MONTHLY","nextRenewalDate":"2026-05-01","categoryId":"c",
+             "isPaused":false,"createdAt":0,"updatedAt":0}
+        """.trimIndent()
+        assertEquals(1, Json.decodeFromString<SubscriptionDto>(jsonAntiguo).toDomain().sharedWith)
+    }
+
+    @Test
+    fun `subscriptionDto acota sharedWith fuera de rango`() {
+        val dto = sub().toDto()
+        assertEquals(1, dto.copy(sharedWith = 0).toDomain().sharedWith)
+        assertEquals(1, dto.copy(sharedWith = -5).toDomain().sharedWith)
+        assertEquals(Subscription.MAX_SHARED_WITH, dto.copy(sharedWith = 99).toDomain().sharedWith)
+    }
+
     // ─── Category ─────────────────────────────────────────────────────────────
 
     @Test

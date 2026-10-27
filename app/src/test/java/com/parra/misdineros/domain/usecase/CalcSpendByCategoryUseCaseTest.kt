@@ -23,7 +23,7 @@ class CalcSpendByCategoryUseCaseTest {
         useCase = CalcSpendByCategoryUseCase(fxRepo)
     }
 
-    private fun sub(id: String, catId: String, amount: Long, paused: Boolean = false) = Subscription(
+    private fun sub(id: String, catId: String, amount: Long, paused: Boolean = false, sharedWith: Int = 1) = Subscription(
         id = id, name = "Sub $id", iconRef = "initial",
         amountMinor = amount, currencyCode = "EUR",
         billingCycle = BillingCycle.MONTHLY,
@@ -31,6 +31,7 @@ class CalcSpendByCategoryUseCaseTest {
         billingAnchorDay = LocalDate.now().plusMonths(1).dayOfMonth,
         categoryId = catId, isPaused = paused, notifyDaysBefore = null, notes = null,
         createdAt = 0L, updatedAt = 0L,
+        sharedWith = sharedWith,
     )
 
     @Test
@@ -66,5 +67,11 @@ class CalcSpendByCategoryUseCaseTest {
         val result = useCase(subs, "EUR")
         assertEquals("streaming", result[0].categoryId)
         assertEquals("musica", result[1].categoryId)
+    }
+
+    @Test
+    fun `una compartida aporta a su categoria solo la parte del usuario`() = runTest {
+        val result = useCase(listOf(sub("1", "musica", 1799L, sharedWith = 4), sub("2", "musica", 500L)), "EUR")
+        assertEquals(listOf(CategorySpend("musica", 950L)), result)
     }
 }

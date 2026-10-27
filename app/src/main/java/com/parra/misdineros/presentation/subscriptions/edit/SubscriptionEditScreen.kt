@@ -1,5 +1,24 @@
 package com.parra.misdineros.presentation.subscriptions.edit
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.outlined.Group
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Switch
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
+import com.parra.misdineros.core.money.MoneyFormatter
+import com.parra.misdineros.designsystem.component.AppCard
+import com.parra.misdineros.designsystem.theme.MisDinerosTheme
+import com.parra.misdineros.domain.model.Subscription
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -236,6 +255,16 @@ fun SubscriptionEditScreen(
                 }
             }
 
+            SharedSection(
+                isShared = state.isShared,
+                sharedWith = state.sharedWith,
+                previewShareMinor = state.previewShareMinor,
+                currencyCode = state.currencyCode,
+                billingCycle = state.billingCycle,
+                onToggle = viewModel::onSharedToggle,
+                onSharedWithChange = viewModel::onSharedWithChange,
+            )
+
             // Renewal date — read-only field with overlay click
             Box {
                 OutlinedTextField(
@@ -399,6 +428,110 @@ fun SubscriptionEditScreen(
             },
         ) {
             DatePicker(state = datePickerState)
+        }
+    }
+}
+
+@Composable
+private fun SharedSection(
+    isShared: Boolean,
+    sharedWith: Int,
+    previewShareMinor: Long?,
+    currencyCode: String,
+    billingCycle: BillingCycle,
+    onToggle: (Boolean) -> Unit,
+    onSharedWithChange: (Int) -> Unit,
+) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .toggleable(value = isShared, role = Role.Switch, onValueChange = onToggle),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(Icons.Outlined.Group, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.shared_title), style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        stringResource(R.string.shared_subtitle),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                // El Row ya es toggleable: el Switch no recibe clics propios para no duplicar el evento.
+                Switch(checked = isShared, onCheckedChange = null)
+            }
+
+            AnimatedVisibility(visible = isShared) {
+                Column(
+                    modifier = Modifier.padding(top = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(stringResource(R.string.shared_people), style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                stringResource(R.string.shared_people_hint),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        OutlinedIconButton(
+                            onClick = { onSharedWithChange(sharedWith - 1) },
+                            enabled = sharedWith > SubscriptionEditUiState.MIN_SHARED_WITH,
+                        ) {
+                            Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.shared_decrease))
+                        }
+                        Text(
+                            text = sharedWith.toString(),
+                            style = MaterialTheme.typography.titleLarge,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .widthIn(min = 40.dp)
+                                .semantics { liveRegion = LiveRegionMode.Polite },
+                        )
+                        OutlinedIconButton(
+                            onClick = { onSharedWithChange(sharedWith + 1) },
+                            enabled = sharedWith < Subscription.MAX_SHARED_WITH,
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.shared_increase))
+                        }
+                    }
+
+                    if (previewShareMinor != null) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(MaterialTheme.shapes.medium)
+                                .background(MisDinerosTheme.colors.segmentTrack)
+                                .padding(horizontal = 12.dp, vertical = 10.dp)
+                                .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                stringResource(R.string.shared_your_share),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Text(
+                                MoneyFormatter.format(previewShareMinor, currencyCode),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Text(
+                                " " + when (billingCycle) {
+                                    BillingCycle.MONTHLY -> stringResource(R.string.amount_per_month_suffix)
+                                    BillingCycle.ANNUAL -> stringResource(R.string.amount_per_year_suffix)
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

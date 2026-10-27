@@ -90,7 +90,7 @@ class BackupRestoreTest {
                 amountMinor = 1299L, currencyCode = "EUR", billingCycle = "MONTHLY",
                 nextRenewalDate = "2026-05-27", billingAnchorDay = 27, categoryId = "cat1",
                 isPaused = false, notifyDaysBefore = 3, notes = "nota",
-                createdAt = 0L, updatedAt = 0L,
+                createdAt = 0L, updatedAt = 0L, sharedWith = 1,
             )
         )
 

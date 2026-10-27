@@ -23,7 +23,7 @@ class CalcSpendByCategoryUseCase @Inject constructor(
         // Sin tipo de cambio la suscripción no cuenta; el aviso lo da CalcMonthlySpendUseCase.
         return grouped.map { (categoryId, subs) ->
             val total = subs.sumOf { sub ->
-                fxRepo.convert(sub.monthlyAmountMinor, sub.currencyCode, targetCurrency) ?: 0L
+                fxRepo.convert(sub.myMonthlyShareMinor, sub.currencyCode, targetCurrency) ?: 0L
             }
             CategorySpend(categoryId, total)
         }.sortedByDescending { it.monthlyAmountMinor }

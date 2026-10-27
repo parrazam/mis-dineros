@@ -35,6 +35,8 @@ class SubscriptionEditUiStateTest {
         categoryId = sub.categoryId,
         notifyDaysBefore = sub.notifyDaysBefore,
         notes = sub.notes ?: "",
+        isShared = sub.isShared,
+        sharedWith = if (sub.isShared) sub.sharedWith else SubscriptionEditUiState.MIN_SHARED_WITH,
         original = sub,
     )
 
@@ -93,5 +95,34 @@ class SubscriptionEditUiStateTest {
         val result = stateFrom(existing).copy(name = "  Netflix  ", notes = "   ").toSubscription("ignored", 1299L, now)
         assertEquals("Netflix", result.name)
         assertNull(result.notes)
+    }
+
+    // ─── Suscripciones compartidas ────────────────────────────────────────────
+
+    @Test
+    fun `editar conserva sharedWith`() {
+        val shared = existing.copy(sharedWith = 4)
+        assertEquals(4, stateFrom(shared).copy(name = "Otro").toSubscription("ignored", 1799L, now).sharedWith)
+    }
+
+    @Test
+    fun `apagar compartida guarda 1 aunque el selector recuerde otro numero`() {
+        val result = stateFrom(existing.copy(sharedWith = 4)).copy(isShared = false).toSubscription("ignored", 1799L, now)
+        assertEquals(1, result.sharedWith)
+    }
+
+    @Test
+    fun `una suscripcion nueva no es compartida`() {
+        val result = SubscriptionEditUiState(name = "Nueva", nextRenewalDate = LocalDate.of(2027, 3, 10))
+            .toSubscription("new-id", 500L, now)
+        assertEquals(1, result.sharedWith)
+    }
+
+    @Test
+    fun `la vista previa reparte el importe escrito`() {
+        val state = SubscriptionEditUiState(amountText = "17,99", isShared = true, sharedWith = 4)
+        assertEquals(450L, state.previewShareMinor)
+        assertNull(state.copy(amountText = "").previewShareMinor)
+        assertNull(state.copy(amountText = "0").previewShareMinor)
     }
 }

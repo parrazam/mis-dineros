@@ -19,7 +19,7 @@ room = "2.8.4"
 datastore = "1.2.1"
 
 # Red / serialización
-kotlinxSerializationJson = "1.7.3"
+kotlinxSerializationJson = "1.8.1"
 kotlinxCoroutines = "1.10.2"
 
 # WorkManager

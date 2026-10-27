@@ -54,7 +54,7 @@ class ExportImportRoundTripTest {
                     currencyCode = "USD", billingCycle = BillingCycle.ANNUAL,
                     nextRenewalDate = LocalDate.of(2030, 6, 1), billingAnchorDay = 1,
                     categoryId = "builtin_musica", isPaused = false, notifyDaysBefore = null, notes = null,
-                    createdAt = 3L, updatedAt = 4L,
+                    createdAt = 3L, updatedAt = 4L, sharedWith = 3,
                 ),
             ),
             categories = listOf(Category("builtin_streaming", "Streaming", "tv", 0x11, true, 0), Category("builtin_musica", "Música", "music", 0x22, true, 1)),
@@ -96,6 +96,8 @@ class ExportImportRoundTripTest {
         assertEquals("ñ € 日本", s1.notes)
         assertEquals(true, s1.isPaused)
         assertEquals(31, s1.billingAnchorDay)
+        assertEquals(3, s2.sharedWith)
+        assertEquals(1, s1.sharedWith)
         assertEquals(2, restored.categories.size)
         assertEquals(1.1, restored.fxRates.single().rate, 0.0)
         assertEquals("USD", restored.settings.globalCurrencyCode)

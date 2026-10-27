@@ -33,6 +33,7 @@ class CalcMonthlySpendUseCaseTest {
         currency: String = "EUR",
         cycle: BillingCycle = BillingCycle.MONTHLY,
         paused: Boolean = false,
+        sharedWith: Int = 1,
     ) = Subscription(
         id = id, name = "Sub $id", iconRef = "initial",
         amountMinor = amountMinor, currencyCode = currency,
@@ -41,6 +42,7 @@ class CalcMonthlySpendUseCaseTest {
         billingAnchorDay = LocalDate.now().plusMonths(1).dayOfMonth,
         categoryId = "cat1", isPaused = paused, notifyDaysBefore = null, notes = null,
         createdAt = 0L, updatedAt = 0L,
+        sharedWith = sharedWith,
     )
 
     @Test
@@ -111,5 +113,24 @@ class CalcMonthlySpendUseCaseTest {
         coEvery { fxRepo.convert(any(), "XXX", "EUR") } returns null
         val result = useCase(listOf(sub("1", 1000L), sub("2", 5000L, currency = "XXX", paused = true)), "EUR")
         assertEquals(emptySet<String>(), result.excludedCurrencies)
+    }
+
+    @Test
+    fun `una compartida suma solo la parte del usuario`() = runTest {
+        val subs = listOf(sub("1", 1000L), sub("2", 1799L, sharedWith = 4))
+        assertEquals(1450L, useCase(subs, "EUR").totalMinor) // 10,00 + 4,50
+    }
+
+    @Test
+    fun `una anual compartida se reparte en una sola division`() = runTest {
+        // 100,00 / (12 × 3) = 2,777… → 2,78
+        assertEquals(278L, useCase(listOf(sub("1", 10000L, cycle = BillingCycle.ANNUAL, sharedWith = 3)), "EUR").totalMinor)
+    }
+
+    @Test
+    fun `la conversion de divisa se aplica sobre la parte`() = runTest {
+        coEvery { fxRepo.convert(500L, "USD", "EUR") } returns 465L
+        val result = useCase(listOf(sub("1", 1000L, currency = "USD", sharedWith = 2)), "EUR")
+        assertEquals(465L, result.totalMinor)
     }
 }
