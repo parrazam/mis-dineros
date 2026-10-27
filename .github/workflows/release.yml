@@ -65,13 +65,40 @@ jobs:
           "$APKSIGNER" verify --print-certs \
             app/build/outputs/apk/release/mis-dineros-${{ github.ref_name }}.apk
 
+      # La action no lee la anotación del tag (la v1.7.0 salió solo con las notas automáticas),
+      # así que se extrae aquí. Se pide a la API y no a git porque actions/checkout puede dejar
+      # el tag como ligero. Un tag ligero da un cuerpo vacío y la release lleva solo las notas.
+      - name: Release notes from annotated tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          ref=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${TAG}")
+          : > release-notes.md
+          if [ "$(jq -r .object.type <<<"$ref")" = "tag" ]; then
+            gh api "repos/${GITHUB_REPOSITORY}/git/tags/$(jq -r .object.sha <<<"$ref")" --jq .message |
+              awk '
+                # Primera línea → título (##); línea suelta seguida de una lista → sección (###).
+                /^-----BEGIN (PGP|SSH) SIGNATURE-----/ { exit }
+                { lines[NR] = $0 }
+                END {
+                  for (i = 1; i <= NR; i++) {
+                    l = lines[i]
+                    if (i == 1) { print "## " l; continue }
+                    if (l != "" && l !~ /^[- ]/ && lines[i-1] == "" && lines[i+1] ~ /^- /) { print "### " l; continue }
+                    print l
+                  }
+                }' > release-notes.md
+          fi
+          cat release-notes.md
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           name: "Mis Dineros ${{ github.ref_name }}"
-          # El nombre correcto del input es generate_release_notes; con generate_notes
-          # la action lo ignoraba en silencio (v3 ya avisa) y el cuerpo de la release
-          # era solo el mensaje del tag anotado, que sigue usándose como body.
+          # El input es generate_release_notes (con generate_notes la action lo ignoraba en
+          # silencio). Las notas automáticas (PRs desde el tag anterior) van debajo del body.
+          body_path: release-notes.md
           generate_release_notes: true
           files: |
             app/build/outputs/apk/release/mis-dineros-${{ github.ref_name }}.apk
